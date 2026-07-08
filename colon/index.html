@@ -262,19 +262,62 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .toggle-panel.abierto { right: 380px; }
 .toggle-panel.oculto { display: none; }
 
-@media (max-width: 768px) {
-  .header { flex-wrap: wrap; padding: 10px 12px; }
-  .header h1 { font-size: 15px; }
-  .leyenda { order: 3; width: 100%; justify-content: center; }
-  .zoom-controls { order: 3; }
+@media (max-width: 860px) {
+  .header { flex-wrap: wrap; gap: 8px; padding: 8px 10px; }
+  .header-busqueda { order: 10; width: 100%; margin-left: 0; }
+  .header-busqueda input { width: 100%; }
+  .header h1 { font-size: 14px; margin-right: auto; }
+  .leyenda { order: 8; gap: 10px; font-size: 11px; }
+  .zoom-controls { order: 6; }
+  .piso-selector { order: 5; }
+  .filter-select { font-size: 11px; padding: 3px 6px; }
+  .limpiar-btn { width: 28px; height: 28px; font-size: 12px; }
+  .header-stats { order: 9; margin-left: 0; flex-wrap: wrap; }
+  .switch-tema { order: 4; }
+  .sync-btn { order: 2; }
   .panel { position: fixed; top: 0; right: 0; height: 100%; z-index: 500; width: 100%; max-width: 360px; }
   .toggle-panel.abierto { right: 360px; }
-  .header-busqueda input { width: 120px; }
   .logo-badge { display: none; }
   .footer .logo-badge { display: inline-flex; flex-direction: row; gap: 6px; padding: 0; }
+  .footer .logo-badge .logo-letters svg { height: 16px; }
   .footer .logo-badge .logo-line { display: none; }
   .footer .logo-badge .logo-sub { display: none; }
-  .footer .logo-badge .logo-letters svg { height: 16px; }
+  .footer { padding: 8px 14px; gap: 8px; font-size: 11px; }
+  .footer .sep { margin: 0 2px; }
+  .minimapa { width: 100px; height: 70px; bottom: 8px; right: 8px; }
+  .toggle-panel { top: 66px; padding: 8px 5px; font-size: 13px; }
+}
+@media (max-width: 480px) {
+  .header { gap: 6px; padding: 6px 8px; }
+  .header h1 { font-size: 12px; }
+  .volver-btn { width: 28px; height: 28px; font-size: 15px; }
+  .zoom-btn { width: 28px; height: 28px; font-size: 13px; }
+  .zoom-level { min-width: 30px; font-size: 10px; }
+  .piso-btn { padding: 5px 12px; font-size: 12px; }
+  .piso-btn:not(.active).lista-btn { width: 28px; height: 28px; font-size: 14px; }
+  .switch-tema { width: 28px; height: 28px; font-size: 14px; }
+  .sync-btn { width: 28px; height: 28px; font-size: 13px; }
+  .limpiar-btn { width: 26px; height: 26px; font-size: 11px; }
+  .leyenda { font-size: 10px; gap: 6px; }
+  .stat-item { font-size: 10px; padding: 1px 6px; }
+  .filter-select { font-size: 10px; padding: 2px 5px; max-width: 110px; }
+  .header-stats { gap: 4px; }
+  .panel { max-width: 100%; }
+  .toggle-panel.abierto { right: 100%; }
+  .toggle-panel { top: 60px; }
+  .lightbox { padding: 10px; }
+  .lb-nav { width: 32px; height: 32px; font-size: 16px; }
+  .lb-nav.prev { left: 6px; }
+  .lb-nav.next { right: 6px; }
+  .lightbox .cerrar-lb { top: 10px; right: 10px; width: 36px; height: 36px; font-size: 18px; }
+  .lb-counter { font-size: 11px; top: 10px; padding: 2px 10px; }
+  .lb-info { padding: 20px 12px 10px; }
+  .lb-info .nro { font-size: 12px; }
+  .lb-info .ub { font-size: 11px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .minimapa { width: 70px; height: 50px; }
+  .footer { padding: 6px 10px; gap: 4px; font-size: 10px; flex-direction: column; }
+  .footer .sync-status { font-size: 10px; }
 }
 .header-busqueda { position: relative; display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .header-busqueda input {
