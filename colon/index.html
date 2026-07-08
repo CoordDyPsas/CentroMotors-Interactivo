@@ -1637,7 +1637,7 @@ function syncData() {
       actualizarStats();
       poblarFiltros();
       if (document.getElementById('lista-overlay').classList.contains('activo')) renderLista();
-      document.getElementById('sync-time').textContent = new Date(data.timestamp).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+      document.getElementById('sync-time').textContent = new Date(data.timestamp).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
       btn.innerHTML = '<i class="ph ph-check"></i>';
       setTimeout(() => { btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i>'; btn.classList.remove('syncing'); }, 2000);
     })
