@@ -28,15 +28,13 @@ function parseAll(csv) {
   return branches;
 }
 
-function pad(n) { return String(n).padStart(2, '0'); }
-
 export async function onRequest(context) {
   try {
     const r = await fetch(CSV_URL + '&_cb=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
     const branches = parseAll(await r.text());
     if (!branches) return new Response(JSON.stringify({ success: false, output: 'Could not parse CSV' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     const d = new Date();
-    return new Response(JSON.stringify({ success: true, output: 'OK', branches, timestamp: pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) }), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    return new Response(JSON.stringify({ success: true, output: 'OK', branches, timestamp: d.toISOString() }), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   } catch (e) {
     return new Response(JSON.stringify({ success: false, output: e.message }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   }
