@@ -1,4 +1,5 @@
-# Wrangler (auto-generated builds only)
+# Wrangler cache
+.wrangler/
 wrangler.toml
 
 # Python

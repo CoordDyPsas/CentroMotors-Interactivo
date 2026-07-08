@@ -1621,7 +1621,7 @@ function syncData() {
   if (btn.classList.contains('syncing')) return;
   btn.classList.add('syncing');
   btn.innerHTML = '<i class="ph ph-spinner"></i>';
-  fetch('/sync')
+  fetch('/api/sync')
     .then(r => r.json())
     .then(data => {
       if (!data.success) throw new Error(data.output);
