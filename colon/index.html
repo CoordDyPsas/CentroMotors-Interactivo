@@ -89,7 +89,7 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .plano-wrapper {
   flex: 1; overflow: hidden; position: relative; background: #0a0a1a;
   background-image: radial-gradient(circle, #515151 1px, transparent 1px);
-  background-size: 40px 40px; cursor: grab;
+  background-size: 40px 40px; cursor: grab; touch-action: none;
 }
 .plano-wrapper.grabbing { cursor: grabbing; }
 .minimapa {
@@ -1589,6 +1589,11 @@ wrapper.addEventListener('touchstart', (e) => {
   if (e.target.closest('.marker')) return;
   if (e.touches.length === 2) {
     lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  } else if (e.touches.length === 1) {
+    isPanning = true;
+    panOcurrio = false;
+    panStart = { x: e.touches[0].clientX - panX * zoom, y: e.touches[0].clientY - panY * zoom };
+    wrapper.classList.add('grabbing');
   }
 });
 wrapper.addEventListener('touchmove', (e) => {
@@ -1607,9 +1612,21 @@ wrapper.addEventListener('touchmove', (e) => {
       aplicarTransform();
     }
     lastTouchDist = dist;
+  } else if (e.touches.length === 1 && isPanning) {
+    e.preventDefault();
+    panOcurrio = true;
+    panX = (e.touches[0].clientX - panStart.x) / zoom;
+    panY = (e.touches[0].clientY - panStart.y) / zoom;
+    aplicarTransform();
   }
 });
-wrapper.addEventListener('touchend', () => { lastTouchDist = 0; });
+wrapper.addEventListener('touchend', () => {
+  lastTouchDist = 0;
+  if (isPanning) {
+    isPanning = false;
+    wrapper.classList.remove('grabbing');
+  }
+});
 
 // Focus trap for lightbox
 let lbFocusTrap = null;
