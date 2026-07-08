@@ -1,0 +1,242 @@
+﻿[
+  {
+    "nro": 1,
+    "ubicacion": "Ventas",
+    "marca": "Midea",
+    "capacidad": "4500",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 2,
+    "ubicacion": "Ventas",
+    "marca": "Midea",
+    "capacidad": "4500",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 3,
+    "ubicacion": "Gastos entrega",
+    "marca": "Surrey",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5287",
+    "tiene_foto": true
+  },
+  {
+    "nro": 4,
+    "ubicacion": "Caja",
+    "marca": "Goldman",
+    "capacidad": "2500",
+    "ultimo_service": "8/07/2025",
+    "estado": "Necesita service",
+    "ot": "5552",
+    "tiene_foto": false
+  },
+  {
+    "nro": 5,
+    "ubicacion": "Gerencia Post Ventas",
+    "marca": "Goldman",
+    "capacidad": "2500",
+    "ultimo_service": "28/06/2025",
+    "estado": "Necesita service",
+    "ot": "5439",
+    "tiene_foto": false
+  },
+  {
+    "nro": 6,
+    "ubicacion": "Sala de estar",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5289",
+    "tiene_foto": false
+  },
+  {
+    "nro": 7,
+    "ubicacion": "Sala de estar",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5289",
+    "tiene_foto": false
+  },
+  {
+    "nro": 8,
+    "ubicacion": "Salon Centro",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5289",
+    "tiene_foto": false
+  },
+  {
+    "nro": 9,
+    "ubicacion": "ExhibiciÃ³n",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5286",
+    "tiene_foto": false
+  },
+  {
+    "nro": 10,
+    "ubicacion": "ExhibiciÃ³n",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5286",
+    "tiene_foto": false
+  },
+  {
+    "nro": 11,
+    "ubicacion": "Repuestos",
+    "marca": "BGH",
+    "capacidad": "9000",
+    "ultimo_service": "8/07/2025",
+    "estado": "Necesita service",
+    "ot": "5552",
+    "tiene_foto": false
+  },
+  {
+    "nro": 245,
+    "ubicacion": "Taller",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5288",
+    "tiene_foto": true
+  },
+  {
+    "nro": 246,
+    "ubicacion": "Taller",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/06/2025",
+    "estado": "Necesita service",
+    "ot": "5288",
+    "tiene_foto": true
+  },
+  {
+    "nro": 248,
+    "ubicacion": "Jefe Taller",
+    "marca": "Midea",
+    "capacidad": "3000",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 12,
+    "ubicacion": "Ventas Planta alta",
+    "marca": "BGH",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "No funciona",
+    "estado": "",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 13,
+    "ubicacion": "Comedor",
+    "marca": "Surrey",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "28/06/2025",
+    "estado": "Necesita service",
+    "ot": "5434",
+    "tiene_foto": true
+  },
+  {
+    "nro": 14,
+    "ubicacion": "Call AdministraciÃ³n",
+    "marca": "Midea",
+    "capacidad": "5500",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 15,
+    "ubicacion": "Call center",
+    "marca": "Midea",
+    "capacidad": "3000",
+    "ultimo_service": "28/06/2025",
+    "estado": "Necesita service",
+    "ot": "5435",
+    "tiene_foto": true
+  },
+  {
+    "nro": 16,
+    "ubicacion": "Sala rack data",
+    "marca": "Electra",
+    "capacidad": "3000",
+    "ultimo_service": "27/03/2026",
+    "estado": "OK",
+    "ot": "7964",
+    "tiene_foto": true
+  },
+  {
+    "nro": 17,
+    "ubicacion": "Gerente general",
+    "marca": "Electra",
+    "capacidad": "3000",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 18,
+    "ubicacion": "Sala reuniÃ³n",
+    "marca": "Surrey",
+    "capacidad": "4500",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 19,
+    "ubicacion": "Gerente Plan de ahorro",
+    "marca": "Electra",
+    "capacidad": "3000",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 20,
+    "ubicacion": "Oficina",
+    "marca": "Electra",
+    "capacidad": "3000",
+    "ultimo_service": "",
+    "estado": "Necesita service",
+    "ot": "",
+    "tiene_foto": true
+  },
+  {
+    "nro": 21,
+    "ubicacion": "RecepciÃ³n",
+    "marca": "Surrey",
+    "capacidad": "Separado por conducto",
+    "ultimo_service": "14/01/2025",
+    "estado": "Necesita service",
+    "ot": "3586",
+    "tiene_foto": false
+  }
+]

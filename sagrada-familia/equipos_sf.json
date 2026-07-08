@@ -1,0 +1,200 @@
+[
+  {
+    "nro": 1,
+    "ubicacion": "Recepción",
+    "marca": "Midea",
+    "capacidad": "5500",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6444",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 2,
+    "ubicacion": "Citas",
+    "marca": "Surrey",
+    "capacidad": "9000",
+    "ultimo_service": "20/09/2025",
+    "estado": "Necesita service",
+    "ot": "6166",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 3,
+    "ubicacion": "Oficina",
+    "marca": "Midea",
+    "capacidad": "3000",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6456",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 4,
+    "ubicacion": "Sala Reunión",
+    "marca": "Midea",
+    "capacidad": "4500",
+    "ultimo_service": "20/09/2025",
+    "estado": "Necesita service",
+    "ot": "6163",
+    "tiene_foto": false,
+    "piso": "pa"
+  },
+  {
+    "nro": 5,
+    "ubicacion": "Ventas",
+    "marca": "Midea",
+    "capacidad": "2250",
+    "ultimo_service": "20/09/2025",
+    "estado": "Necesita service",
+    "ot": "6163",
+    "tiene_foto": false,
+    "piso": "pa"
+  },
+  {
+    "nro": 6,
+    "ubicacion": "Rack",
+    "marca": "Surrey",
+    "capacidad": "3000",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6457",
+    "tiene_foto": false,
+    "piso": "pa"
+  },
+  {
+    "nro": 7,
+    "ubicacion": "Comedor",
+    "marca": "Midea",
+    "capacidad": "4500",
+    "ultimo_service": "20/09/2025",
+    "estado": "Necesita service",
+    "ot": "6163",
+    "tiene_foto": false,
+    "piso": "pa"
+  },
+  {
+    "nro": 8,
+    "ubicacion": "Comedor",
+    "marca": "Midea",
+    "capacidad": "4500",
+    "ultimo_service": "20/09/2025",
+    "estado": "Necesita service",
+    "ot": "6163",
+    "tiene_foto": false,
+    "piso": "pa"
+  },
+  {
+    "nro": 9,
+    "ubicacion": "Garita",
+    "marca": "Midea",
+    "capacidad": "3000",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6458",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 10,
+    "ubicacion": "Lavadero",
+    "marca": "Carrier",
+    "capacidad": "Piso Techo - 15000",
+    "ultimo_service": "14/02/2026",
+    "estado": "Necesita service",
+    "ot": "7632",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 11,
+    "ubicacion": "Lavadero",
+    "marca": "Midea",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/02/2026",
+    "estado": "Necesita service",
+    "ot": "7633",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 12,
+    "ubicacion": "Lavadero",
+    "marca": "Midea",
+    "capacidad": "Piso Techo - 15000",
+    "ultimo_service": "14/02/2026",
+    "estado": "Necesita service",
+    "ot": "7633",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 13,
+    "ubicacion": "Lavadero",
+    "marca": "Midea",
+    "capacidad": "Piso Techo - 15000",
+    "ultimo_service": "14/02/2026",
+    "estado": "Necesita service",
+    "ot": "7633",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 14,
+    "ubicacion": "Lavadero",
+    "marca": "Midea",
+    "capacidad": "Piso Techo - 18000",
+    "ultimo_service": "14/02/2026",
+    "estado": "Necesita service",
+    "ot": "7632",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 15,
+    "ubicacion": "Lavadero",
+    "marca": "Carrier",
+    "capacidad": "Piso Techo - 15000",
+    "ultimo_service": "14/02/2026",
+    "estado": "Necesita service",
+    "ot": "7632",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 16,
+    "ubicacion": "Repuestos",
+    "marca": "Surrey",
+    "capacidad": "4500",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6459",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 17,
+    "ubicacion": "Garantía",
+    "marca": "Midea",
+    "capacidad": "2250",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6460",
+    "tiene_foto": false,
+    "piso": "pb"
+  },
+  {
+    "nro": 18,
+    "ubicacion": "Caja",
+    "marca": "Midea",
+    "capacidad": "3000",
+    "ultimo_service": "17/10/2025",
+    "estado": "Necesita service",
+    "ot": "6437",
+    "tiene_foto": false,
+    "piso": "pb"
+  }
+]

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Posicionar Equipos - Colón</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #515151; color: #eee; display: flex; height: 100vh; }
+.sidebar {
+  width: 280px; background: #515151; padding: 16px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+}
+.sidebar h2 { font-size: 16px; margin-bottom: 8px; color: #515151; }
+.piso-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.piso-btn.active { background: #e94560; color: #fff; }
+.piso-btn:not(.active) { background: #515151; color: #aaa; }
+.equipo-item {
+  padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.equipo-item:hover { background: #515151; }
+.equipo-item.selected { background: #e94560; color: #fff; }
+.equipo-item.placed { opacity: 0.6; }
+.equipo-item.placed::after { content: "✓"; color: #4ecca3; margin-left: auto; }
+.equipo-nro { font-weight: 700; min-width: 30px; font-size: 12px; }
+.equipo-ubic { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.equipo-marca { font-size: 10px; color: #555; }
+.equipo-foto { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.equipo-foto.si { background: #4ecca3; }
+.equipo-foto.no { background: #555; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.toolbar {
+  padding: 8px 16px; background: #515151; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid #515151; flex-wrap: wrap;
+}
+.toolbar .info { font-size: 12px; color: #aaa; }
+.zoom-group { display: flex; gap: 2px; align-items: center; }
+.zoom-btn {
+  width: 30px; height: 30px; border: none; border-radius: 4px; cursor: pointer;
+  background: #515151; color: #fff; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.zoom-btn:hover { background: #666666; }
+.zoom-level { font-size: 11px; color: #aaa; min-width: 38px; text-align: center; }
+.btn-save {
+  margin-left: auto; padding: 8px 20px; background: #4ecca3; color: #111;
+  border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+}
+.btn-save:hover { background: #3db88b; }
+.canvas-container {
+  flex: 1; overflow: hidden; position: relative; background: #0a0a1a;
+  background-image: radial-gradient(circle, #1a1a3a 1px, transparent 1px);
+  background-size: 40px 40px; cursor: grab;
+  user-select: none; -webkit-user-select: none;
+}
+.canvas-container.grabbing { cursor: grabbing; }
+#plano-wrapper { position: absolute; transform-origin: 0 0; }
+#plano { display: block; user-select: none; }
+.marker {
+  position: absolute; width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff; cursor: grab;
+  border: 2px solid #fff; transform: translate(-50%, -50%);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5); transition: 0.1s;
+  z-index: 10;
+}
+.marker:hover { transform: translate(-50%, -50%) scale(1.25); z-index: 100; }
+.marker.necesita { background: #e94560; }
+.marker.ok { background: #4ecca3; }
+.marker.nofunciona { background: #666; }
+.coord-info {
+  position: fixed; bottom: 12px; right: 12px; background: rgba(0,0,0,0.8);
+  padding: 8px 14px; border-radius: 6px; font-size: 12px; color: #aaa; z-index: 1000;
+}
+.instrucciones {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: #515151; padding: 30px 40px; border-radius: 12px;
+  border: 2px solid #515151; z-index: 2000; max-width: 440px; text-align: center;
+}
+.instrucciones h3 { margin-bottom: 12px; color: #e94560; }
+.instrucciones p { margin-bottom: 8px; font-size: 14px; line-height: 1.6; color: #ccc; }
+.instrucciones .btn-empezar {
+  margin-top: 16px; padding: 10px 30px; background: #e94560; color: #fff;
+  border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;
+}
+.instrucciones .btn-empezar:hover { background: #d63851; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <h2>Sucursal Colón</h2>
+  <div style="display:flex;gap:8px">
+    <button class="piso-btn active" onclick="cambiarPiso('pb')">Planta Baja</button>
+    <button class="piso-btn" onclick="cambiarPiso('pa')">Planta Alta</button>
+  </div>
+  <div style="margin:4px 0;font-size:11px;color:#666">
+    <span style="color:#4ecca3">●</span> Con foto
+    <span style="color:#555;margin-left:8px">●</span> Sin foto
+  </div>
+  <div id="lista-equipos"></div>
+</div>
+<div class="main">
+  <div class="toolbar">
+    <span class="info" id="contador">0/0 colocados</span>
+    <div class="zoom-group">
+      <button class="zoom-btn" onclick="zoomIn()">+</button>
+      <span class="zoom-level" id="zoomLevel">100%</span>
+      <button class="zoom-btn" onclick="zoomOut()">−</button>
+      <button class="zoom-btn" onclick="resetView()" title="Restablecer">⟲</button>
+    </div>
+    <button class="btn-save" onclick="guardarCoords()">💾 Guardar</button>
+  </div>
+  <div class="canvas-container" id="canvas-container">
+    <div id="plano-wrapper">
+      <img id="plano" src="plano_planta_baja.png" alt="Plano" draggable="false">
+    </div>
+  </div>
+</div>
+<div id="coordInfo" class="coord-info">X: — Y: —</div>
+<div id="instrucciones" class="instrucciones">
+  <h3>📍 Posicionar equipos - Colón</h3>
+  <p><strong>1.</strong> Seleccioná un equipo de la lista.</p>
+  <p><strong>2.</strong> Hacé clic en el plano donde está ubicado.</p>
+  <p><strong>3.</strong> Arrastrá los marcadores para ajustar.</p>
+  <p><strong>4.</strong> Mouse: zoom con rueda, arrastrar para mover el plano.</p>
+  <button class="btn-empezar" onclick="this.parentElement.style.display='none'">¡Empezar!</button>
+</div>
+<script>
+const PLANOS = { pb: 'plano_planta_baja.png', pa: 'plano_planta_alta.png' };
+const EQUIPOS = [
+  {"nro":1,"ubicacion":"Sala exhibición","marca":"BGH","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":2,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","tiene_foto":false,"piso":"pb"},
+  {"nro":3,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","tiene_foto":false,"piso":"pb"},
+  {"nro":4,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6441","tiene_foto":false,"piso":"pb"},
+  {"nro":5,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6438","tiene_foto":false,"piso":"pb"},
+  {"nro":6,"ubicacion":"GR","marca":"Midea","capacidad":"Piso techo","ultimo_service":"20/04/2026","estado":"OK","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":7,"ubicacion":"GR","marca":"Midea","capacidad":"7000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6588","tiene_foto":false,"piso":"pb"},
+  {"nro":8,"ubicacion":"Sala entrega","marca":"Midea","capacidad":"Piso techo","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":9,"ubicacion":"Sala estar","marca":"Philco","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6617","tiene_foto":false,"piso":"pb"},
+  {"nro":10,"ubicacion":"Sala estar","marca":"Midea","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6617","tiene_foto":false,"piso":"pb"},
+  {"nro":11,"ubicacion":"Sala estar","marca":"Philco","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6616","tiene_foto":false,"piso":"pb"},
+  {"nro":12,"ubicacion":"Sala estar","marca":"Midea","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6616","tiene_foto":false,"piso":"pb"},
+  {"nro":13,"ubicacion":"Oficinas frente a Post-ventas","marca":"Midea","capacidad":"5000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6614","tiene_foto":false,"piso":"pb"},
+  {"nro":14,"ubicacion":"Gerencia de Post-Ventas","marca":"Hitachi","capacidad":"3000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6614","tiene_foto":false,"piso":"pb"},
+  {"nro":15,"ubicacion":"Deposito Respuestos","marca":"Hitachi","capacidad":"4500","ultimo_service":"No funciona","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":16,"ubicacion":"Deposito Respuestos","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"28/03/2026","estado":"OK","ot":"7931","tiene_foto":false,"piso":"pb"},
+  {"nro":17,"ubicacion":"Deposito Respuestos","marca":"Surrey","capacidad":"5000","ultimo_service":"28/03/2026","estado":"OK","ot":"7931","tiene_foto":false,"piso":"pb"},
+  {"nro":18,"ubicacion":"Call planta alta","marca":"Midea","capacidad":"5000","ultimo_service":"21/03/2026","estado":"OK","ot":"7929","tiene_foto":false,"piso":"pa"},
+  {"nro":19,"ubicacion":"Tesorería","marca":"Kelvinator","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":20,"ubicacion":"Caja","marca":"Philco","capacidad":"3000","ultimo_service":"24/10/2025","estado":"Necesita service","ot":"6522","tiene_foto":true,"piso":"pb"},
+  {"nro":21,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","tiene_foto":false,"piso":"pb"},
+  {"nro":22,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","tiene_foto":false,"piso":"pb"},
+  {"nro":23,"ubicacion":"Oficina Ramonda","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","tiene_foto":false,"piso":"pb"},
+  {"nro":24,"ubicacion":"Planeamiento","marca":"Philco","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","tiene_foto":false,"piso":"pb"},
+  {"nro":25,"ubicacion":"Gerente ventas","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","tiene_foto":false,"piso":"pb"},
+  {"nro":26,"ubicacion":"Ventas","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","tiene_foto":false,"piso":"pb"},
+  {"nro":27,"ubicacion":"Ventas","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","tiene_foto":false,"piso":"pb"},
+  {"nro":28,"ubicacion":"Archivo","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pa"},
+  {"nro":29,"ubicacion":"Oficina Berrondo","marca":"Hitachi","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","tiene_foto":false,"piso":"pa"},
+  {"nro":30,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","tiene_foto":false,"piso":"pa"},
+  {"nro":31,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","tiene_foto":false,"piso":"pa"},
+  {"nro":32,"ubicacion":"Reunion","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","tiene_foto":false,"piso":"pa"},
+  {"nro":33,"ubicacion":"Datos","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pa"},
+  {"nro":34,"ubicacion":"Comedor","marca":"MIdea","capacidad":"7500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pa"},
+  {"nro":35,"ubicacion":"RRHH","marca":"Midea","capacidad":"5500","ultimo_service":"20/08/2025","estado":"Necesita service","ot":"5927","tiene_foto":false,"piso":"pa"},
+  {"nro":36,"ubicacion":"Garantías","marca":"Midea","capacidad":"2500","ultimo_service":"28/03/2026","estado":"OK","ot":"7966","tiene_foto":false,"piso":"pb"},
+  {"nro":37,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pa"},
+  {"nro":38,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pa"},
+  {"nro":39,"ubicacion":"Presidencia","marca":"Midea","capacidad":"Piso techo","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6940","tiene_foto":false,"piso":"pa"},
+  {"nro":40,"ubicacion":"Sala Reunión","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pa"},
+  {"nro":41,"ubicacion":"Ventas usados","marca":"Audinac","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":42,"ubicacion":"Ventas usados","marca":"Hisense","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":43,"ubicacion":"Sala caja de cambios","marca":"","capacidad":"Ventana Grande","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":44,"ubicacion":"Lavadero","marca":"Midea","capacidad":"4500","ultimo_service":"21/10/2025","estado":"Necesita service","ot":"6479","tiene_foto":false,"piso":"pb"},
+  {"nro":45,"ubicacion":"Garita Playa","marca":"Hitachi","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":46,"ubicacion":"Pre entrega Accesorios","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":47,"ubicacion":"Electrica","marca":"Midea","capacidad":"5000","ultimo_service":"21/12/2025","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":48,"ubicacion":"Alistaje","marca":"Midea","capacidad":"5000","ultimo_service":"9/01/2026","estado":"Necesita service","ot":"7281","tiene_foto":false,"piso":"pb"},
+  {"nro":49,"ubicacion":"Polarizado","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":50,"ubicacion":"Llaves","marca":"Kelvinator","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":51,"ubicacion":"Guardia","marca":"Surrey","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":false,"piso":"pb"},
+  {"nro":395,"ubicacion":"Diagnostico","marca":"Midea","capacidad":"3000","ultimo_service":"28/03/2026","estado":"OK","ot":"7966","tiene_foto":false,"piso":"pb"}
+];
+const IMG_W = 3309;
+const IMG_H = 2339;
+let pisoActual = 'pb';
+let seleccionado = null;
+const COORDS = {};
+let zoom = 1, panX = 0, panY = 0;
+let isPanning = false, panStart = { x: 0, y: 0 };
+let draggingMarker = null, dragOff = { x: 0, y: 0 };
+
+const container = document.getElementById('canvas-container');
+const wrapper = document.getElementById('plano-wrapper');
+const img = document.getElementById('plano');
+const zoomLevelEl = document.getElementById('zoomLevel');
+
+function estadoClase(estado) {
+  if (!estado || estado === 'No funciona') return 'nofunciona';
+  if (estado === 'OK') return 'ok';
+  return 'necesita';
+}
+
+function clamps() {
+  const wr = container.getBoundingClientRect();
+  const minVis = 100;
+  panX = Math.max(minVis / zoom - IMG_W, Math.min((wr.width - minVis) / zoom, panX));
+  panY = Math.max(minVis / zoom - IMG_H, Math.min((wr.height - minVis) / zoom, panY));
+}
+
+function aplicarTransform() {
+  clamps();
+  wrapper.style.transform = 'scale(' + zoom + ') translate(' + panX + 'px, ' + panY + 'px)';
+  zoomLevelEl.textContent = Math.round(zoom * 100) + '%';
+}
+
+function fitToScreen() {
+  const wr = container.getBoundingClientRect();
+  const zx = wr.width / IMG_W, zy = wr.height / IMG_H;
+  zoom = Math.min(zx, zy, 1) * 0.9;
+  panX = (wr.width - IMG_W * zoom) / (2 * zoom);
+  panY = (wr.height - IMG_H * zoom) / (2 * zoom);
+  aplicarTransform();
+}
+
+function zoomCentrado(factor, mx, my) {
+  const wr = container.getBoundingClientRect();
+  if (mx === undefined) { mx = wr.width / 2; my = wr.height / 2; }
+  const oldZ = zoom;
+  zoom = Math.max(0.1, Math.min(10, zoom * factor));
+  panX = panX + mx * (1/zoom - 1/oldZ);
+  panY = panY + my * (1/zoom - 1/oldZ);
+  aplicarTransform();
+}
+
+function zoomIn() { zoomCentrado(1.4); }
+function zoomOut() { zoomCentrado(1/1.4); }
+function resetView() { fitToScreen(); }
+
+function scr2cont(sx, sy) {
+  return { x: sx / zoom - panX, y: sy / zoom - panY };
+}
+
+function renderizarLista() {
+  const div = document.getElementById('lista-equipos');
+  const filtrados = EQUIPOS.filter(e => e.piso === pisoActual);
+  div.innerHTML = filtrados.map(e =>
+    '<div class="equipo-item' + (seleccionado === e.nro ? ' selected' : '') + (COORDS[e.nro] ? ' placed' : '') +
+    '" onclick="seleccionarEquipo(' + e.nro + ')">' +
+    '<span class="equipo-foto ' + (e.tiene_foto ? 'si' : 'no') + '"></span>' +
+    '<span class="equipo-nro">#' + e.nro + '</span>' +
+    '<span class="equipo-ubic">' + e.ubicacion + '</span>' +
+    '<span class="equipo-marca">' + e.marca + '</span></div>'
+  ).join('');
+  actualizarContador();
+}
+
+function actualizarContador() {
+  const total = EQUIPOS.filter(e => e.piso === pisoActual).length;
+  const colocados = EQUIPOS.filter(e => e.piso === pisoActual && COORDS[e.nro]).length;
+  document.getElementById('contador').textContent = colocados + '/' + total + ' colocados';
+}
+
+function seleccionarEquipo(nro) { seleccionado = nro; renderizarLista(); }
+
+function cambiarPiso(piso) {
+  pisoActual = piso;
+  document.querySelectorAll('.piso-btn').forEach(b => {
+    b.classList.toggle('active', (b.textContent.includes('Baja') && piso === 'pb') || (b.textContent.includes('Alta') && piso === 'pa'));
+  });
+  img.src = PLANOS[piso];
+  fitToScreen();
+  seleccionado = null;
+  renderizarLista();
+  renderizarMarcadores();
+}
+
+function renderizarMarcadores() {
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+  Object.entries(COORDS).forEach(([nro, coord]) => {
+    if (coord.piso !== pisoActual) return;
+    const eq = EQUIPOS.find(e => e.nro === parseInt(nro));
+    if (!eq) return;
+    const m = document.createElement('div');
+    m.className = 'marker ' + estadoClase(eq.estado);
+    m.style.left = coord.x + 'px';
+    m.style.top = coord.y + 'px';
+    m.textContent = nro;
+    m.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      draggingMarker = parseInt(nro);
+      const wr = container.getBoundingClientRect();
+      const p = scr2cont(e.clientX - wr.left, e.clientY - wr.top);
+      dragOff = { x: p.x - coord.x, y: p.y - coord.y };
+      m.style.cursor = 'grabbing';
+    });
+    m.addEventListener('dblclick', () => { delete COORDS[nro]; renderizarMarcadores(); renderizarLista(); });
+    wrapper.appendChild(m);
+  });
+}
+
+container.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  if (e.target.closest('.marker')) return;
+  isPanning = true;
+  panStart = { x: e.clientX - panX * zoom, y: e.clientY - panY * zoom };
+  container.classList.add('grabbing');
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (draggingMarker !== null) {
+    const wr = container.getBoundingClientRect();
+    const p = scr2cont(e.clientX - wr.left, e.clientY - wr.top);
+    COORDS[draggingMarker] = { x: Math.round(p.x - dragOff.x), y: Math.round(p.y - dragOff.y), piso: pisoActual };
+    renderizarMarcadores();
+    renderizarLista();
+    return;
+  }
+  if (!isPanning) return;
+  panX = (e.clientX - panStart.x) / zoom;
+  panY = (e.clientY - panStart.y) / zoom;
+  aplicarTransform();
+});
+
+window.addEventListener('mouseup', () => {
+  if (draggingMarker !== null) { draggingMarker = null; document.querySelectorAll('.marker').forEach(m => m.style.cursor = 'grab'); }
+  if (isPanning) { isPanning = false; container.classList.remove('grabbing'); }
+});
+
+container.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = container.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  zoomCentrado(e.deltaY > 0 ? 1/1.2 : 1.2, mx, my);
+}, { passive: false });
+
+container.addEventListener('dblclick', (e) => {
+  if (e.target.closest('.marker')) return;
+  const rect = container.getBoundingClientRect();
+  zoomCentrado(2, e.clientX - rect.left, e.clientY - rect.top);
+});
+
+container.addEventListener('click', (e) => {
+  if (seleccionado === null) return;
+  if (e.target.closest('.marker')) return;
+  const wr = container.getBoundingClientRect();
+  const p = scr2cont(e.clientX - wr.left, e.clientY - wr.top);
+  // Check if click is within image bounds
+  if (p.x < 0 || p.x > IMG_W || p.y < 0 || p.y > IMG_H) return;
+  COORDS[seleccionado] = { x: Math.round(p.x), y: Math.round(p.y), piso: pisoActual };
+  seleccionado = null;
+  renderizarMarcadores();
+  renderizarLista();
+});
+
+container.addEventListener('mousemove', (e) => {
+  const wr = container.getBoundingClientRect();
+  const p = scr2cont(e.clientX - wr.left, e.clientY - wr.top);
+  const txt = 'X: ' + Math.round(p.x) + '  Y: ' + Math.round(p.y);
+  document.getElementById('coordInfo').textContent = seleccionado ? txt + '  |  Click para colocar #' + seleccionado : txt;
+});
+
+img.addEventListener('load', () => {
+  wrapper.style.width = IMG_W + 'px';
+  wrapper.style.height = IMG_H + 'px';
+  fitToScreen();
+  renderizarMarcadores();
+});
+
+window.addEventListener('resize', fitToScreen);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { seleccionado = null; renderizarLista(); }
+  if (e.key === '+' || e.key === '=') zoomIn();
+  if (e.key === '-') zoomOut();
+  if (e.key === '0') resetView();
+});
+
+function guardarCoords() {
+  const coordsArr = Object.entries(COORDS).map(([nro, c]) => ({ nro: parseInt(nro), x: c.x, y: c.y, piso: c.piso }));
+  const blob = new Blob([JSON.stringify(coordsArr, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'coordenadas_colon.json'; a.click(); URL.revokeObjectURL(url);
+  alert('✅ Coordenadas guardadas: ' + coordsArr.length + ' equipos');
+}
+
+renderizarLista();
+</script>
+</body>
+</html>

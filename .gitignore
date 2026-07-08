@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Local server config
+descargar_ot_config.json
+
+# Original OT download folders (duplicated in ot/)
+monsenor/OT-*/
+colon/OT-*/
+**/OT-*/**
+**/OT */**
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.bak

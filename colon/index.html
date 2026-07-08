@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DyP — Toyota Colón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="manifest" href="manifest.json">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a; color: #f0f0f0; height: 100vh; display: flex; flex-direction: column; }
+
+.header {
+  background: rgba(10,10,10,0.95); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  padding: 10px 18px; display: flex; align-items: center; gap: 12px;
+  border-bottom: 2px solid #ff6900; flex-shrink: 0; box-shadow: 0 2px 20px rgba(0,0,0,0.4); position: relative; z-index: 10;
+  flex-wrap: wrap; transition: background 0.4s ease;
+}
+.header h1 { font-size: 18px; color: #fff; letter-spacing: 0.5px; }
+.header h1 span { color: #ff6900; font-weight: 700; }
+.volver-btn {
+  background: none; border: 1px solid rgba(255,105,0,0.3); color: #aaa;
+  padding: 4px 8px; border-radius: 6px; cursor: pointer;
+  font-size: 18px; transition: 0.2s; text-decoration: none; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex-shrink: 0;
+}
+.volver-btn:hover { border-color: #ff6900; color: #fff; }
+.piso-selector { display: flex; gap: 6px; flex-shrink: 0; }
+.piso-btn {
+  padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer;
+  font-weight: 600; font-size: 13px; transition: 0.2s; font-family: 'Inter', sans-serif;
+}
+.piso-btn.active { background: #ff6900; color: #fff; }
+.piso-btn:not(.active) { background: #515151; color: #aaa; border: none; }
+.piso-btn:not(.active):hover { background: #666; }
+.piso-btn:not(.active).lista-btn { background: #515151; color: #fff; border: none; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700; padding: 0; font-size: 16px; }
+.piso-btn:not(.active).lista-btn:hover { background: #666; }
+.lista-overlay {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
+}
+.lista-overlay.activo { display: flex; }
+.lista-panel {
+  background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
+  width: 90%; max-width: 500px; max-height: 80vh; display: flex;
+  flex-direction: column; overflow: hidden;
+}
+.lista-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: rgba(10,10,10,0.95);
+  border-bottom: 1px solid #333; font-size: 16px; font-weight: 700;
+}
+.lista-cerrar {
+  background: none; border: none; color: #ff6900; font-size: 22px;
+  cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.lista-cerrar:hover { background: rgba(255,105,0,0.2); }
+.lista-body {
+  flex: 1; overflow-y: auto; padding: 8px;
+}
+.lista-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  cursor: pointer; border-radius: 6px; transition: 0.15s;
+}
+.lista-item:hover { background: rgba(255,255,255,0.04); }
+.lista-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.lista-item .nro { font-weight: 700; min-width: 36px; }
+.lista-item .ub { font-size: 13px; color: #888; flex: 1; }
+.lista-item .estado-tag { font-size: 11px; padding: 2px 8px; border-radius: 8px; }
+.leyenda { display: flex; gap: 16px; font-size: 12px; color: #aaa; align-items: center; }
+.leyenda span { display: flex; align-items: center; gap: 4px; }
+.leyenda .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.zoom-controls {
+  display: flex; gap: 4px; align-items: center;
+}
+.zoom-btn {
+  width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer;
+  background: #515151; color: #fff; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.zoom-btn:hover { background: #666666; }
+.zoom-level { font-size: 12px; color: #aaa; min-width: 44px; text-align: center; }
+
+.contenedor { display: flex; flex: 1; overflow: hidden; }
+
+.plano-wrapper {
+  flex: 1; overflow: hidden; position: relative; background: #0a0a1a;
+  background-image: radial-gradient(circle, #515151 1px, transparent 1px);
+  background-size: 40px 40px; cursor: grab;
+}
+.plano-wrapper.grabbing { cursor: grabbing; }
+.minimapa {
+  position: absolute; bottom: 12px; right: 12px; z-index: 100;
+  width: 160px; height: 113px; border: 2px solid #ff6900;
+  border-radius: 6px; background: rgba(0,0,0,0.6);
+  cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+}
+.minimapa:hover { opacity: 1; }
+#plano-container { position: absolute; transform-origin: 0 0; transition: opacity 0.3s ease; }
+#plano-container img { display: block; user-select: none; pointer-events: none; }
+
+.marker {
+  position: absolute; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  border: 2.5px solid #fff; cursor: pointer;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
+  z-index: 10;
+}
+.marker:hover {
+  transform: translate(-50%, -50%) scale(1.4);
+  z-index: 100;
+}
+.marker.necesita { background: #e94560; box-shadow: 0 0 12px rgba(233,69,96,0.6), 0 2px 8px rgba(0,0,0,0.6); animation: pulse-necesita 2s ease-in-out infinite; }
+.marker.ok { background: #2ecc71; box-shadow: 0 0 12px rgba(46,204,113,0.5), 0 2px 8px rgba(0,0,0,0.6); }
+.marker.nofunciona { background: #666; box-shadow: 0 0 12px rgba(102,102,102,0.4), 0 2px 8px rgba(0,0,0,0.6); }
+.marker::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid transparent; transition: all 0.3s;
+}
+.marker:hover::after {
+  border-color: inherit; transform: scale(1.1); opacity: 0.5;
+}
+.marker.necesita::after { border-color: #e94560; }
+.marker.ok::after { border-color: #2ecc71; }
+.marker.nofunciona::after { border-color: #666; }
+@keyframes pulse-necesita {
+  0%, 100% { box-shadow: 0 0 12px rgba(233,69,96,0.6), 0 2px 8px rgba(0,0,0,0.6); }
+  50% { box-shadow: 0 0 20px rgba(233,69,96,0.9), 0 2px 12px rgba(0,0,0,0.6); }
+}
+@keyframes flash-marker {
+  0% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); }
+  25% { filter: brightness(1.8); transform: translate(-50%, -50%) scale(1.5); }
+  50% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); }
+  75% { filter: brightness(1.4); transform: translate(-50%, -50%) scale(1.2); }
+  100% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); }
+}
+.marker.flash { animation: flash-marker 0.6s ease-out !important; }
+
+.tooltip {
+  position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.92); color: #fff; padding: 14px 18px; border-radius: 12px;
+  font-size: 20px; white-space: normal; min-width: 290px; max-width: 400px; text-align: left;
+  line-height: 1.7;
+  pointer-events: none; z-index: 200; display: none; border: 2px solid #ff6900;
+  box-shadow: 0 0 28px rgba(255,105,0,0.6);
+}
+.marker:hover .tooltip { display: block; }
+.tooltip .tt-label { color: rgba(255,255,255,0.5); }
+.tooltip .tt-dot { display: inline-block; width: 13px; height: 13px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.tooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #ff6900;
+}
+
+.panel {
+  width: 380px; background: rgba(10,10,10,0.97); flex-shrink: 0;
+  display: flex; flex-direction: column; border-left: 2px solid #ff6900;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel.cerrado { width: 0; overflow: hidden; opacity: 0; border: none; }
+.panel-header {
+  padding: 16px 20px; background: rgba(10,10,10,0.95); display: flex;
+  align-items: center; justify-content: space-between; border-bottom: 2px solid #ff6900;
+}
+.panel-header h2 { font-size: 16px; letter-spacing: 0.3px; }
+.panel-close {
+  background: none; border: none; color: #ff6900; font-size: 22px;
+  cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.panel-close:hover { background: rgba(255,105,0,0.2); transform: rotate(90deg); }
+.panel-copy {
+  background: none; border: none; color: #ff6900; font-size: 16px;
+  cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.panel-copy:hover { background: rgba(255,105,0,0.2); transform: scale(1.15); }
+.panel-body { flex: 1; overflow-y: auto; padding: 20px; background: rgba(10,10,10,0.97); }
+
+.foto-container {
+  width: 100%; height: 220px; border-radius: 8px; overflow: hidden;
+  margin-bottom: 4px; border: 1px solid #ff6900; position: relative;
+  display: flex; flex-direction: column;
+}
+.foto-track {
+  display: flex; flex: 1; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; cursor: grab;
+}
+.foto-track.dragging { cursor: grabbing; scroll-behavior: auto; }
+.foto-track::-webkit-scrollbar { display: none; }
+.carousel-slide {
+  flex: 0 0 100%; height: 100%; scroll-snap-align: start;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, #2a2a2a, #0a0a1a);
+  position: relative;
+}
+.carousel-slide img {
+  width: 100%; height: 100%; object-fit: contain; cursor: zoom-in;
+}
+.carousel-slide .sin-foto {
+  color: #666; font-size: 14px; text-align: center; padding: 20px;
+}
+.carousel-slide .sin-foto .icon { font-size: 48px; margin-bottom: 12px; filter: grayscale(0.5); }
+.ot-link { color: #ff6900; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.ot-link:hover { text-decoration: underline; }
+.carousel-dots {
+  display: flex; justify-content: center; gap: 6px; padding: 6px 0;
+  background: rgba(255,255,255,0.03); border-top: 1px solid #333;
+  min-height: 24px;
+}
+.carousel-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #666; border: none; cursor: pointer; transition: 0.2s;
+  padding: 0;
+}
+.carousel-dot.activo { background: #ff6900; transform: scale(1.3); }
+.carousel-dot:hover { background: #ff8533; }
+.carousel-dot.oculto { display: none; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.info-item {
+  padding: 12px 14px; background: #515151; border-radius: 6px;
+  border-left: 3px solid #ff6900; display: flex; align-items: center; gap: 10px;
+}
+.info-item .label-icon { font-size: 20px; color: #ff6900; flex-shrink: 0; width: 22px; text-align: center; }
+.info-item > div { min-width: 0; flex: 1; }
+.info-item .label { font-size: 10px; color: #ff6900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+.info-item .value { font-size: 15px; font-weight: 600; }
+.info-item.full { grid-column: 1 / -1; }
+.estado-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.3px;
+}
+.estado-badge.necesita { background: rgba(255,105,0,0.2); color: #ff6900; border: 1px solid rgba(255,105,0,0.4); }
+.estado-badge.ok { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.4); }
+.estado-badge.nofunciona { background: rgba(102,102,102,0.2); color: #999; border: 1px solid rgba(102,102,102,0.4); }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+::-webkit-scrollbar-thumb { background: #ff6900; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #e65c00; }
+
+/* Firefox scrollbar */
+* { scrollbar-width: thin; scrollbar-color: #ff6900 rgba(255,255,255,0.02); }
+
+.toggle-panel {
+  position: fixed; top: 80px; right: 0; z-index: 50;
+  background: #ff6900; color: #fff; border: none; border-radius: 8px 0 0 8px;
+  padding: 12px 8px; cursor: pointer; font-size: 16px; transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
+  box-shadow: -2px 2px 8px rgba(0,0,0,0.3);
+}
+.toggle-panel:hover { background: #ff8533; }
+.toggle-panel.cerrado { right: 0; }
+.toggle-panel.abierto { right: 380px; }
+.toggle-panel.oculto { display: none; }
+
+@media (max-width: 768px) {
+  .header { flex-wrap: wrap; padding: 10px 12px; }
+  .header h1 { font-size: 15px; }
+  .leyenda { order: 3; width: 100%; justify-content: center; }
+  .zoom-controls { order: 3; }
+  .panel { position: fixed; top: 0; right: 0; height: 100%; z-index: 500; width: 100%; max-width: 360px; }
+  .toggle-panel.abierto { right: 360px; }
+  .header-busqueda input { width: 120px; }
+  .logo-badge { display: none; }
+  .footer .logo-badge { display: inline-flex; flex-direction: row; gap: 6px; padding: 0; }
+  .footer .logo-badge .logo-line { display: none; }
+  .footer .logo-badge .logo-sub { display: none; }
+  .footer .logo-badge .logo-letters svg { height: 16px; }
+}
+.header-busqueda { position: relative; display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.header-busqueda input {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 6px 14px; color: #fff; font-size: 13px;
+  outline: none; width: 160px; transition: 0.2s;
+}
+.header-busqueda input::placeholder { color: rgba(255,255,255,0.3); }
+.header-busqueda input:focus { border-color: #ff6900; background: rgba(255,255,255,0.08); }
+.header-stats {
+  display: flex; align-items: center; gap: 6px; margin-left: 12px;
+}
+.stat-item {
+  display: flex; align-items: center; gap: 3px; font-size: 12px; padding: 2px 8px;
+  border-radius: 10px; background: #515151; cursor: pointer;
+  border: 1px solid transparent; transition: 0.2s;
+}
+.stat-item:hover { background: #666; }
+.stat-item.activo { border-color: #ff6900; background: rgba(255,105,0,0.15); }
+.stat-item .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.filter-select {
+  background: #515151; border: 1px solid rgba(255,255,255,0.08); color: #fff;
+  border-radius: 4px; padding: 4px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
+  cursor: pointer; outline: none; transition: 0.2s;
+}
+.filter-select:hover { border-color: #ff6900; }
+body.modo-profesional .filter-select { background: rgba(10,10,10,0.95); border-color: transparent; }
+.limpiar-btn {
+  width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer;
+  background: #515151; border: 1px solid rgba(255,255,255,0.08);
+  color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: 0.2s; flex-shrink: 0;
+}
+.limpiar-btn:hover { background: #ff6900; color: #fff; }
+body.modo-profesional .limpiar-btn { background: rgba(10,10,10,0.95); border-color: transparent; }
+body.modo-profesional .limpiar-btn:hover { background: #ff6900; }
+.search-suggestions {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
+  background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 0 0 8px 8px;
+  max-height: 200px; overflow-y: auto; display: none; margin-top: 2px;
+}
+.search-suggestions.show { display: block; }
+.search-suggestion {
+  padding: 8px 14px; cursor: pointer; font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px;
+}
+.search-suggestion:hover { background: #ff6900; color: #fff; }
+.search-suggestion .sug-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.search-suggestion .sug-nro { font-weight: 700; min-width: 30px; }
+.search-suggestion .sug-ub { color: #aaa; font-size: 12px; }
+.search-suggestion:hover .sug-ub { color: #ddd; }
+
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.92); justify-content: center; align-items: center;
+  cursor: zoom-out; padding: 40px;
+}
+.lightbox.activo { display: flex; }
+.lb-content {
+  display: flex; flex-direction: column; align-items: center;
+  max-width: 95vw; max-height: 90vh; width: 100%;
+  cursor: default; border-radius: 8px; overflow: hidden; position: relative;
+}
+.lb-track {
+  display: flex; flex: 1; width: 100%; overflow: hidden;
+  scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; cursor: grab; border-radius: 8px;
+}
+.lb-track.dragging { cursor: grabbing; scroll-behavior: auto; }
+.lb-track::-webkit-scrollbar { display: none; }
+.lb-slide {
+  flex: 0 0 100%; scroll-snap-align: start;
+  display: flex; align-items: center; justify-content: center;
+  max-height: 85vh;
+}
+.lb-slide img {
+  max-width: 100%; max-height: 85vh; object-fit: contain;
+  border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  user-select: none; -webkit-user-drag: none; pointer-events: none;
+}
+.lb-dots {
+  position: absolute; bottom: 56px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 8px; padding: 8px 0;
+  min-height: 16px; z-index: 6; pointer-events: none;
+}
+.lb-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.3); border: none; cursor: pointer;
+  transition: 0.2s; padding: 0; pointer-events: auto;
+}
+.lb-dot.activo { background: #ff6900; transform: scale(1.3); }
+.lb-dot:hover { background: rgba(255,105,0,0.6); }
+.lightbox .cerrar-lb {
+  position: fixed; top: 20px; right: 30px; font-size: 24px;
+  color: #fff; cursor: pointer; width: 50px; height: 50px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.1); border: none;
+  transition: 0.2s; z-index: 10;
+}
+.lightbox .cerrar-lb:hover { background: rgba(255,105,0,0.3); color: #ff6900; }
+.lb-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(0,0,0,0.4); color: #fff; border: none;
+  font-size: 24px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: 0.2s; z-index: 5;
+}
+.lb-nav:hover { background: rgba(255,105,0,0.6); }
+.lb-nav.prev { left: 16px; }
+.lb-nav.next { right: 16px; }
+.lb-counter {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.5); color: #fff; padding: 4px 14px;
+  border-radius: 12px; font-size: 13px; z-index: 5;
+  pointer-events: none;
+}
+.lb-info {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 30px 20px 14px; display: flex; align-items: center; gap: 12px;
+  pointer-events: none; z-index: 5;
+}
+.lb-info .nro { font-size: 14px; font-weight: 700; }
+.lb-info .ub { font-size: 13px; color: #ccc; }
+.lb-info .badge {
+  font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 600;
+}
+.lb-info .badge.necesita { background: #ff6900; color: #fff; }
+.lb-info .badge.ok { background: #2ecc71; color: #111; }
+.lb-info .badge.nofunciona { background: #666; color: #fff; }
+
+/* === Footer === */
+.footer {
+  background: rgba(15,15,30,0.85); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,105,0,0.2);
+  padding: 10px 28px; display: flex; align-items: center; justify-content: center;
+  gap: 20px; font-size: 12px; color: #fff; flex-shrink: 0; flex-wrap: wrap;
+  position: relative; z-index: 5;
+}
+.footer .sep { color: #fff; }
+.footer .cliente { color: #fff; }
+.footer .sync-status { color: rgba(255,255,255,0.5); font-size: 11px; display: flex; align-items: center; gap: 4px; }
+.footer .sync-status i { font-size: 12px; }
+
+/* === Logo Badge Header === */
+.logo-badge {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: rgba(255,255,255,0.92); padding: 6px 14px;
+  border-radius: 8px; flex-shrink: 0;
+  transition: background 0.4s ease;
+}
+.logo-letters { display: flex; align-items: center; line-height: 1; }
+.logo-letters svg { height: 1em; width: auto; display: block; }
+.logo-letters svg .d-path { fill: #444; }
+.logo-letters svg .y-path { fill: #ff6900; }
+.logo-letters svg .p-path { fill: #444; }
+.logo-letters svg path { transition: fill 0.4s ease; }
+.logo-line { width: 100%; height: 2px; background: #ff6900; border-radius: 1px; }
+.logo-sub { font-family: Arial, Helvetica, sans-serif; font-size: 6.8px; font-weight: 700; color: #444; white-space: nowrap; line-height: 1; transition: color 0.4s ease; }
+
+/* === Footer Logo === */
+.footer .logo-badge { background: transparent; padding: 0; gap: 1px; }
+.footer .logo-badge .logo-letters svg .d-path { fill: #fff; }
+.footer .logo-badge .logo-letters svg .y-path { fill: #ff6900; }
+.footer .logo-badge .logo-letters svg .p-path { fill: #fff; }
+.footer .logo-badge .logo-line { height: 1.5px; }
+.footer .logo-badge .logo-sub { font-size: 5.5px; color: #fff; }
+
+/* === Theme Toggle === */
+.switch-tema {
+  width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer;
+  background: #515151; color: #fff; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.switch-tema:hover { background: #666666; }
+
+/* === Sync Button === */
+.sync-btn {
+  width: 32px; height: 32px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(10,10,10,0.95); color: #fff; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.4s ease, border-color 0.4s ease;
+  flex-shrink: 0;
+}
+.sync-btn:hover { border-color: #ff6900; }
+.sync-btn.syncing { pointer-events: none; opacity: 0.7; }
+body:not(.modo-profesional) .sync-btn { background: #515151; border-color: transparent; }
+.sync-btn i { font-size: 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sync-btn.syncing i { animation: spin 1s linear infinite; }
+
+/* === MODO OSCURO === */
+body.modo-profesional {
+  background: #0d0d1a;
+}
+body.modo-profesional .header {
+  background: rgba(81,81,81,0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom-color: #ff6900;
+}
+body.modo-profesional .zoom-btn { background: rgba(10,10,10,0.95); border: 1px solid rgba(255,255,255,0.08); }
+body.modo-profesional .zoom-btn:hover { background: rgba(255,255,255,0.08); }
+body.modo-profesional .piso-btn:not(.active) { background: rgba(10,10,10,0.95); color: #aaa; border: 1px solid rgba(255,255,255,0.08); }
+body.modo-profesional .piso-btn:not(.active):hover { background: rgba(255,255,255,0.08); }
+body.modo-profesional .piso-btn:not(.active).lista-btn { background: rgba(10,10,10,0.95); color: #fff; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700; padding: 0; }
+body.modo-profesional .piso-btn:not(.active).lista-btn:hover { background: rgba(255,255,255,0.08); }
+body.modo-profesional .panel {
+  background: #5c5c5c;
+  border-left: 2px solid #ff6900;
+}
+body.modo-profesional .panel-header {
+  background: linear-gradient(180deg, #515151 0%, #474747 100%);
+  border-bottom: 2px solid #ff6900;
+}
+body.modo-profesional .panel-body { background: #5c5c5c; }
+body.modo-profesional .info-item { background: rgba(10,10,10,0.95); }
+body.modo-profesional .info-item .label { color: #ff6900; }
+body.modo-profesional .info-item .label-icon { color: #ff6900; }
+body.modo-profesional .header-busqueda input {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.15);
+}
+body.modo-profesional .header-busqueda input::placeholder { color: rgba(255,255,255,0.4); }
+body.modo-profesional .header-busqueda input:focus { background: rgba(255,255,255,0.15); }
+body.modo-profesional .stat-item { background: rgba(10,10,10,0.95); border: 1px solid rgba(255,255,255,0.08); }
+body.modo-profesional .stat-item:hover { background: rgba(255,255,255,0.08); }
+body.modo-profesional .switch-tema {
+  background: rgba(10,10,10,0.95); border: 1px solid rgba(255,255,255,0.08);
+}
+body.modo-profesional .switch-tema:hover { background: rgba(255,255,255,0.08); }
+body.modo-profesional .sync-btn { background: rgba(10,10,10,0.95); border: 1px solid rgba(255,255,255,0.08); }
+body.modo-profesional .sync-btn:hover { background: rgba(255,255,255,0.08); }
+body.modo-profesional .logo-badge {
+  background: #fff;
+}
+body.modo-profesional .logo-letters svg .d-path { fill: #111; }
+body.modo-profesional .logo-letters svg .y-path { fill: #ff6900; }
+body.modo-profesional .logo-letters svg .p-path { fill: #111; }
+body.modo-profesional .logo-sub { color: #111; }
+body.modo-profesional .footer { background: rgba(81,81,81,0.85); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+body.modo-profesional .footer .logo-badge { background: transparent; }
+body.modo-profesional .foto-container { border-color: #ff6900; }
+body.modo-profesional .carousel-dots { background: #515151; border-top-color: #ff6900; }
+body.modo-profesional .lista-panel { background: #5c5c5c; border-color: #ff6900; }
+body.modo-profesional .lista-header { background: linear-gradient(180deg, #515151 0%, #474747 100%); border-bottom-color: #ff6900; }
+body.modo-profesional .lista-item:hover { background: #515151; }
+body.modo-profesional .lista-item .ub { color: #aaa; }
+body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #ff6900; }
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation-duration: 0.15s; }
+::view-transition-new(root) { animation-duration: 0.2s; }
+.skeleton {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  background-size: 200% 100%; animation: shimmer 1.4s infinite;
+  border-radius: 8px; min-height: 120px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body class="modo-profesional">
+
+<div class="header">
+  <a class="volver-btn" href="../Planos%20interactivos%20-%20Centro%20Motors.html"><i class="ph ph-arrow-left"></i></a>
+  <div class="logo-badge">
+    <div class="logo-letters"><svg viewBox="0 0 100 41" xmlns="http://www.w3.org/2000/svg"><path class="d-path" d="M 1.67,0.67 0.00,3.12 0.56,39.02 3.90,40.91 18.51,40.80 28.32,37.01 33.89,30.99 36.57,23.75 36.23,15.38 32.66,8.03 20.62,0.33 Z M 10.70,8.36 20.85,8.92 27.76,15.83 27.98,24.41 21.63,31.55 11.37,32.66 8.36,30.10 8.14,11.48 Z"/><path class="y-path" d="M 39.24,15.94 37.57,19.19 47.49,29.49 47.49,39.01 50.95,40.80 52.40,29.49 62.32,17.51 58.75,16.17 49.94,24.90 Z"/><path class="p-path" d="M 95.21,2.56 87.40,0.00 64.10,1.34 63.10,4.79 65.66,7.92 88.07,8.25 91.75,11.48 88.74,15.61 66.33,15.83 63.88,17.39 63.10,37.46 64.77,40.13 70.68,39.02 71.24,27.54 73.24,24.53 89.74,23.63 97.66,19.06 99.78,9.59 Z"/></svg></div>
+    <div class="logo-line"></div>
+    <div class="logo-sub">Aire Acondicionado y Calefacción</div>
+  </div>
+  <h1>Toyota <span>Colón</span></h1>
+  <div class="leyenda">
+    <span><span class="dot" style="background:#2ecc71"></span> OK</span>
+    <span><span class="dot" style="background:#ff6900"></span> Necesita</span>
+    <span><span class="dot" style="background:#666"></span> No funciona</span>
+  </div>
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()"><i class="ph ph-plus"></i></button>
+    <span class="zoom-level" id="zoomLevel">41%</span>
+    <button class="zoom-btn" onclick="zoomOut()"><i class="ph ph-minus"></i></button>
+    <button class="zoom-btn" onclick="resetView()" title="Restablecer vista"><i class="ph ph-arrows-out"></i></button>
+  </div>
+  <div class="piso-selector">
+    <button class="piso-btn active" data-piso="pb" onclick="cambiarPiso('pb')">PB</button>
+    <button class="piso-btn" data-piso="pa" onclick="cambiarPiso('pa')">PA</button>
+    <button class="piso-btn lista-btn" onclick="toggleLista()" title="Lista de equipos"><i class="ph ph-list"></i></button>
+    <button class="piso-btn lista-btn" onclick="exportarCSV()" title="Exportar CSV" style="font-size:14px"><i class="ph ph-download-simple"></i></button>
+  </div>
+  <div class="header-busqueda">
+    <input type="text" id="search-input" placeholder="Buscar equipo..." oninput="onSearchInput(this.value)" onblur="setTimeout(()=>cerrarSug(),200)" onfocus="onSearchInput(this.value)">
+    <div class="search-suggestions" id="search-suggestions"></div>
+    <div class="header-stats" id="header-stats"></div>
+  </div>
+  <select class="filter-select" id="filtro-marca" onchange="toggleFiltroMarca(this.value)"><option value="">Marca: todas</option></select>
+  <select class="filter-select" id="filtro-capacidad" onchange="toggleFiltroCapacidad(this.value)"><option value="">Capacidad: todas</option></select>
+  <button class="limpiar-btn" onclick="limpiarFiltros()" title="Limpiar filtros"><i class="ph ph-x-circle"></i></button>
+  <button class="switch-tema" onclick="toggleTema()"><i class="ph ph-sun"></i></button>
+  <button class="sync-btn" id="sync-btn" onclick="syncData()" title="Sincronizar datos desde Google Sheets"><i class="ph ph-arrows-clockwise"></i></button>
+</div>
+
+<div class="lista-overlay" id="lista-overlay" onclick="toggleLista()">
+  <div class="lista-panel" onclick="event.stopPropagation()">
+    <div class="lista-header">
+      <span>Equipos — <span id="lista-piso-label">Planta Baja</span></span>
+      <button class="lista-cerrar" onclick="toggleLista()"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="lista-body" id="lista-body"></div>
+  </div>
+</div>
+
+<div class="contenedor">
+  <div class="plano-wrapper" id="plano-wrapper">
+    <div id="plano-container">
+      <img id="plano" src="plano_planta_baja.png" alt="Plano Colón" draggable="false">
+    </div>
+    <canvas id="minimapa" class="minimapa"></canvas>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="panel-header">
+      <h2 id="panel-titulo">Equipo</h2>
+      <div style="display:flex;gap:6px">
+        <button class="panel-copy" onclick="copiarEquipo()" title="Copiar info"><i class="ph ph-copy"></i></button>
+        <button class="panel-close" onclick="cerrarPanelCompleto()"><i class="ph ph-x"></i></button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <p style="color:#fff;text-align:center;margin-top:40px">Seleccioná un equipo en el plano para ver su información.</p>
+    </div>
+  </div>
+</div>
+
+<button class="toggle-panel cerrado oculto" id="toggle-panel" onclick="togglePanel()"><i class="ph ph-caret-right"></i></button>
+
+<div class="footer">
+  <div class="logo-badge">
+    <div class="logo-letters"><svg viewBox="0 0 100 41" xmlns="http://www.w3.org/2000/svg"><path class="d-path" d="M 1.67,0.67 0.00,3.12 0.56,39.02 3.90,40.91 18.51,40.80 28.32,37.01 33.89,30.99 36.57,23.75 36.23,15.38 32.66,8.03 20.62,0.33 Z M 10.70,8.36 20.85,8.92 27.76,15.83 27.98,24.41 21.63,31.55 11.37,32.66 8.36,30.10 8.14,11.48 Z"/><path class="y-path" d="M 39.24,15.94 37.57,19.19 47.49,29.49 47.49,39.01 50.95,40.80 52.40,29.49 62.32,17.51 58.75,16.17 49.94,24.90 Z"/><path class="p-path" d="M 95.21,2.56 87.40,0.00 64.10,1.34 63.10,4.79 65.66,7.92 88.07,8.25 91.75,11.48 88.74,15.61 66.33,15.83 63.88,17.39 63.10,37.46 64.77,40.13 70.68,39.02 71.24,27.54 73.24,24.53 89.74,23.63 97.66,19.06 99.78,9.59 Z"/></svg></div>
+    <div class="logo-line"></div>
+    <div class="logo-sub">Aire Acondicionado y Calefacción</div>
+  </div>
+  <span class="sep">|</span>
+  <span>Coordinación de Servicio técnico</span>
+  <span class="sep">|</span>
+  <span class="cliente">Toyota Centro Motors</span>
+  <span class="sep">|</span>
+  <span class="sync-status"><i class="ph ph-clock-counter-clockwise"></i> <span id="sync-time">08/07/2026 11:24</span></span>
+</div>
+
+<script>
+const EQUIPOS = [
+  {"nro":1,"ubicacion":"Sala exhibición","marca":"BGH","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":871,"y":532},
+  {"nro":2,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":[],"piso":"pb","x":674,"y":556},
+  {"nro":3,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":[],"piso":"pb","x":675,"y":640},
+  {"nro":4,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6441","fotos":[],"piso":"pb","x":674,"y":775},
+  {"nro":5,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6438","fotos":[],"piso":"pb","x":673,"y":831},
+  {"nro":6,"ubicacion":"GR","marca":"Midea","capacidad":"Piso techo","ultimo_service":"20/04/2026","estado":"OK","ot":"","fotos":[],"piso":"pb","x":674,"y":950},
+  {"nro":7,"ubicacion":"GR","marca":"Midea","capacidad":"7000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6588","fotos":[],"piso":"pb","x":735,"y":1013},
+  {"nro":8,"ubicacion":"Sala entrega","marca":"Midea","capacidad":"Piso techo","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":866,"y":945},
+  {"nro":9,"ubicacion":"Sala estar","marca":"Philco","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6617","fotos":[],"piso":"pb","x":909,"y":1020},
+  {"nro":10,"ubicacion":"Sala estar","marca":"Midea","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6617","fotos":[],"piso":"pb","x":986,"y":1021},
+  {"nro":11,"ubicacion":"Sala estar","marca":"Philco","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6616","fotos":[],"piso":"pb","x":1146,"y":1003},
+  {"nro":12,"ubicacion":"Sala estar","marca":"Midea","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6616","fotos":[],"piso":"pb","x":1146,"y":946},
+  {"nro":13,"ubicacion":"Oficinas frente a Post-ventas","marca":"Midea","capacidad":"5000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6614","fotos":[],"piso":"pb","x":1122,"y":820},
+  {"nro":14,"ubicacion":"Gerencia de Post-Ventas","marca":"Hitachi","capacidad":"3000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6614","fotos":[],"piso":"pb","x":1038,"y":796},
+  {"nro":15,"ubicacion":"Deposito Repuestos","marca":"Hitachi","capacidad":"4500","ultimo_service":"-","estado":"OK","ot":"","fotos":[],"piso":"pb","x":1148,"y":717},
+  {"nro":16,"ubicacion":"Deposito Repuestos","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"28/03/2026","estado":"OK","ot":"7931","fotos":[],"piso":"pb","x":1086,"y":657},
+  {"nro":17,"ubicacion":"Deposito Repuestos","marca":"Surrey","capacidad":"5000","ultimo_service":"28/03/2026","estado":"OK","ot":"7931","fotos":[],"piso":"pb","x":1184,"y":640},
+  {"nro":18,"ubicacion":"Call planta alta","marca":"Midea","capacidad":"5000","ultimo_service":"21/03/2026","estado":"OK","ot":"7929","fotos":[],"piso":"pa","x":1452,"y":1167},
+  {"nro":19,"ubicacion":"Tesorería","marca":"Kelvinator","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1005,"y":791},
+  {"nro":20,"ubicacion":"Caja","marca":"Philco","capacidad":"3000","ultimo_service":"24/10/2025","estado":"Necesita service","ot":"6522","fotos":["Equipo 20.jpeg"],"piso":"pb","x":1004,"y":826},
+  {"nro":21,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","fotos":[],"piso":"pb","x":1003,"y":742},
+  {"nro":22,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","fotos":[],"piso":"pb","x":1004,"y":615},
+  {"nro":23,"ubicacion":"Oficina Ramonda","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":[],"piso":"pb","x":984,"y":507},
+  {"nro":24,"ubicacion":"Planeamiento","marca":"Philco","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":[],"piso":"pb","x":938,"y":507},
+  {"nro":25,"ubicacion":"Gerente ventas","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":[],"piso":"pb","x":885,"y":516},
+  {"nro":26,"ubicacion":"Ventas","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":700},
+  {"nro":27,"ubicacion":"Ventas","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":642},
+  {"nro":28,"ubicacion":"Archivo","marca":"Midea","capacidad":"4500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1427,"y":819},
+  {"nro":29,"ubicacion":"Oficina Berrondo","marca":"Hitachi","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":[],"piso":"pa","x":1769,"y":1062},
+  {"nro":30,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":[],"piso":"pa","x":1449,"y":1025},
+  {"nro":31,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":[],"piso":"pa","x":1451,"y":880},
+  {"nro":32,"ubicacion":"Reunion","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":[],"piso":"pa","x":1649,"y":797},
+  {"nro":33,"ubicacion":"Datos","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1769,"y":879},
+  {"nro":34,"ubicacion":"Comedor","marca":"Midea","capacidad":"7500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1844,"y":727},
+  {"nro":35,"ubicacion":"RRHH","marca":"Midea","capacidad":"5500","ultimo_service":"20/08/2025","estado":"Necesita service","ot":"5927","fotos":[],"piso":"pa","x":1831,"y":1276},
+  {"nro":36,"ubicacion":"Garantías","marca":"Midea","capacidad":"2500","ultimo_service":"28/03/2026","estado":"OK","ot":"7966","fotos":[],"piso":"pb","x":1404,"y":639},
+  {"nro":37,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1420,"y":432},
+  {"nro":38,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1344,"y":391},
+  {"nro":39,"ubicacion":"Presidencia","marca":"Midea","capacidad":"Piso techo","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6940","fotos":[],"piso":"pa","x":1191,"y":394},
+  {"nro":40,"ubicacion":"Sala Reunión","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1426,"y":967},
+  {"nro":41,"ubicacion":"Ventas usados","marca":"Audinac","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1745},
+  {"nro":42,"ubicacion":"Ventas usados","marca":"Hisense","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1841},
+  {"nro":43,"ubicacion":"Sala caja de cambios","marca":"","capacidad":"Ventana Grande","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1510,"y":541},
+  {"nro":44,"ubicacion":"Lavadero","marca":"Midea","capacidad":"4500","ultimo_service":"21/10/2025","estado":"Necesita service","ot":"6479","fotos":[],"piso":"pb","x":1914,"y":1244},
+  {"nro":45,"ubicacion":"Garita Playa","marca":"Hitachi","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1622,"y":603},
+  {"nro":46,"ubicacion":"Pre entrega Accesorios","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2278,"y":859},
+  {"nro":47,"ubicacion":"Electrica","marca":"Midea","capacidad":"5000","ultimo_service":"21/12/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2110,"y":842},
+  {"nro":48,"ubicacion":"Alistaje","marca":"Midea","capacidad":"5000","ultimo_service":"9/01/2026","estado":"Necesita service","ot":"7281","fotos":[],"piso":"pb","x":2210,"y":859},
+  {"nro":49,"ubicacion":"Polarizado","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2168,"y":659},
+  {"nro":50,"ubicacion":"Llaves","marca":"Kelvinator","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1956,"y":1028},
+  {"nro":51,"ubicacion":"Guardia","marca":"Surrey","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1884,"y":1013},
+  {"nro":395,"ubicacion":"Diagnostico","marca":"Midea","capacidad":"3000","ultimo_service":"28/03/2026","estado":"Necesita service","ot":"7966","fotos":[],"piso":"pb","x":1274,"y":640}
+];
+
+const IMG_W = 3309;
+const IMG_H = 2339;
+
+let pisoActual = 'pb';
+let panelAbierto = false;
+let equipoSeleccionado = null;
+let filtroEstado = null;
+let filtroMarca = null;
+let filtroCapacidad = null;
+
+let zoom = 0.41;
+let panX = 0, panY = 0;
+let isPanning = false, panOcurrio = false, panStart = { x: 0, y: 0 };
+
+const wrapper = document.getElementById('plano-wrapper');
+const container = document.getElementById('plano-container');
+const img = document.getElementById('plano');
+// Minimap setup (one-time)
+(function initMinimap() {
+  const mc = document.getElementById('minimapa');
+  if (!mc) return;
+  mc.width = 160; mc.height = 113;
+  mc.addEventListener('click', (e) => {
+    const rect = mc.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) / mc.offsetWidth * IMG_W;
+    const my = (e.clientY - rect.top) / mc.offsetHeight * IMG_H;
+    const wr2 = wrapper.getBoundingClientRect();
+    panX = (wr2.width / 2) / zoom - mx;
+    panY = (wr2.height / 2) / zoom - my;
+    aplicarTransform();
+  });
+})();
+const zoomLevelEl = document.getElementById('zoomLevel');
+const OT_URL_BASE = 'https://app22.persat.com.ar/dypsas/DigitalFormToPdfServlet?action=get_work_order_in_pdf&wo_id=';
+const BRANCH_KEY = 'colon';
+
+function abrirOT(nro) {
+  if (!nro) return;
+  fetch('/ot/' + BRANCH_KEY + '/' + nro + '.pdf')
+    .then(function(r) { if (!r.ok) throw new Error(); return r.blob(); })
+    .then(function(blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'OT_' + nro + '.pdf';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 1000);
+    })
+    .catch(function() { window.open(OT_URL_BASE + nro, '_blank', 'noopener'); });
+}
+
+function estadoClase(estado) {
+  const e = (estado || '').toLowerCase();
+  if (!e || e === 'no funciona') return 'nofunciona';
+  if (e === 'ok') return 'ok';
+  return 'necesita';
+}
+
+function formatearFecha(str) {
+  if (!str || str === '—' || str === 'No funciona') return str || '—';
+  const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!partes) return str;
+  const [_, d, m, a] = partes;
+  const fecha = new Date(+a, +m - 1, +d);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  fecha.setHours(0, 0, 0, 0);
+  const diffMs = hoy - fecha;
+  const diffDias = Math.round(diffMs / 86400000);
+  let relativo = '';
+  if (diffDias === 0) relativo = 'Hoy';
+  else if (diffDias === 1) relativo = 'Ayer';
+  else if (diffDias < 30) relativo = 'hace ' + diffDias + ' días';
+  else if (diffDias < 365) relativo = 'hace ' + Math.floor(diffDias / 30) + ' meses';
+  else relativo = 'hace ' + Math.floor(diffDias / 365) + ' años';
+  const dd = d.padStart(2, '0');
+  const mm = m.padStart(2, '0');
+  return dd + '/' + mm + '/' + a + ' <span class="fecha-rel">— ' + relativo + '</span>';
+}
+
+function precargarFotos(urls) {
+  urls.forEach(url => { const img = new Image(); img.src = url; });
+}
+
+function clamps() {
+  const wr = wrapper.getBoundingClientRect();
+  const minVis = 100;
+  const maxPX = (wr.width - minVis) / zoom;
+  const minPX = minVis / zoom - IMG_W;
+  const maxPY = (wr.height - minVis) / zoom;
+  const minPY = minVis / zoom - IMG_H;
+  panX = Math.max(minPX, Math.min(maxPX, panX));
+  panY = Math.max(minPY, Math.min(maxPY, panY));
+}
+
+function aplicarTransform() {
+  clamps();
+  container.style.transform = 'scale(' + zoom + ') translate(' + panX + 'px, ' + panY + 'px)';
+  zoomLevelEl.textContent = Math.round(zoom * 100) + '%';
+  dibujarMinimapa();
+}
+
+function fitToScreen() {
+  const wr = wrapper.getBoundingClientRect();
+  const zx = wr.width / IMG_W;
+  const zy = wr.height / IMG_H;
+  zoom = Math.min(zx, zy, 1) * 0.9;
+  panX = (wr.width - IMG_W * zoom) / (2 * zoom);
+  panY = (wr.height - IMG_H * zoom) / (2 * zoom);
+  aplicarTransform();
+}
+
+function zoomCentrado(factor) {
+  const wr = wrapper.getBoundingClientRect();
+  const cx = wr.width / 2;
+  const cy = wr.height / 2;
+  const oldZ = zoom;
+  zoom = Math.max(0.1, Math.min(10, zoom * factor));
+  panX = panX + cx * (1/zoom - 1/oldZ);
+  panY = panY + cy * (1/zoom - 1/oldZ);
+  aplicarTransform();
+}
+
+function animarZoom(zoomDest, panXDest, panYDest, duracion) {
+  const z0 = zoom, px0 = panX, py0 = panY;
+  const t0 = performance.now();
+  function paso(ahora) {
+    const t = Math.min((ahora - t0) / duracion, 1);
+    const e = 1 - Math.pow(1 - t, 3);
+    zoom = z0 + (zoomDest - z0) * e;
+    panX = px0 + (panXDest - px0) * e;
+    panY = py0 + (panYDest - py0) * e;
+    aplicarTransform();
+    if (t < 1) requestAnimationFrame(paso);
+  }
+  requestAnimationFrame(paso);
+}
+function zoomIn() { zoomCentrado(1.4); }
+function zoomOut() { zoomCentrado(1/1.4); }
+function resetView() { fitToScreen(); }
+
+function dibujarMinimapa() {
+  const c = document.getElementById('minimapa');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const cw = c.width, ch = c.height;
+  ctx.clearRect(0, 0, cw, ch);
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(0, 0, cw, ch);
+  const sx = cw / IMG_W, sy = ch / IMG_H;
+  ctx.fillStyle = '#ff6900';
+  const vw = (wrapper.clientWidth / zoom) * sx;
+  const vh = (wrapper.clientHeight / zoom) * sy;
+  const vx = (-panX) * sx;
+  const vy = (-panY) * sy;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(vx, vy, vw, vh);
+  ctx.globalAlpha = 0.8;
+  ctx.strokeStyle = '#ff6900';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(vx, vy, vw, vh);
+  const equipos = equiposFiltrados();
+  equipos.forEach(eq => {
+    const mx = eq.x * sx, my = eq.y * sy;
+    const cls = estadoClase(eq.estado);
+    ctx.beginPath();
+    ctx.arc(mx, my, 3, 0, Math.PI * 2);
+    ctx.fillStyle = cls === 'necesita' ? '#ff6900' : cls === 'ok' ? '#2ecc71' : '#666';
+    ctx.globalAlpha = 0.85;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function centrarEnMarker(eq) {
+  const wr = wrapper.getBoundingClientRect();
+  const targetZoom = Math.max(0.1, Math.min(10, Math.min(0.6, (wr.width / IMG_W) * 2)));
+  const targetPanX = (wr.width / 2) / targetZoom - eq.x;
+  const targetPanY = (wr.height / 2) / targetZoom - eq.y;
+  animarZoom(targetZoom, targetPanX, targetPanY, 350);
+}
+
+function cambiarPiso(piso) {
+  pisoActual = piso;
+  document.querySelectorAll('.piso-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.piso === piso);
+  });
+  // Cerrar panel y limpiar selección
+  equipoSeleccionado = null;
+  document.getElementById('panel').classList.add('cerrado');
+  document.getElementById('toggle-panel').classList.remove('abierto');
+  document.getElementById('toggle-panel').classList.add('cerrado', 'oculto');
+  document.getElementById('toggle-panel').innerHTML = '<i class="ph ph-caret-right"></i>';
+  panelAbierto = false;
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  const nuevaSrc = piso === 'pb' ? 'plano_planta_baja.png' : 'plano_planta_alta.png';
+  if (img.getAttribute('src') !== nuevaSrc) {
+    container.style.opacity = '0';
+    setTimeout(() => {
+      img.src = nuevaSrc;
+      fitToScreen();
+      renderizarMarcadores();
+    }, 300);
+  } else {
+    fitToScreen();
+    renderizarMarcadores();
+  }
+}
+
+function renderizarMarcadores() {
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+  const texto = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  const equipos = EQUIPOS.filter(e => e.piso === pisoActual);
+  equipos.forEach(eq => {
+    if (filtroMarca && eq.marca !== filtroMarca) return;
+    if (filtroCapacidad && eq.capacidad !== filtroCapacidad) return;
+    const matchTexto = !texto || String(eq.nro).includes(texto) || eq.ubicacion.toLowerCase().includes(texto);
+    if (!matchTexto) return;
+    const cls = estadoClase(eq.estado);
+    if (filtroEstado && cls !== filtroEstado) return;
+    const m = document.createElement('div');
+    m.className = 'marker ' + estadoClase(eq.estado);
+    m.dataset.nro = eq.nro;
+    m.style.left = eq.x + 'px';
+    m.style.top = eq.y + 'px';
+    const es = (eq.estado || '').toLowerCase();
+    const dotColor = es === 'ok' ? '#2ecc71' : es === 'no funciona' ? '#666' : '#ff6900';
+    let tt = '<span class="tt-label">Ubicaci&oacute;n</span><br>' + eq.ubicacion + '<br>' +
+             '<span class="tt-label">Estado</span><br><span class="tt-dot" style="background:' + dotColor + '"></span>' + eq.estado;
+    if (eq.marca) tt += '<br><span class="tt-label">Marca</span><br>' + eq.marca;
+    if (eq.capacidad) tt += '<br><span class="tt-label">Capacidad</span><br>' + eq.capacidad;
+    if (eq.ultimo_service) tt += '<br><span class="tt-label">&Uacute;ltimo service</span><br>' + eq.ultimo_service;
+    m.innerHTML = eq.nro + '<div class="tooltip">' + tt + '</div>';
+    m.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mostrarEquipo(eq.nro);
+      flashMarker(eq.nro);
+    });
+    container.appendChild(m);
+  });
+  actualizarStats();
+  dibujarMinimapa();
+}
+
+function mostrarEquipo(nro) {
+  const eq = EQUIPOS.find(e => e.nro === nro);
+  if (!eq) return;
+  equipoSeleccionado = eq;
+  document.getElementById('panel-titulo').textContent = '#' + eq.nro + ' - ' + eq.ubicacion;
+
+  let fotoHtml;
+  const fotos = eq.fotos || [];
+  if (fotos.length > 0) {
+    let slides = fotos.map((f, i) => '<div class="carousel-slide"><div class="skeleton"></div><img src="' + f + '" alt="' + eq.nro + '" draggable="false" data-idx="' + i + '" loading="' + (i > 0 ? 'lazy' : 'eager') + '" onload="this.previousElementSibling.remove()" onerror="this.parentElement.innerHTML=\'<div class=\\\'sin-foto\\\'><div class=\\\'icon\\\'><i class=\\\'ph ph-camera-slash\\\'></i></div>Foto no disponible</div>\'"></div>').join('');
+    let dotsHtml = '';
+    if (fotos.length > 1) {
+      dotsHtml = fotos.map((_, i) => '<button class="carousel-dot' + (i === 0 ? ' activo' : '') + '" data-idx="' + i + '"></button>').join('');
+    }
+    fotoHtml = '<div class="foto-container"><div class="foto-track">' + slides + '</div><div class="carousel-dots">' + dotsHtml + '</div></div>';
+  } else {
+    fotoHtml = '<div class="foto-container"><div class="foto-track"><div class="carousel-slide"><div class="sin-foto"><div class="icon"><i class="ph ph-camera-slash"></i></div>Sin foto disponible</div></div></div></div>';
+  }
+
+  const badgeClase = estadoClase(eq.estado);
+  const badgeTexto = eq.estado || 'Sin datos';
+  const badgeIcono = badgeClase === 'ok' ? '<i class="ph ph-check-circle"></i>' : badgeClase === 'nofunciona' ? '<i class="ph ph-x-circle"></i>' : '<i class="ph ph-warning-circle"></i>';
+
+  document.getElementById('panel-body').innerHTML =
+    fotoHtml +
+    '<div class="info-grid">' +
+      '<div class="info-item"><i class="ph ph-map-pin label-icon"></i><div><div class="label">Ubicación</div><div class="value">' + eq.ubicacion + '</div></div></div>' +
+      '<div class="info-item"><i class="ph ph-trademark label-icon"></i><div><div class="label">Marca</div><div class="value">' + eq.marca + '</div></div></div>' +
+      '<div class="info-item"><i class="ph ph-lightning label-icon"></i><div><div class="label">Capacidad</div><div class="value">' + eq.capacidad + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + badgeTexto + '</span></div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
+    '</div>';
+
+  initCarousel();
+  carruselEq = eq;
+  centrarEnMarker(eq);
+  precargarFotos(fotos);
+
+  panelAbierto = true;
+  document.getElementById('panel').classList.remove('cerrado');
+  document.getElementById('toggle-panel').classList.remove('oculto');
+  document.getElementById('toggle-panel').classList.remove('cerrado');
+  document.getElementById('toggle-panel').classList.add('abierto');
+  document.getElementById('toggle-panel').innerHTML = '<i class="ph ph-caret-left"></i>';
+  history.replaceState(null, '', '#eq-' + nro);
+}
+
+// Lightbox click delegation for panel carousel
+document.getElementById('panel').addEventListener('click', (e) => {
+  const img = e.target.closest('.carousel-slide img');
+  if (img && carruselEq) {
+    const idx = parseInt(img.dataset.idx) || 0;
+    abrirLightbox(carruselEq, idx);
+  }
+});
+
+function cerrarPanel() {
+  panelAbierto = false;
+  document.getElementById('panel').classList.add('cerrado');
+  document.getElementById('toggle-panel').classList.remove('abierto');
+  document.getElementById('toggle-panel').classList.add('cerrado');
+  document.getElementById('toggle-panel').innerHTML = '<i class="ph ph-caret-right"></i>';
+  const wr = wrapper.getBoundingClientRect();
+  const zDest = Math.min(wr.width / IMG_W, wr.height / IMG_H, 1) * 0.9;
+  const pxDest = (wr.width - IMG_W * zDest) / (2 * zDest);
+  const pyDest = (wr.height - IMG_H * zDest) / (2 * zDest);
+  animarZoom(zDest, pxDest, pyDest, 350);
+}
+
+function cerrarPanelCompleto() {
+  equipoSeleccionado = null;
+  document.getElementById('toggle-panel').classList.add('oculto');
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  cerrarPanel();
+}
+
+function togglePanel() {
+  if (panelAbierto) cerrarPanel();
+  else if (equipoSeleccionado) mostrarEquipo(equipoSeleccionado.nro);
+}
+
+function toggleTema(guardar) {
+  const body = document.body;
+  const btn = document.querySelector('.switch-tema');
+  body.classList.toggle('modo-profesional');
+  if (body.classList.contains('modo-profesional')) {
+    btn.innerHTML = '<i class="ph ph-sun"></i>';
+    if (guardar !== false) localStorage.setItem('dyp_tema', 'claro');
+  } else {
+    btn.innerHTML = '<i class="ph ph-moon"></i>';
+    if (guardar !== false) localStorage.setItem('dyp_tema', 'oscuro');
+  }
+}
+// Restore theme — default es Modo Claro (gray, .modo-profesional activo)
+if (localStorage.getItem('dyp_tema') === 'oscuro') toggleTema(false);
+
+function copiarEquipo() {
+  const eq = equipoSeleccionado;
+  if (!eq) return;
+  const lines = [
+    'Equipo #' + eq.nro,
+    'Ubicación: ' + eq.ubicacion,
+    'Marca: ' + eq.marca,
+    'Capacidad: ' + eq.capacidad,
+    'Último Service: ' + (eq.ultimo_service || '—'),
+    'Estado: ' + (eq.estado || 'Sin datos'),
+    'OT: ' + (eq.ot || '—') + (eq.ot ? ' — ' + OT_URL_BASE + eq.ot : ''),
+    'Piso: ' + (eq.piso === 'pb' ? 'Planta Baja' : 'Planta Alta')
+  ];
+  const copiar = (txt) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(txt);
+    }
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    return Promise.resolve();
+  };
+  copiar(lines.join('\n')).then(() => {
+    const btn = document.querySelector('.panel-copy');
+    if (btn) { btn.innerHTML = '<i class="ph ph-check"></i>'; setTimeout(() => { btn.innerHTML = '<i class="ph ph-copy"></i>'; }, 1500); }
+  }).catch(() => {});
+}
+
+let carruselDrag = false, carruselStartX = 0, carruselScrollLeft = 0, carruselMoved = false;
+let carruselTrack = null;
+let carruselEq = null;
+
+function initCarousel() {
+  const track = document.querySelector('.foto-track');
+  if (!track) return;
+  carruselTrack = track;
+
+  const newTrack = track.cloneNode(true);
+  track.parentNode.replaceChild(newTrack, track);
+  carruselTrack = newTrack;
+
+  const dots = document.querySelectorAll('.carousel-dot');
+  const actualizarDot = () => {
+    if (dots.length < 2) return;
+    const idx = Math.round(carruselTrack.scrollLeft / carruselTrack.clientWidth);
+    dots.forEach(d => d.classList.remove('activo'));
+    if (dots[idx]) dots[idx].classList.add('activo');
+  };
+
+  const fotoContainer = newTrack.closest('.foto-container');
+  if (fotoContainer) {
+    fotoContainer.querySelectorAll('.carousel-dot').forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(dot.dataset.idx);
+        newTrack.children[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      });
+    });
+  }
+
+  newTrack.addEventListener('scroll', actualizarDot);
+
+  newTrack.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    carruselDrag = true;
+    carruselMoved = false;
+    carruselStartX = e.clientX;
+    carruselScrollLeft = newTrack.scrollLeft;
+    newTrack.classList.add('dragging');
+    newTrack.style.scrollSnapType = 'none';
+  });
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (!carruselDrag || !carruselTrack) return;
+  e.preventDefault();
+  const dx = e.clientX - carruselStartX;
+  if (Math.abs(dx) > 5) carruselMoved = true;
+  carruselTrack.scrollLeft = carruselScrollLeft - dx;
+});
+
+document.addEventListener('mouseup', () => {
+  if (!carruselDrag || !carruselTrack) return;
+  const track = carruselTrack;
+  carruselDrag = false;
+  track.classList.remove('dragging');
+  track.style.scrollSnapType = '';
+  if (carruselMoved) {
+    const slideW = track.clientWidth;
+    const rawIdx = track.scrollLeft / slideW;
+    let targetIdx;
+    if (track.scrollLeft > carruselScrollLeft) {
+      targetIdx = Math.floor(rawIdx + 0.93);
+    } else if (track.scrollLeft < carruselScrollLeft) {
+      targetIdx = Math.ceil(rawIdx - 0.93);
+    } else {
+      targetIdx = Math.round(rawIdx);
+    }
+    const targetSlide = track.children[targetIdx];
+    if (targetSlide) targetSlide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    const killClick = (ce) => { ce.stopPropagation(); track.removeEventListener('click', killClick, true); };
+    track.addEventListener('click', killClick, true);
+  }
+});
+
+// Pan
+wrapper.addEventListener('mousedown', (e) => {
+  if (e.button !== 0 || e.target.closest('.marker')) return;
+  isPanning = true;
+  panOcurrio = false;
+  panStart = { x: e.clientX - panX * zoom, y: e.clientY - panY * zoom };
+  wrapper.classList.add('grabbing');
+  e.preventDefault();
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isPanning) return;
+  panOcurrio = true;
+  panX = (e.clientX - panStart.x) / zoom;
+  panY = (e.clientY - panStart.y) / zoom;
+  aplicarTransform();
+});
+
+window.addEventListener('mouseup', () => {
+  if (isPanning) { isPanning = false; wrapper.classList.remove('grabbing'); }
+});
+
+// Zoom wheel
+wrapper.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = wrapper.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const oldZ = zoom;
+  const delta = e.deltaY > 0 ? 1 / 1.2 : 1.2;
+  zoom = Math.max(0.1, Math.min(10, zoom * delta));
+  panX = panX + mx * (1/zoom - 1/oldZ);
+  panY = panY + my * (1/zoom - 1/oldZ);
+  aplicarTransform();
+}, { passive: false });
+
+// Double-click zoom
+wrapper.addEventListener('dblclick', (e) => {
+  if (e.target.closest('.marker')) return;
+  const rect = wrapper.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const oldZ = zoom;
+  zoom = Math.min(zoom * 2, 10);
+  panX = panX + mx * (1/zoom - 1/oldZ);
+  panY = panY + my * (1/zoom - 1/oldZ);
+  aplicarTransform();
+});
+
+// Click on plan background closes panel (solo si no hubo arrastre)
+wrapper.addEventListener('click', (e) => {
+  if (e.target.closest('.marker')) return;
+  if (panOcurrio) { panOcurrio = false; return; }
+  if (e.button === 0) cerrarPanelCompleto();
+});
+
+img.addEventListener('load', () => {
+  container.style.width = IMG_W + 'px';
+  container.style.height = IMG_H + 'px';
+  const wr = wrapper.getBoundingClientRect();
+  panX = (wr.width - IMG_W * zoom) / (2 * zoom);
+  panY = (wr.height - IMG_H * zoom) / (2 * zoom);
+  container.style.opacity = '1';
+  aplicarTransform();
+  renderizarMarcadores();
+  poblarFiltros();
+  cargarEquipos();
+  // URL hash — primero #eq-N, luego filtros
+  if (location.hash.startsWith('#eq-')) {
+    const nro = parseInt(location.hash.slice(4));
+    if (nro && EQUIPOS.some(e => e.nro === nro)) {
+      cambiarPiso(EQUIPOS.find(e => e.nro === nro).piso);
+      mostrarEquipo(nro);
+    }
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  } else if (location.hash.length > 1) {
+    const params = new URLSearchParams(location.hash.slice(1));
+    const m = params.get('marca');
+    const c = params.get('capacidad');
+    const e = params.get('estado');
+    if (m) { filtroMarca = m; document.getElementById('filtro-marca').value = m; }
+    if (c) { filtroCapacidad = c; document.getElementById('filtro-capacidad').value = c; }
+    if (e) { filtroEstado = e; }
+    if (m || c || e) renderizarMarcadores();
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+});
+
+window.addEventListener('resize', fitToScreen);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('lightbox').classList.contains('activo')) cerrarLightbox();
+    else if (panelAbierto) cerrarPanelCompleto();
+  }
+  if (e.key === '+' || e.key === '=') zoomIn();
+  if (e.key === '-') zoomOut();
+  if (e.key === '0') resetView();
+  if (e.key === 'ArrowLeft' && document.getElementById('lightbox').classList.contains('activo')) {
+    e.preventDefault(); navegarLb(-1);
+  }
+  if (e.key === 'ArrowRight' && document.getElementById('lightbox').classList.contains('activo')) {
+    e.preventDefault(); navegarLb(1);
+  }
+  if ((e.key === 's' || e.key === '/') && !e.ctrlKey && !e.metaKey) {
+    if (document.activeElement?.id !== 'search-input') {
+      e.preventDefault(); document.getElementById('search-input').focus();
+    }
+  }
+});
+
+let lbDrag = false, lbStartX = 0, lbStartScroll = 0, lbMoved = false;
+let lbEquipo = null, lbIdx = 0;
+
+function cerrarLightbox() {
+  document.getElementById('lightbox').classList.remove('activo');
+}
+
+function abrirLightbox(equipo, idx) {
+  lbEquipo = equipo; lbIdx = idx;
+  const fotos = equipo.fotos || [];
+  const track = document.getElementById('lb-track');
+  const dots = document.getElementById('lb-dots');
+  track.innerHTML = fotos.map((f, i) =>
+    '<div class="lb-slide"><div class="skeleton" style="min-height:200px;width:100%"></div><img src="' + f + '" alt="" draggable="false" loading="' + (i > 0 ? 'lazy' : 'eager') + '" onload="this.previousElementSibling.remove()" onerror="this.parentElement.innerHTML=\'<div class=\\\'sin-foto\\\' style=\\\'padding:40px;text-align:center;color:#888\\\'><i class=\\\'ph ph-camera-slash\\\' style=\\\'font-size:32px;display:block;margin-bottom:8px\\\'></i>Foto no disponible</div>\'"></div>'
+  ).join('');
+  if (fotos.length > 1) {
+    dots.innerHTML = fotos.map((_, i) =>
+      '<button class="lb-dot' + (i === idx ? ' activo' : '') + '" data-idx="' + i + '"></button>'
+    ).join('');
+  } else {
+    dots.innerHTML = '';
+  }
+  actualizarLbInfo();
+  if (idx > 0) track.scrollLeft = idx * track.clientWidth;
+  document.getElementById('lightbox').classList.add('activo');
+  initLbCarousel();
+}
+
+function actualizarLbInfo() {
+  const eq = lbEquipo;
+  const total = (eq.fotos || []).length;
+  document.getElementById('lb-counter').textContent = total > 1 ? (lbIdx + 1) + ' / ' + total : '';
+  const badgeClase = estadoClase(eq.estado);
+  document.getElementById('lb-info').innerHTML =
+    '<span class="nro">#' + eq.nro + '</span>' +
+    '<span class="ub">' + eq.ubicacion + '</span>' +
+    '<span class="badge ' + badgeClase + '">' + eq.estado + '</span>';
+}
+
+function actualizarLbCounter() {
+  const track = document.getElementById('lb-track');
+  const total = (lbEquipo?.fotos || []).length;
+  if (total < 2) return;
+  const i = Math.round(track.scrollLeft / track.clientWidth);
+  if (i !== lbIdx) { lbIdx = i; actualizarLbInfo(); }
+}
+
+function navegarLb(dir) {
+  const track = document.getElementById('lb-track');
+  const total = (lbEquipo?.fotos || []).length;
+  if (total < 2) return;
+  const i = Math.round(track.scrollLeft / track.clientWidth);
+  const next = Math.max(0, Math.min(total - 1, i + dir));
+  track.children[next].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+}
+
+function initLbCarousel() {
+  const track = document.getElementById('lb-track');
+  if (!track) return;
+
+  const newTrack = track.cloneNode(true);
+  track.parentNode.replaceChild(newTrack, track);
+  newTrack.id = 'lb-track';
+  newTrack.scrollLeft = lbIdx * newTrack.clientWidth;
+
+  const dots = document.querySelectorAll('.lb-dot');
+  const onLbScroll = () => {
+    if (dots.length > 1) {
+      const i = Math.round(newTrack.scrollLeft / newTrack.clientWidth);
+      dots.forEach(d => d.classList.remove('activo'));
+      if (dots[i]) dots[i].classList.add('activo');
+    }
+    actualizarLbCounter();
+  };
+  newTrack.addEventListener('scroll', onLbScroll);
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const i = parseInt(dot.dataset.idx);
+      newTrack.children[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    });
+  });
+
+  newTrack.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    lbDrag = true; lbMoved = false;
+    lbStartX = e.clientX;
+    lbStartScroll = newTrack.scrollLeft;
+    newTrack.classList.add('dragging');
+    newTrack.style.scrollSnapType = 'none';
+  });
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (!lbDrag) return;
+  e.preventDefault();
+  const track = document.getElementById('lb-track');
+  if (!track) return;
+  const dx = e.clientX - lbStartX;
+  if (Math.abs(dx) > 5) lbMoved = true;
+  track.scrollLeft = lbStartScroll - dx;
+});
+
+document.addEventListener('mouseup', () => {
+  if (!lbDrag) return;
+  const track = document.getElementById('lb-track');
+  lbDrag = false;
+  if (!track) return;
+  track.classList.remove('dragging');
+  track.style.scrollSnapType = '';
+  if (lbMoved) {
+    const slideW = track.clientWidth;
+    const rawIdx = track.scrollLeft / slideW;
+    let targetIdx;
+    if (track.scrollLeft > lbStartScroll) {
+      targetIdx = Math.floor(rawIdx + 0.9);
+    } else if (track.scrollLeft < lbStartScroll) {
+      targetIdx = Math.ceil(rawIdx - 0.9);
+    } else {
+      targetIdx = Math.round(rawIdx);
+    }
+    const s = track.children[targetIdx];
+    if (s) s.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    const kill = (e) => { e.stopPropagation(); track.removeEventListener('click', kill, true); };
+    track.addEventListener('click', kill, true);
+  }
+});
+
+function equiposFiltrados() {
+  return EQUIPOS.filter(e => e.piso === pisoActual).filter(e => {
+    if (filtroMarca && e.marca !== filtroMarca) return false;
+    if (filtroCapacidad && e.capacidad !== filtroCapacidad) return false;
+    if (filtroEstado && estadoClase(e.estado) !== filtroEstado) return false;
+    return true;
+  });
+}
+function actualizarStats() {
+  const equipos = equiposFiltrados();
+  const necesita = equipos.filter(e => estadoClase(e.estado) === 'necesita').length;
+  const ok = equipos.filter(e => estadoClase(e.estado) === 'ok').length;
+  const nofunciona = equipos.filter(e => estadoClase(e.estado) === 'nofunciona').length;
+  const totalPiso = EQUIPOS.filter(e => e.piso === pisoActual).length;
+  const mostrados = equipos.length;
+  const filtrosActivos = filtroMarca || filtroCapacidad || filtroEstado;
+  const contador = filtrosActivos ? '<span class="stat-item" style="cursor:default;background:transparent;border-color:transparent;font-size:11px;color:#888">' + mostrados + ' de ' + totalPiso + '</span>' : '';
+  document.getElementById('header-stats').innerHTML =
+    contador +
+    '<span class="stat-item' + (filtroEstado === 'ok' ? ' activo' : '') + '" data-filtro="ok" onclick="toggleFiltro(\'ok\')"><span class="dot" style="background:#2ecc71"></span> ' + ok + '</span>' +
+    '<span class="stat-item' + (filtroEstado === 'necesita' ? ' activo' : '') + '" data-filtro="necesita" onclick="toggleFiltro(\'necesita\')"><span class="dot" style="background:#ff6900"></span> ' + necesita + '</span>' +
+    '<span class="stat-item' + (filtroEstado === 'nofunciona' ? ' activo' : '') + '" data-filtro="nofunciona" onclick="toggleFiltro(\'nofunciona\')"><span class="dot" style="background:#666"></span> ' + nofunciona + '</span>';
+}
+
+function actualizarHashFiltros() {
+  const params = [];
+  if (filtroMarca) params.push('marca=' + encodeURIComponent(filtroMarca));
+  if (filtroCapacidad) params.push('capacidad=' + encodeURIComponent(filtroCapacidad));
+  if (filtroEstado) params.push('estado=' + encodeURIComponent(filtroEstado));
+  history.replaceState(null, '', params.length ? '#' + params.join('&') : window.location.pathname + window.location.search);
+}
+
+function toggleFiltro(cls) {
+  if (filtroEstado === cls) filtroEstado = null;
+  else filtroEstado = cls;
+  actualizarHashFiltros();
+  renderizarMarcadores();
+  if (filtroEstado) {
+    document.querySelectorAll('.marker').forEach(m => {
+      m.classList.add('flash');
+      m.addEventListener('animationend', () => m.classList.remove('flash'), { once: true });
+    });
+  }
+}
+
+function toggleFiltroMarca(val) {
+  filtroMarca = val || null;
+  actualizarHashFiltros();
+  renderizarMarcadores();
+}
+function toggleFiltroCapacidad(val) {
+  filtroCapacidad = val || null;
+  actualizarHashFiltros();
+  renderizarMarcadores();
+}
+function poblarFiltros() {
+  const marcas = [...new Set(EQUIPOS.map(e => e.marca).filter(Boolean))].sort();
+  const capacidades = [...new Set(EQUIPOS.map(e => e.capacidad).filter(Boolean))].sort();
+  const mSel = document.getElementById('filtro-marca');
+  const cSel = document.getElementById('filtro-capacidad');
+  mSel.innerHTML = '<option value="">Marca: todas</option>' + marcas.map(m => '<option value="' + m.replace(/"/g,'&quot;') + '">' + m + '</option>').join('');
+  cSel.innerHTML = '<option value="">Capacidad: todas</option>' + capacidades.map(c => '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>').join('');
+}
+function limpiarFiltros() {
+  filtroMarca = null;
+  filtroCapacidad = null;
+  filtroEstado = null;
+  document.getElementById('search-input').value = '';
+  document.getElementById('filtro-marca').value = '';
+  document.getElementById('filtro-capacidad').value = '';
+  actualizarHashFiltros();
+  renderizarMarcadores();
+}
+function exportarCSV() {
+  function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  const colores = { 'OK':'#2ecc71','Necesita service':'#ff6900','No funciona':'#666' };
+  let rows = '<tr style="background:#ff6900;color:#fff"><th>Nro</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último Service</th><th>OT</th><th>URL OT</th><th>Piso</th></tr>';
+  EQUIPOS.slice().sort((a,b) => a.nro - b.nro).forEach(eq => {
+    const c = colores[eq.estado] || '#999';
+    const otId = eq.ot || '';
+    const otUrl = otId ? OT_URL_BASE + otId : '';
+    rows += '<tr><td style="font-weight:600;text-align:center">' + eq.nro + '</td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca||'-') + '</td><td>' + esc(eq.capacidad||'-') + '</td><td style="background:' + c + ';color:#fff;font-weight:600;text-align:center">' + esc(eq.estado) + '</td><td>' + esc(eq.ultimo_service||'-') + '</td><td>' + esc(otId||'-') + '</td><td>' + (otUrl ? '<a href="' + otUrl + '" style="color:#ff6900;font-weight:600">Descargar OT</a>' : '-') + '</td><td style="text-align:center">' + eq.piso.toUpperCase() + '</td></tr>';
+  });
+  const html = '<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;font-family:Inter,Arial,sans-serif;font-size:13px}td,th{border:1px solid #ccc;padding:6px 10px}th{background:#ff6900;color:#fff;font-weight:700}tr:nth-child(even){background:#f5f5f5}</style></head><body><table>' + rows + '</table></body></html>';
+  const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'equipos_colon.xls';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+function flashMarker(nro) {
+  document.querySelectorAll('.marker').forEach(m => {
+    if (parseInt(m.dataset.nro) === nro) {
+      m.classList.add('flash');
+      m.addEventListener('animationend', () => m.classList.remove('flash'), { once: true });
+    }
+  });
+}
+
+function toggleLista() {
+  const ol = document.getElementById('lista-overlay');
+  ol.classList.toggle('activo');
+  if (ol.classList.contains('activo')) renderLista();
+}
+
+function renderLista() {
+  const body = document.getElementById('lista-body');
+  document.getElementById('lista-piso-label').textContent = pisoActual === 'pb' ? 'Planta Baja' : 'Planta Alta';
+  body.innerHTML = '';
+  const equipos = equiposFiltrados().sort((a, b) => a.nro - b.nro);
+  equipos.forEach(eq => {
+    const d = document.createElement('div');
+    d.className = 'lista-item';
+    const cls = estadoClase(eq.estado);
+    const dotColor = cls === 'necesita' ? '#ff6900' : cls === 'ok' ? '#2ecc71' : '#666';
+    const tagColor = cls === 'necesita' ? '#ff6900' : cls === 'ok' ? '#2ecc71' : '#666';
+    d.innerHTML =
+      '<span class="dot" style="background:' + dotColor + '"></span>' +
+      '<span class="nro">#' + eq.nro + '</span>' +
+      '<span class="ub">' + eq.ubicacion + '</span>' +
+      '<span class="estado-tag" style="background:' + tagColor + ';color:#fff">' + eq.estado + '</span>';
+    d.addEventListener('click', () => {
+      toggleLista();
+      mostrarEquipo(eq.nro);
+      centrarEnMarker(eq);
+      flashMarker(eq.nro);
+    });
+    body.appendChild(d);
+  });
+}
+
+function filtrarBusqueda(texto) {
+  renderizarMarcadores();
+}
+
+function onSearchInput(texto) {
+  filtrarBusqueda(texto);
+  const cont = document.getElementById('search-suggestions');
+  cont.innerHTML = '';
+  if (!texto.trim()) { cont.classList.remove('show'); return; }
+  const t = texto.toLowerCase().trim();
+  const matches = EQUIPOS.filter(e => {
+    if (e.piso !== pisoActual) return false;
+    if (filtroMarca && e.marca !== filtroMarca) return false;
+    if (filtroCapacidad && e.capacidad !== filtroCapacidad) return false;
+    return String(e.nro).includes(t) || e.ubicacion.toLowerCase().includes(t);
+  }).slice(0, 10);
+  if (!matches.length) { cont.classList.remove('show'); return; }
+  matches.forEach(eq => {
+    const d = document.createElement('div');
+    d.className = 'search-suggestion';
+    const cls = estadoClase(eq.estado);
+    const dotColor = cls === 'necesita' ? '#ff6900' : cls === 'ok' ? '#2ecc71' : '#666';
+    d.innerHTML = '<span class="sug-dot" style="background:' + dotColor + '"></span><span class="sug-nro">#' + eq.nro + '</span><span class="sug-ub">' + eq.ubicacion + '</span>';
+    d.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      document.getElementById('search-input').value = eq.nro;
+      cont.classList.remove('show');
+      mostrarEquipo(eq.nro);
+      centrarEnMarker(eq);
+      flashMarker(eq.nro);
+    });
+    cont.appendChild(d);
+  });
+  cont.classList.add('show');
+}
+
+function cerrarSug() {
+  document.getElementById('search-suggestions').classList.remove('show');
+}
+
+// Pinch-to-zoom
+let lastTouchDist = 0;
+wrapper.addEventListener('touchstart', (e) => {
+  if (e.target.closest('.marker')) return;
+  if (e.touches.length === 2) {
+    lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  }
+});
+wrapper.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    if (lastTouchDist > 0) {
+      const factor = dist / lastTouchDist;
+      const rect = wrapper.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      const oldZ = zoom;
+      zoom = Math.max(0.1, Math.min(10, zoom * factor));
+      panX = panX + cx * (1/zoom - 1/oldZ);
+      panY = panY + cy * (1/zoom - 1/oldZ);
+      aplicarTransform();
+    }
+    lastTouchDist = dist;
+  }
+});
+wrapper.addEventListener('touchend', () => { lastTouchDist = 0; });
+
+// Focus trap for lightbox
+let lbFocusTrap = null;
+function initFocusTrap() {
+  const lb = document.getElementById('lightbox');
+  const focusable = lb.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (focusable.length < 2) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (lbFocusTrap) lb.removeEventListener('keydown', lbFocusTrap);
+  lbFocusTrap = (e) => {
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+    else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+  };
+  lb.addEventListener('keydown', lbFocusTrap);
+  setTimeout(() => focusable[0]?.focus(), 100);
+}
+// Patch abrirLightbox to init focus trap
+const _origAbrirLb = abrirLightbox;
+abrirLightbox = function(eq, idx) { _origAbrirLb(eq, idx); initFocusTrap(); };
+
+// Fetch live data from Cloudflare Worker
+function cargarEquipos() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/equipos/' + BRANCH_KEY, true);
+  xhr.onload = function() {
+    if (xhr.status !== 200) return;
+    try {
+      var data = JSON.parse(xhr.responseText);
+      if (!data || !data.length) return;
+      var map = {};
+      data.forEach(function(eq) { map[eq.nro] = eq; });
+      var cambios = 0;
+      EQUIPOS.forEach(function(eq) {
+        var upd = map[eq.nro];
+        if (upd) { Object.assign(eq, upd); cambios++; }
+      });
+      if (cambios > 0) {
+        renderizarMarcadores();
+        actualizarStats();
+        poblarFiltros();
+        if (document.getElementById('lista-overlay').classList.contains('activo')) renderLista();
+      }
+    } catch(e) {}
+  };
+  xhr.send();
+}
+
+// Sync button
+function syncData() {
+  const btn = document.getElementById('sync-btn');
+  if (btn.classList.contains('syncing')) return;
+  btn.classList.add('syncing');
+  btn.innerHTML = '<i class="ph ph-spinner"></i>';
+  fetch('/sync')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.output);
+      const branch = data.branches['colon'];
+      if (!branch) throw new Error('No data for this branch');
+      const map = {};
+      branch.forEach(eq => { map[eq.nro] = eq; });
+      EQUIPOS.forEach(eq => {
+        const upd = map[eq.nro];
+        if (upd) Object.assign(eq, upd);
+      });
+      renderizarMarcadores();
+      actualizarStats();
+      poblarFiltros();
+      if (document.getElementById('lista-overlay').classList.contains('activo')) renderLista();
+      document.getElementById('sync-time').textContent = data.timestamp;
+      btn.innerHTML = '<i class="ph ph-check"></i>';
+      setTimeout(() => { btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i>'; btn.classList.remove('syncing'); }, 2000);
+    })
+    .catch(err => {
+      console.error('Sync error:', err);
+      btn.innerHTML = '<i class="ph ph-x"></i>';
+      setTimeout(() => { btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i>'; btn.classList.remove('syncing'); }, 3000);
+    });
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+
+<div id="lightbox" class="lightbox" onclick="cerrarLightbox()">
+  <button class="cerrar-lb" onclick="cerrarLightbox()" aria-label="Cerrar"><i class="ph ph-x"></i></button>
+  <div class="lb-content" onclick="event.stopPropagation()">
+    <div class="lb-counter" id="lb-counter"></div>
+    <button class="lb-nav prev" id="lb-prev" onclick="navegarLb(-1)"><i class="ph ph-caret-left"></i></button>
+    <div class="lb-track" id="lb-track"></div>
+    <button class="lb-nav next" id="lb-next" onclick="navegarLb(1)"><i class="ph ph-caret-right"></i></button>
+    <div class="lb-dots" id="lb-dots"></div>
+    <div class="lb-info" id="lb-info"></div>
+  </div>
+</div>
+</body>
+</html>

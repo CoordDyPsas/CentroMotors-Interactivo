@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Posicionar Equipos - Monseñor</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #515151; color: #eee; display: flex; height: 100vh; }
+.sidebar {
+  width: 280px; background: #515151; padding: 16px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+}
+.sidebar h2 { font-size: 16px; margin-bottom: 8px; color: #515151; }
+.piso-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.piso-btn.active { background: #e94560; color: #fff; }
+.piso-btn:not(.active) { background: #515151; color: #aaa; }
+.equipo-item {
+  padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+.equipo-item:hover { background: #515151; }
+.equipo-item.selected { background: #e94560; color: #fff; }
+.equipo-item.placed { opacity: 0.6; }
+.equipo-item.placed::after { content: "\2713"; color: #4ecca3; margin-left: auto; }
+.equipo-nro { font-weight: 700; min-width: 36px; }
+.equipo-ubic { font-size: 12px; color: #888; }
+.equipo-foto { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.equipo-foto.si { background: #4ecca3; }
+.equipo-foto.no { background: #555; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.toolbar {
+  padding: 8px 16px; background: #515151; display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid #515151;
+}
+.toolbar .info { font-size: 13px; color: #aaa; }
+.btn-save {
+  margin-left: auto; padding: 8px 20px; background: #4ecca3; color: #111;
+  border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+}
+.btn-save:hover { background: #3db88b; }
+.canvas-container {
+  flex: 1; overflow: auto; position: relative; background: #0a0a1a;
+  display: flex; align-items: center; justify-content: center;
+}
+#plano-wrapper { position: relative; display: inline-block; }
+#plano { display: block; max-width: none; cursor: crosshair; user-select: none; }
+.marker {
+  position: absolute; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; cursor: grab;
+  border: 2px solid #fff; transform: translate(-50%, -50%);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5); transition: 0.1s;
+  pointer-events: auto;
+}
+.marker:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 100; }
+.marker.necesita { background: #e94560; }
+.marker.ok { background: #4ecca3; }
+.marker.nofunciona { background: #666; }
+.coord-info {
+  position: fixed; bottom: 12px; right: 12px; background: rgba(0,0,0,0.8);
+  padding: 8px 14px; border-radius: 6px; font-size: 12px; color: #aaa; z-index: 1000;
+}
+.instrucciones {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: #515151; padding: 30px 40px; border-radius: 12px;
+  border: 2px solid #515151; z-index: 2000; max-width: 440px; text-align: center;
+}
+.instrucciones h3 { margin-bottom: 12px; color: #e94560; }
+.instrucciones p { margin-bottom: 8px; font-size: 14px; line-height: 1.6; color: #ccc; }
+.instrucciones .btn-empezar {
+  margin-top: 16px; padding: 10px 30px; background: #e94560; color: #fff;
+  border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;
+}
+.instrucciones .btn-empezar:hover { background: #d63851; }
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <h2>Sucursal Monseñor</h2>
+  <div style="display:flex;gap:8px">
+    <button class="piso-btn active" onclick="cambiarPiso('pb')">Planta Baja</button>
+    <button class="piso-btn" onclick="cambiarPiso('pa')">Planta Alta</button>
+  </div>
+  <div style="margin:4px 0;font-size:12px;color:#666">
+    <span style="color:#4ecca3">●</span> Con foto
+    <span style="color:#555;margin-left:8px">●</span> Sin foto
+  </div>
+  <div id="lista-equipos"></div>
+</div>
+
+<div class="main">
+  <div class="toolbar">
+    <span class="info">Seleccioná un equipo de la lista y hacé clic en el plano para ubicarlo.</span>
+    <span class="info" id="contador">0/0 colocados</span>
+    <button class="btn-save" onclick="guardarCoords()">💾 Guardar coordenadas</button>
+  </div>
+  <div class="canvas-container">
+    <div id="plano-wrapper">
+      <img id="plano" src="plano_pb.png" alt="Plano" draggable="false">
+    </div>
+  </div>
+</div>
+
+<div id="coordInfo" class="coord-info">X: — Y: —</div>
+
+<div id="instrucciones" class="instrucciones">
+  <h3>📍 Posicionar equipos</h3>
+  <p><strong>1.</strong> En la lista de la izquierda, hacé clic sobre un equipo para seleccionarlo.</p>
+  <p><strong>2.</strong> Después hacé clic en el plano en el lugar donde está ubicado.</p>
+  <p><strong>3.</strong> Podés arrastrar los marcadores para ajustarlos.</p>
+  <p><strong>4.</strong> Al terminar, hacé clic en <strong>"Guardar coordenadas"</strong>.</p>
+  <button class="btn-empezar" onclick="document.getElementById('instrucciones').style.display='none'">¡Empezar!</button>
+</div>
+
+<script>
+const PLANOS = { pb: 'plano_pb.png', pa: 'plano_pa.png' };
+
+const EQUIPOS = [
+  {"nro":1,"ubicacion":"Ventas","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pb"},
+  {"nro":2,"ubicacion":"Ventas","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pb"},
+  {"nro":3,"ubicacion":"Gastos entrega","marca":"Surrey","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5287","tiene_foto":true,"piso":"pb"},
+  {"nro":4,"ubicacion":"Caja","marca":"Goldman","capacidad":"2500","ultimo_service":"8/07/2025","estado":"Necesita service","ot":"5552","tiene_foto":false,"piso":"pb"},
+  {"nro":5,"ubicacion":"Gerencia Post Ventas","marca":"Goldman","capacidad":"2500","ultimo_service":"28/06/2025","estado":"Necesita service","ot":"5439","tiene_foto":false,"piso":"pb"},
+  {"nro":6,"ubicacion":"Sala de estar","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5289","tiene_foto":false,"piso":"pb"},
+  {"nro":7,"ubicacion":"Sala de estar","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5289","tiene_foto":false,"piso":"pb"},
+  {"nro":8,"ubicacion":"Salon Centro","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5289","tiene_foto":false,"piso":"pb"},
+  {"nro":9,"ubicacion":"Exhibición","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5286","tiene_foto":false,"piso":"pb"},
+  {"nro":10,"ubicacion":"Exhibición","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5286","tiene_foto":false,"piso":"pb"},
+  {"nro":11,"ubicacion":"Repuestos","marca":"BGH","capacidad":"9000","ultimo_service":"8/07/2025","estado":"Necesita service","ot":"5552","tiene_foto":false,"piso":"pb"},
+  {"nro":245,"ubicacion":"Taller","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5288","tiene_foto":true,"piso":"pb"},
+  {"nro":246,"ubicacion":"Taller","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5288","tiene_foto":true,"piso":"pb"},
+  {"nro":248,"ubicacion":"Jefe Taller","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pb"},
+  {"nro":12,"ubicacion":"Ventas Planta alta","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"No funciona","estado":"No funciona","ot":"","tiene_foto":true,"piso":"pa"},
+  {"nro":13,"ubicacion":"Comedor","marca":"Surrey","capacidad":"Piso Techo - 18000","ultimo_service":"28/06/2025","estado":"Necesita service","ot":"5434","tiene_foto":true,"piso":"pa"},
+  {"nro":14,"ubicacion":"Call Administración","marca":"Midea","capacidad":"5500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pa"},
+  {"nro":15,"ubicacion":"Call center","marca":"Midea","capacidad":"3000","ultimo_service":"28/06/2025","estado":"Necesita service","ot":"5435","tiene_foto":true,"piso":"pa"},
+  {"nro":16,"ubicacion":"Sala rack data","marca":"Electra","capacidad":"3000","ultimo_service":"27/03/2026","estado":"OK","ot":"7964","tiene_foto":true,"piso":"pa"},
+  {"nro":17,"ubicacion":"Gerente general","marca":"Electra","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pa"},
+  {"nro":18,"ubicacion":"Sala reunión","marca":"Surrey","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pa"},
+  {"nro":19,"ubicacion":"Gerente Plan de ahorro","marca":"Electra","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pa"},
+  {"nro":20,"ubicacion":"Oficina","marca":"Electra","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","tiene_foto":true,"piso":"pa"},
+  {"nro":21,"ubicacion":"Recepción","marca":"Surrey","capacidad":"Separado por conducto","ultimo_service":"14/01/2025","estado":"Necesita service","ot":"3586","tiene_foto":false,"piso":"pb"}
+];
+
+const COORDS = {};
+let pisoActual = 'pb';
+let seleccionado = null;
+let arrastrando = null;
+
+function estadoClase(estado) {
+  if (!estado || estado === 'No funciona') return 'nofunciona';
+  if (estado === 'OK') return 'ok';
+  return 'necesita';
+}
+
+function renderizarLista() {
+  const div = document.getElementById('lista-equipos');
+  const filtrados = EQUIPOS.filter(e => e.piso === pisoActual);
+  div.innerHTML = filtrados.map(e => `
+    <div class="equipo-item${seleccionado === e.nro ? ' selected' : ''}${COORDS[e.nro] ? ' placed' : ''}"
+         onclick="seleccionarEquipo(${e.nro})">
+      <span class="equipo-foto ${e.tiene_foto ? 'si' : 'no'}"></span>
+      <span class="equipo-nro">#${e.nro}</span>
+      <span class="equipo-ubic">${e.ubicacion}</span>
+    </div>
+  `).join('');
+  actualizarContador();
+}
+
+function actualizarContador() {
+  const total = EQUIPOS.filter(e => e.piso === pisoActual).length;
+  const colocados = EQUIPOS.filter(e => e.piso === pisoActual && COORDS[e.nro]).length;
+  document.getElementById('contador').textContent = colocados + '/' + total + ' colocados';
+}
+
+function seleccionarEquipo(nro) {
+  seleccionado = nro;
+  renderizarLista();
+}
+
+function cambiarPiso(piso) {
+  pisoActual = piso;
+  document.querySelectorAll('.piso-btn').forEach(b => {
+    const esPB = b.textContent.includes('Baja');
+    b.classList.toggle('active', (piso === 'pb' && esPB) || (piso === 'pa' && !esPB));
+  });
+  document.getElementById('plano').src = PLANOS[piso];
+  seleccionado = null;
+  renderizarLista();
+  renderizarMarcadores();
+}
+
+function renderizarMarcadores() {
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+
+  Object.entries(COORDS).forEach(([nro, coord]) => {
+    if (coord.piso !== pisoActual) return;
+    const eq = EQUIPOS.find(e => e.nro === parseInt(nro));
+    if (!eq) return;
+    const m = document.createElement('div');
+    m.className = 'marker ' + estadoClase(eq.estado);
+    m.dataset.nro = nro;
+    m.style.left = coord.x + 'px';
+    m.style.top = coord.y + 'px';
+    m.textContent = nro;
+
+    let drag = false, startX, startY, offsetX, offsetY;
+    m.addEventListener('mousedown', (e) => {
+      drag = true;
+      const wrapper = document.getElementById('plano-wrapper');
+      const img = document.getElementById('plano');
+      const scale = img.getBoundingClientRect().width / img.naturalWidth;
+      const wr = wrapper.getBoundingClientRect();
+      offsetX = (e.clientX - wr.left) / scale - coord.x;
+      offsetY = (e.clientY - wr.top) / scale - coord.y;
+      m.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!drag) return;
+      const img = document.getElementById('plano');
+      const wrapper = document.getElementById('plano-wrapper');
+      const scale = img.getBoundingClientRect().width / img.naturalWidth;
+      const wr = wrapper.getBoundingClientRect();
+      let x = (e.clientX - wr.left) / scale - offsetX;
+      let y = (e.clientY - wr.top) / scale - offsetY;
+      x = Math.max(0, Math.min(img.naturalWidth, x));
+      y = Math.max(0, Math.min(img.naturalHeight, y));
+      COORDS[parseInt(nro)] = { x: Math.round(x), y: Math.round(y), piso: pisoActual };
+      renderizarMarcadores();
+      renderizarLista();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (drag) {
+        drag = false;
+        document.querySelectorAll('.marker').forEach(m => m.style.cursor = 'grab');
+      }
+    });
+
+    m.addEventListener('dblclick', () => {
+      delete COORDS[nro];
+      renderizarMarcadores();
+      renderizarLista();
+    });
+
+    document.getElementById('plano-wrapper').appendChild(m);
+  });
+}
+
+document.getElementById('plano').addEventListener('click', (e) => {
+  if (seleccionado === null) return;
+  const img = e.currentTarget;
+  const rect = img.getBoundingClientRect();
+  const scale = img.naturalWidth / rect.width;
+  const x = Math.round((e.clientX - rect.left) * scale);
+  const y = Math.round((e.clientY - rect.top) * scale);
+  COORDS[seleccionado] = { x, y, piso: pisoActual };
+  seleccionado = null;
+  renderizarMarcadores();
+  renderizarLista();
+});
+
+document.getElementById('plano').addEventListener('mousemove', (e) => {
+  const img = e.currentTarget;
+  const rect = img.getBoundingClientRect();
+  const scale = img.naturalWidth / rect.width;
+  const x = Math.round((e.clientX - rect.left) * scale);
+  const y = Math.round((e.clientY - rect.top) * scale);
+  document.getElementById('coordInfo').textContent = 'X: ' + x + '  Y: ' + y + '  |  Click para colocar';
+});
+
+function guardarCoords() {
+  const coordsArr = Object.entries(COORDS).map(([nro, c]) => ({
+    nro: parseInt(nro), x: c.x, y: c.y, piso: c.piso
+  }));
+  const dataStr = JSON.stringify(coordsArr, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'coordenadas_monsenor.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  alert('✅ Coordenadas guardadas: ' + coordsArr.length + ' equipos\n\nSe descargó coordenadas_monsenor.json');
+}
+
+renderizarLista();
+</script>
+</body>
+</html>

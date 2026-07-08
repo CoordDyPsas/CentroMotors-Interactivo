@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Posicionador - Sagrada Familia</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #111; color: #eee; height: 100vh; display: flex; flex-direction: column; }
+.header {
+  background: linear-gradient(135deg, #515151, #515151);
+  padding: 10px 20px; display: flex; align-items: center; gap: 16px;
+  border-bottom: 2px solid #e94560; flex-shrink: 0; flex-wrap: wrap;
+}
+.header h1 { font-size: 16px; }
+.header h1 span { color: #e94560; }
+.piso-btn, .save-btn, .load-btn {
+  padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer;
+  font-weight: 600; font-size: 13px; transition: 0.2s;
+}
+.piso-btn.active { background: #e94560; color: #fff; }
+.piso-btn:not(.active) { background: #515151; color: #aaa; }
+.piso-btn:not(.active):hover { background: #666666; }
+.save-btn { background: #2ecc71; color: #111; }
+.save-btn:hover { background: #27ae60; }
+.load-btn { background: #f39c12; color: #111; }
+.load-btn:hover { background: #e67e22; }
+.help { font-size: 12px; color: #888; margin-left: auto; }
+.contador { font-size: 13px; color: #aaa; }
+
+.plano-wrapper { flex: 1; overflow: hidden; position: relative; background: #0a0a1a; cursor: crosshair; }
+#plano-container { position: absolute; transform-origin: 0 0; }
+#plano-container img { display: block; user-select: none; pointer-events: none; }
+
+.marker {
+  position: absolute; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  border: 2px solid #fff; cursor: move;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  z-index: 10; user-select: none;
+}
+.marker.ubicado { background: #e94560; }
+.marker.pendiente { background: #555; opacity: 0.5; }
+.marker .label { position: absolute; left: 34px; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.85); color: #fff; padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; white-space: nowrap; pointer-events: none; display: none; }
+.marker:hover .label { display: block; }
+.marker.dragging { z-index: 100; transform: translate(-50%, -50%) scale(1.3); }
+
+.coord-list {
+  position: fixed; right: 0; top: 60px; width: 280px; background: #515151;
+  border-left: 1px solid #515151; padding: 10px; max-height: calc(100vh - 70px);
+  overflow-y: auto; font-size: 12px; z-index: 50;
+}
+.coord-list h3 { margin-bottom: 8px; font-size: 14px; }
+.coord-item {
+  padding: 4px 8px; border-radius: 4px; margin-bottom: 2px;
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; transition: 0.15s;
+}
+.coord-item:hover { background: #515151; }
+.coord-item.ubicado { border-left: 3px solid #e94560; }
+.coord-item.pendiente { border-left: 3px solid #555; opacity: 0.6; }
+.coord-item .info { flex: 1; }
+.coord-item .coords { font-size: 10px; color: #888; }
+.coord-item .boton-x {
+  background: none; border: none; color: #e94560; cursor: pointer;
+  font-size: 14px; padding: 0 4px;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Posicionador <span>Sagrada Familia</span></h1>
+  <button class="piso-btn active" data-piso="pb" onclick="cambiarPiso('pb')">PB</button>
+  <button class="piso-btn" data-piso="pa" onclick="cambiarPiso('pa')">PA</button>
+  <button class="save-btn" onclick="guardar()">💾 Guardar</button>
+  <button class="load-btn" onclick="document.getElementById('loadFile').click()">📂 Cargar</button>
+  <input type="file" id="loadFile" accept=".json" style="display:none" onchange="cargar(event)">
+  <span class="contador" id="contador">PB: 0/13 ubicados</span>
+  <span class="help">Click para colocar · Arrastrar para ajustar</span>
+</div>
+<div class="plano-wrapper" id="plano-wrapper">
+  <div id="plano-container">
+    <img id="plano" src="plano.png" alt="Plano" draggable="false">
+  </div>
+</div>
+<div class="coord-list" id="coord-list">
+  <h3>Equipos <span id="piso-label">PB</span></h3>
+  <div id="lista-equipos"></div>
+</div>
+<script>
+const EQUIPOS = [
+  {"nro":1,"ubicacion":"Recepción","marca":"Midea","capacidad":"5500","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6444","piso":"pb","tiene_foto":false},
+  {"nro":2,"ubicacion":"Citas","marca":"Surrey","capacidad":"9000","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6166","piso":"pb","tiene_foto":false},
+  {"nro":3,"ubicacion":"Oficina","marca":"Midea","capacidad":"3000","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6456","piso":"pb","tiene_foto":false},
+  {"nro":4,"ubicacion":"Sala Reunión","marca":"Midea","capacidad":"4500","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6163","piso":"pa","tiene_foto":false},
+  {"nro":5,"ubicacion":"Ventas","marca":"Midea","capacidad":"2250","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6163","piso":"pa","tiene_foto":false},
+  {"nro":6,"ubicacion":"Rack","marca":"Surrey","capacidad":"3000","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6457","piso":"pa","tiene_foto":false},
+  {"nro":7,"ubicacion":"Comedor","marca":"Midea","capacidad":"4500","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6163","piso":"pa","tiene_foto":false},
+  {"nro":8,"ubicacion":"Comedor","marca":"Midea","capacidad":"4500","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6163","piso":"pa","tiene_foto":false},
+  {"nro":9,"ubicacion":"Garita","marca":"Midea","capacidad":"3000","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6458","piso":"pb","tiene_foto":false},
+  {"nro":10,"ubicacion":"Lavadero","marca":"Carrier","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","tiene_foto":false},
+  {"nro":11,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 18000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","tiene_foto":false},
+  {"nro":12,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","tiene_foto":false},
+  {"nro":13,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","tiene_foto":false},
+  {"nro":14,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 18000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","tiene_foto":false},
+  {"nro":15,"ubicacion":"Lavadero","marca":"Carrier","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","tiene_foto":false},
+  {"nro":16,"ubicacion":"Repuestos","marca":"Surrey","capacidad":"4500","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6459","piso":"pb","tiene_foto":false},
+  {"nro":17,"ubicacion":"Garantía","marca":"Midea","capacidad":"2250","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6460","piso":"pb","tiene_foto":false},
+  {"nro":18,"ubicacion":"Caja","marca":"Midea","capacidad":"3000","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6437","piso":"pb","tiene_foto":false}
+];
+
+const IMG_W = 3309, IMG_H = 2339;
+let pisoActual = 'pb';
+let zoom = 1, panX = 0, panY = 0;
+let isPanning = false, panStart = { x: 0, y: 0 };
+let isDraggingMarker = false, dragTarget = null, dragOffset = { x: 0, y: 0 };
+
+const wrapper = document.getElementById('plano-wrapper');
+const container = document.getElementById('plano-container');
+const img = document.getElementById('plano');
+
+// Initialize coordinates
+if (!window.COORDS) {
+  window.COORDS = {};
+  EQUIPOS.forEach(e => { window.COORDS[e.nro] = null; });
+}
+
+function clamps() {
+  const wr = wrapper.getBoundingClientRect();
+  panX = Math.max(-IMG_W, Math.min(wr.width / zoom, panX));
+  panY = Math.max(-IMG_H, Math.min(wr.height / zoom, panY));
+}
+
+function aplicarTransform() {
+  clamps();
+  container.style.transform = 'scale(' + zoom + ') translate(' + panX + 'px, ' + panY + 'px)';
+}
+
+function fitToScreen() {
+  const wr = wrapper.getBoundingClientRect();
+  const zx = wr.width / IMG_W, zy = wr.height / IMG_H;
+  zoom = Math.min(zx, zy, 1) * 0.9;
+  panX = (wr.width - IMG_W * zoom) / (2 * zoom);
+  panY = (wr.height - IMG_H * zoom) / (2 * zoom);
+  aplicarTransform();
+}
+
+function getPos(e) {
+  const rect = wrapper.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  return { x: (mx - panX * zoom) / zoom, y: (my - panY * zoom) / zoom };
+}
+
+function actualizarLista() {
+  const lista = document.getElementById('lista-equipos');
+  const pisoEqs = EQUIPOS.filter(e => e.piso === pisoActual);
+  lista.innerHTML = '';
+  let ubicados = 0;
+  pisoEqs.forEach(eq => {
+    const tiene = window.COORDS[eq.nro] !== null;
+    if (tiene) ubicados++;
+    const div = document.createElement('div');
+    div.className = 'coord-item ' + (tiene ? 'ubicado' : 'pendiente');
+    div.innerHTML = '<div class="info">#' + eq.nro + ' ' + eq.ubicacion +
+      '<div class="coords">' + (tiene ? 'x:' + Math.round(window.COORDS[eq.nro].x) + ' y:' + Math.round(window.COORDS[eq.nro].y) : '—') +
+      '</div></div>' +
+      (tiene ? '<button class="boton-x" onclick="event.stopPropagation();eliminarCoord(' + eq.nro + ')">✕</button>' : '');
+    div.onclick = () => {
+      if (window.COORDS[eq.nro]) {
+        const c = window.COORDS[eq.nro];
+        centerOn(c.x, c.y);
+      }
+    };
+    lista.appendChild(div);
+  });
+  const total = pisoEqs.length;
+  document.getElementById('contador').textContent = pisoActual.toUpperCase() + ': ' + ubicados + '/' + total + ' ubicados';
+}
+
+function centerOn(x, y) {
+  const wr = wrapper.getBoundingClientRect();
+  panX = wr.width / (2 * zoom) - x;
+  panY = wr.height / (2 * zoom) - y;
+  aplicarTransform();
+  actualizarMarcadores();
+}
+
+function actualizarMarcadores() {
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+  EQUIPOS.filter(e => e.piso === pisoActual).forEach(eq => {
+    const c = window.COORDS[eq.nro];
+    if (!c) return;
+    const m = document.createElement('div');
+    m.className = 'marker ubicado';
+    m.dataset.nro = eq.nro;
+    m.style.left = c.x + 'px';
+    m.style.top = c.y + 'px';
+    m.textContent = eq.nro;
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = '#' + eq.nro + ' ' + eq.ubicacion;
+    m.appendChild(label);
+    m.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      isDraggingMarker = true;
+      dragTarget = m;
+      const pos = getPos(e);
+      dragOffset = { x: pos.x - c.x, y: pos.y - c.y };
+      m.classList.add('dragging');
+    });
+    container.appendChild(m);
+  });
+}
+
+function cambiarPiso(piso) {
+  pisoActual = piso;
+  document.querySelectorAll('.piso-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.piso === piso);
+  });
+  document.getElementById('piso-label').textContent = piso.toUpperCase();
+  actualizarLista();
+  actualizarMarcadores();
+}
+
+function eliminarCoord(nro) {
+  window.COORDS[nro] = null;
+  actualizarLista();
+  actualizarMarcadores();
+}
+
+function guardar() {
+  const data = {};
+  EQUIPOS.forEach(e => {
+    if (window.COORDS[e.nro]) {
+      data[e.nro] = { x: window.COORDS[e.nro].x, y: window.COORDS[e.nro].y };
+    }
+  });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'coordenadas_sf.json';
+  a.click();
+  alert('Guardado: ' + Object.keys(data).length + ' coordenadas');
+}
+
+function cargar(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = JSON.parse(e.target.result);
+    Object.keys(data).forEach(k => {
+      const nro = parseInt(k);
+      if (window.COORDS[nro] !== undefined) {
+        window.COORDS[nro] = data[k];
+      }
+    });
+    actualizarLista();
+    actualizarMarcadores();
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// Click to place
+wrapper.addEventListener('click', (e) => {
+  if (isDraggingMarker) return;
+  if (e.target.closest('.coord-list') || e.target.closest('.header')) return;
+  const pos = getPos(e);
+  // Find first unplaced equipo in current floor
+  const pisoEqs = EQUIPOS.filter(eq => eq.piso === pisoActual);
+  const sinCoord = pisoEqs.find(eq => window.COORDS[eq.nro] === null);
+  if (sinCoord) {
+    window.COORDS[sinCoord.nro] = { x: pos.x, y: pos.y };
+    actualizarLista();
+    actualizarMarcadores();
+  }
+});
+
+// Pan
+wrapper.addEventListener('mousedown', (e) => {
+  if (e.button !== 0 || e.target.closest('.marker')) return;
+  isPanning = true;
+  panStart = { x: e.clientX - panX * zoom, y: e.clientY - panY * zoom };
+  wrapper.style.cursor = 'grabbing';
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (isDraggingMarker && dragTarget) {
+    const pos = getPos(e);
+    const nro = parseInt(dragTarget.dataset.nro);
+    const c = window.COORDS[nro];
+    if (c) {
+      c.x = pos.x - dragOffset.x;
+      c.y = pos.y - dragOffset.y;
+      dragTarget.style.left = c.x + 'px';
+      dragTarget.style.top = c.y + 'px';
+      actualizarLista();
+    }
+    return;
+  }
+  if (isPanning) {
+    panX = (e.clientX - panStart.x) / zoom;
+    panY = (e.clientY - panStart.y) / zoom;
+    aplicarTransform();
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  if (isDraggingMarker && dragTarget) {
+    dragTarget.classList.remove('dragging');
+    isDraggingMarker = false;
+    dragTarget = null;
+  }
+  if (isPanning) {
+    isPanning = false;
+    wrapper.style.cursor = 'crosshair';
+  }
+});
+
+wrapper.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = wrapper.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const oldZ = zoom;
+  zoom = Math.max(0.1, Math.min(5, zoom * (e.deltaY > 0 ? 1/1.2 : 1.2)));
+  panX = panX + mx * (1/zoom - 1/oldZ);
+  panY = panY + my * (1/zoom - 1/oldZ);
+  aplicarTransform();
+}, { passive: false });
+
+img.addEventListener('load', () => {
+  container.style.width = IMG_W + 'px';
+  container.style.height = IMG_H + 'px';
+  fitToScreen();
+  actualizarLista();
+});
+
+window.addEventListener('resize', fitToScreen);
+</script>
+</body>
+</html>
