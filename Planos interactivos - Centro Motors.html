@@ -258,7 +258,10 @@ body.modo-profesional .logo-sub { color: #111; }
       }
     }
     if (localStorage.getItem('dyp_tema') === 'oscuro') toggleTema(false);
-    document.getElementById('sync-time').textContent = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
+    (function tick() {
+      document.getElementById('sync-time').textContent = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
+      setTimeout(tick, 1000);
+    })();
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
