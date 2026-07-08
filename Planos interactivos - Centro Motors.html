@@ -174,7 +174,7 @@ body.modo-profesional .logo-sub { color: #111; }
     <span class="sep">|</span>
     <span>Coordinación de Servicio técnico</span>
     <span class="sep">|</span>
-    <span class="sync-status"><i class="ph ph-clock-counter-clockwise"></i> <span id="sync-time">08/07/2026 11:24</span></span>
+    <span class="sync-status"><i class="ph ph-clock-counter-clockwise"></i> <span id="sync-time">Cargando...</span></span>
   </div>
   <script>
     const SUCURSALES = [
@@ -258,6 +258,7 @@ body.modo-profesional .logo-sub { color: #111; }
       }
     }
     if (localStorage.getItem('dyp_tema') === 'oscuro') toggleTema(false);
+    document.getElementById('sync-time').textContent = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
