@@ -1350,6 +1350,7 @@ function cargarEquipos() {
         var upd = map[eq.nro];
         if (upd) { Object.assign(eq, upd); cambios++; }
       });
+      document.getElementById('sync-time').textContent = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
       if (cambios > 0) {
         renderizarMarcadores();
         actualizarStats();
