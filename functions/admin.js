@@ -30,6 +30,7 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
 </style>
 </head>
 <body>
+<a href="javascript:history.back()" style="display:inline-flex;align-items:center;gap:6px;color:#ff6900;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:10px">&larr; Volver</a>
 <h1>Dashboard</h1>
 <p class="sub">Panel de administración — Planos Interactivos DyP</p>
 
