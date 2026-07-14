@@ -694,9 +694,9 @@ const EQUIPOS = [
   {"nro":10,"ubicacion":"Exhibición","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"14/06/2025","estado":"Necesita service","ot":"5286","fotos":["Equipo 10.jpeg"],"piso":"pb","x":582,"y":1758},
   {"nro":11,"ubicacion":"Repuestos","marca":"BGH","capacidad":"9000","ultimo_service":"8/07/2025","estado":"Necesita service","ot":"5552","fotos":[],"piso":"pb","x":2450,"y":709},
   {"nro":21,"ubicacion":"Recepción","marca":"Surrey","capacidad":"Separado por conducto","ultimo_service":"14/01/2025","estado":"Necesita service","ot":"3586","fotos":[],"piso":"pb","x":884,"y":865},
-  {"nro":245,"ubicacion":"Taller","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"4/07/2026","estado":"OK","ot":"9040","fotos":["Equipo 245.jpeg"],"piso":"pb","x":1800,"y":1017},
-  {"nro":246,"ubicacion":"Taller","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"4/07/2026","estado":"OK","ot":"9045","fotos":["Equipo 246.jpeg"],"piso":"pb","x":1250,"y":1017},
-  {"nro":248,"ubicacion":"Jefe Taller","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 248.jpeg"],"piso":"pb","x":1640,"y":285},
+  {"nro":245,"ubicacion":"Taller","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"4/07/2026","estado":"OK","ot":"9040","fotos":["Equipo 245.jpeg"],"piso":"pb","x":1800,"y":1017,"intervalo_meses":3},
+  {"nro":246,"ubicacion":"Taller","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"4/07/2026","estado":"OK","ot":"9045","fotos":["Equipo 246.jpeg"],"piso":"pb","x":1250,"y":1017,"intervalo_meses":3},
+  {"nro":248,"ubicacion":"Jefe Taller","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 248.jpeg"],"piso":"pb","x":1640,"y":285,"intervalo_meses":3},
   {"nro":12,"ubicacion":"Ventas Planta alta","marca":"BGH","capacidad":"Piso Techo - 18000","ultimo_service":"-","estado":"No funciona","ot":"","fotos":["Equipo 12.jpeg"],"piso":"pa","x":1083,"y":1349},
   {"nro":13,"ubicacion":"Comedor","marca":"Surrey","capacidad":"Piso Techo - 18000","ultimo_service":"28/06/2025","estado":"Necesita service","ot":"5434","fotos":["Equipo 13.jpeg"],"piso":"pa","x":1066,"y":1077},
   {"nro":14,"ubicacion":"Call Administración","marca":"Midea","capacidad":"5500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 14.jpeg"],"piso":"pa","x":1084,"y":1015},
@@ -791,17 +791,18 @@ function formatearFecha(str) {
   return dd + '/' + mm + '/' + a + ' <span class="fecha-rel">— ' + relativo + '</span>';
 }
 
-function calcularProximoService(str) {
+function calcularProximoService(str, intervaloMeses) {
   if (!str || str === '-' || str === '—' || str === 'No funciona') return { html: '-', cls: '' };
   const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!partes) return { html: str, cls: '' };
   const [_, d, m, a] = partes;
   const ultimo = new Date(+a, +m - 1, +d);
-  const proximo = new Date(ultimo);
-  proximo.setMonth(proximo.getMonth() + 6);
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   ultimo.setHours(0, 0, 0, 0);
+  const intMeses = intervaloMeses || 6;
+  const proximo = new Date(ultimo);
+  proximo.setMonth(proximo.getMonth() + intMeses);
   proximo.setHours(0, 0, 0, 0);
   const diffMs = proximo - hoy;
   const diffDias = Math.round(diffMs / 86400000);
@@ -1059,7 +1060,7 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + badgeTexto + '</span></div></div></div>' +
       '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
-      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service).html + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
     '</div>';
 
   initCarousel();

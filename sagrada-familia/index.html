@@ -676,12 +676,12 @@ const EQUIPOS = [
   {"nro":7,"ubicacion":"Comedor","marca":"Midea","capacidad":"4500","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6163","piso":"pa","fotos":["Equipo 7.jpeg"],"x":1673,"y":276},
   {"nro":8,"ubicacion":"Comedor","marca":"Midea","capacidad":"4500","ultimo_service":"20/09/2025","estado":"Necesita service","ot":"6163","piso":"pa","fotos":["Equipo 8.jpeg"],"x":1423,"y":233},
   {"nro":9,"ubicacion":"Garita","marca":"Midea","capacidad":"3000","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6458","piso":"pb","fotos":["Equipo 9.jpeg"],"x":2032,"y":933},
-  {"nro":10,"ubicacion":"Lavadero","marca":"Carrier","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","fotos":["Equipo 10.jpg","Equipo 10b.jpg"],"x":1374,"y":1432},
-  {"nro":11,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 18000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","fotos":["Equipo 11.jpeg"],"x":1040,"y":1435},
-  {"nro":12,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","fotos":["Equipo 12.jpeg"],"x":712,"y":1438},
-  {"nro":13,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","fotos":["Equipo 13.jpeg"],"x":702,"y":807},
-  {"nro":14,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 18000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","fotos":["Equipo 14.jpeg","Equipo 14b.jpeg"],"x":1037,"y":806},
-  {"nro":15,"ubicacion":"Lavadero","marca":"Carrier","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","fotos":["Equipo 15.jpg","Equipo 15b.jpg"],"x":1364,"y":806},
+  {"nro":10,"ubicacion":"Lavadero","marca":"Carrier","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","fotos":["Equipo 10.jpg","Equipo 10b.jpg"],"x":1374,"y":1432,"intervalo_meses":3},
+  {"nro":11,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 18000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","fotos":["Equipo 11.jpeg"],"x":1040,"y":1435,"intervalo_meses":3},
+  {"nro":12,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","fotos":["Equipo 12.jpeg"],"x":712,"y":1438,"intervalo_meses":3},
+  {"nro":13,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7633","piso":"pb","fotos":["Equipo 13.jpeg"],"x":702,"y":807,"intervalo_meses":3},
+  {"nro":14,"ubicacion":"Lavadero","marca":"Midea","capacidad":"Piso Techo - 18000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","fotos":["Equipo 14.jpeg","Equipo 14b.jpeg"],"x":1037,"y":806,"intervalo_meses":3},
+  {"nro":15,"ubicacion":"Lavadero","marca":"Carrier","capacidad":"Piso Techo - 15000","ultimo_service":"14/02/2026","estado":"Necesita service","ot":"7632","piso":"pb","fotos":["Equipo 15.jpg","Equipo 15b.jpg"],"x":1364,"y":806,"intervalo_meses":3},
   {"nro":16,"ubicacion":"Repuestos","marca":"Surrey","capacidad":"4500","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6459","piso":"pb","fotos":["Equipo 16.jpeg","Equipo 16b.jpeg"],"x":1634,"y":835},
   {"nro":17,"ubicacion":"Garantía","marca":"Midea","capacidad":"2250","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6460","piso":"pb","fotos":["Equipo 17.jpeg"],"x":1758,"y":768},
   {"nro":18,"ubicacion":"Caja","marca":"Midea","capacidad":"3000","ultimo_service":"17/10/2025","estado":"Necesita service","ot":"6437","piso":"pb","fotos":["Equipo 18.jpeg"],"x":2014,"y":1400}
@@ -764,17 +764,18 @@ function formatearFecha(str) {
   return dd + '/' + mm + '/' + a + ' <span class="fecha-rel">— ' + relativo + '</span>';
 }
 
-function calcularProximoService(str) {
+function calcularProximoService(str, intervaloMeses) {
   if (!str || str === '-' || str === '—' || str === 'No funciona') return { html: '-', cls: '' };
   const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!partes) return { html: str, cls: '' };
   const [_, d, m, a] = partes;
   const ultimo = new Date(+a, +m - 1, +d);
-  const proximo = new Date(ultimo);
-  proximo.setMonth(proximo.getMonth() + 6);
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   ultimo.setHours(0, 0, 0, 0);
+  const intMeses = intervaloMeses || 6;
+  const proximo = new Date(ultimo);
+  proximo.setMonth(proximo.getMonth() + intMeses);
   proximo.setHours(0, 0, 0, 0);
   const diffMs = proximo - hoy;
   const diffDias = Math.round(diffMs / 86400000);
@@ -1011,7 +1012,7 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + badgeTexto + '</span></div></div></div>' +
       '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
-      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service).html + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
     '</div>';
 
   initCarousel();

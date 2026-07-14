@@ -709,19 +709,18 @@ const EQUIPOS = [
   {"nro":38,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1344,"y":391},
   {"nro":39,"ubicacion":"Presidencia","marca":"Midea","capacidad":"Piso techo","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6940","fotos":["Equipo 39.jpeg"],"piso":"pa","x":1191,"y":394},
   {"nro":40,"ubicacion":"Sala Reunión","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1426,"y":967},
-  {"nro":41,"ubicacion":"Ventas usados","marca":"Audinac","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1745},
-  {"nro":42,"ubicacion":"Ventas usados","marca":"Hisense","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1841},
-  {"nro":43,"ubicacion":"Sala caja de cambios","marca":"","capacidad":"Ventana Grande","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1510,"y":541},
-  {"nro":44,"ubicacion":"Lavadero","marca":"Midea","capacidad":"4500","ultimo_service":"21/10/2025","estado":"Necesita service","ot":"6479","fotos":[],"piso":"pb","x":1914,"y":1244},
-  {"nro":45,"ubicacion":"Garita Playa","marca":"Hitachi","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1622,"y":603},
-  {"nro":46,"ubicacion":"Pre entrega Accesorios","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2278,"y":859},
-  {"nro":47,"ubicacion":"Electrica","marca":"Midea","capacidad":"5000","ultimo_service":"21/12/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2110,"y":842},
-  {"nro":48,"ubicacion":"Alistaje","marca":"Midea","capacidad":"5000","ultimo_service":"9/01/2026","estado":"Necesita service","ot":"7281","fotos":[],"piso":"pb","x":2210,"y":859},
-  {"nro":49,"ubicacion":"Polarizado","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2168,"y":659},
-  {"nro":50,"ubicacion":"Llaves","marca":"Kelvinator","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1956,"y":1028},
-  {"nro":51,"ubicacion":"Guardia","marca":"Surrey","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1884,"y":1013},
-  {"nro":395,"ubicacion":"Diagnostico","marca":"Midea","capacidad":"3000","ultimo_service":"28/03/2026","estado":"Necesita service","ot":"7966","fotos":["Equipo 395.jpeg"],"piso":"pb","x":1274,"y":640}
-];
+  {"nro":41,"ubicacion":"Ventas usados","marca":"Audinac","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1745,"intervalo_meses":3},
+  {"nro":42,"ubicacion":"Ventas usados","marca":"Hisense","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1841,"intervalo_meses":3},
+  {"nro":43,"ubicacion":"Sala caja de cambios","marca":"","capacidad":"Ventana Grande","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1510,"y":541,"intervalo_meses":3},
+  {"nro":44,"ubicacion":"Lavadero","marca":"Midea","capacidad":"4500","ultimo_service":"21/10/2025","estado":"Necesita service","ot":"6479","fotos":[],"piso":"pb","x":1914,"y":1244,"intervalo_meses":3},
+  {"nro":45,"ubicacion":"Garita Playa","marca":"Hitachi","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1622,"y":603,"intervalo_meses":3},
+  {"nro":46,"ubicacion":"Pre entrega Accesorios","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2278,"y":859,"intervalo_meses":3},
+  {"nro":47,"ubicacion":"Electrica","marca":"Midea","capacidad":"5000","ultimo_service":"21/12/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2110,"y":842,"intervalo_meses":3},
+  {"nro":48,"ubicacion":"Alistaje","marca":"Midea","capacidad":"5000","ultimo_service":"9/01/2026","estado":"Necesita service","ot":"7281","fotos":[],"piso":"pb","x":2210,"y":859,"intervalo_meses":3},
+  {"nro":49,"ubicacion":"Polarizado","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2168,"y":659,"intervalo_meses":3},
+  {"nro":50,"ubicacion":"Llaves","marca":"Kelvinator","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1956,"y":1028,"intervalo_meses":3},
+  {"nro":51,"ubicacion":"Guardia","marca":"Surrey","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1884,"y":1013,"intervalo_meses":3},
+  {"nro":395,"ubicacion":"Diagnostico","marca":"Midea","capacidad":"3000","ultimo_service":"28/03/2026","estado":"Necesita service","ot":"7966","fotos":["Equipo 395.jpeg"],"piso":"pb","x":1274,"y":640,"intervalo_meses":3}];
 
 const IMG_W = 3309;
 const IMG_H = 2339;
@@ -803,17 +802,18 @@ function formatearFecha(str) {
   return dd + '/' + mm + '/' + a + ' <span class="fecha-rel">— ' + relativo + '</span>';
 }
 
-function calcularProximoService(str) {
+function calcularProximoService(str, intervaloMeses) {
   if (!str || str === '-' || str === '—' || str === 'No funciona') return { html: '-', cls: '' };
   const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!partes) return { html: str, cls: '' };
   const [_, d, m, a] = partes;
   const ultimo = new Date(+a, +m - 1, +d);
-  const proximo = new Date(ultimo);
-  proximo.setMonth(proximo.getMonth() + 6);
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   ultimo.setHours(0, 0, 0, 0);
+  const intMeses = intervaloMeses || 6;
+  const proximo = new Date(ultimo);
+  proximo.setMonth(proximo.getMonth() + intMeses);
   proximo.setHours(0, 0, 0, 0);
   const diffMs = proximo - hoy;
   const diffDias = Math.round(diffMs / 86400000);
@@ -1062,7 +1062,7 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + badgeTexto + '</span></div></div></div>' +
       '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
-      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service).html + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
     '</div>';
 
   initCarousel();
