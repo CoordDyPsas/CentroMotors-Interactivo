@@ -129,6 +129,8 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .marker.necesita::after { border-color: #e94560; }
 .marker.ok::after { border-color: #2ecc71; }
 .marker.nofunciona::after { border-color: #666; }
+.marker.has-fotos::after { content: '\01F4F7'; font-size: 12px; position: absolute; top: -6px; right: -6px; background: none; border: none; inset: auto; }
+.marker.has-fotos:hover::after { transform: none; opacity: 1; }
 @keyframes pulse-necesita {
   0%, 100% { box-shadow: 0 0 12px rgba(233,69,96,0.6), 0 2px 8px rgba(0,0,0,0.6); }
   50% { box-shadow: 0 0 20px rgba(233,69,96,0.9), 0 2px 12px rgba(0,0,0,0.6); }
@@ -169,6 +171,9 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
   align-items: center; justify-content: space-between; border-bottom: 2px solid #ff6900;
 }
 .panel-header h2 { font-size: 16px; letter-spacing: 0.3px; }
+.foto-indicator { font-size: 11px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #ff6900; font-weight: 600; }
+.foto-indicator.no-fotos { color: #888; cursor: default; }
+.foto-indicator i { font-size: 14px; }
 .panel-close {
   background: none; border: none; color: #ff6900; font-size: 22px;
   cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
@@ -636,6 +641,7 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
   <div class="panel" id="panel">
     <div class="panel-header">
       <h2 id="panel-titulo">Equipo</h2>
+      <span id="panel-foto-indicator" class="foto-indicator no-fotos"><i class="ph ph-camera-slash"></i> <span id="panel-foto-text">Sin fotos</span></span>
       <div style="display:flex;gap:6px">
         <button class="panel-copy" onclick="copiarEquipo()" title="Copiar info"><i class="ph ph-copy"></i></button>
         <button class="panel-close" onclick="cerrarPanelCompleto()"><i class="ph ph-x"></i></button>
@@ -948,8 +954,9 @@ function renderizarMarcadores() {
     if (!matchTexto) return;
     const cls = estadoClase(eq.estado);
     if (filtroEstado && cls !== filtroEstado) return;
+    const hasFotos = (eq.fotos || []).length > 0;
     const m = document.createElement('div');
-    m.className = 'marker ' + estadoClase(eq.estado);
+    m.className = 'marker ' + estadoClase(eq.estado) + (hasFotos ? ' has-fotos' : '');
     m.dataset.nro = eq.nro;
     m.style.left = eq.x + 'px';
     m.style.top = eq.y + 'px';
@@ -960,6 +967,7 @@ function renderizarMarcadores() {
     if (eq.marca) tt += '<br><span class="tt-label">Marca</span><br>' + eq.marca;
     if (eq.capacidad) tt += '<br><span class="tt-label">Capacidad</span><br>' + eq.capacidad;
     if (eq.ultimo_service) tt += '<br><span class="tt-label">&Uacute;ltimo service</span><br>' + eq.ultimo_service;
+    if (hasFotos) tt += '<br><span class="tt-label">Fotos</span><br>' + eq.fotos.length;
     m.innerHTML = eq.nro + '<div class="tooltip">' + tt + '</div>';
     m.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -983,8 +991,20 @@ function mostrarEquipo(nro) {
   trackClick('panel', nro);
   document.getElementById('panel-titulo').textContent = '#' + eq.nro + ' - ' + eq.ubicacion;
 
-  let fotoHtml;
+  // Foto indicator in panel header
   const fotos = eq.fotos || [];
+  const fi = document.getElementById('panel-foto-indicator');
+  if (fotos.length > 0) {
+    fi.className = 'foto-indicator';
+    fi.onclick = () => { const track = document.querySelector('.foto-track'); if (track && track.querySelector('img')) { const img = track.querySelector('img'); abrirLightbox(eq, parseInt(img.dataset.idx) || 0); } };
+    fi.innerHTML = '<i class="ph ph-camera"></i> <span>' + fotos.length + ' foto' + (fotos.length > 1 ? 's' : '') + '</span>';
+  } else {
+    fi.className = 'foto-indicator no-fotos';
+    fi.onclick = null;
+    fi.innerHTML = '<i class="ph ph-camera-slash"></i> <span>Sin fotos</span>';
+  }
+
+  let fotoHtml;
   if (fotos.length > 0) {
     let slides = fotos.map((f, i) => '<div class="carousel-slide"><div class="skeleton"></div><img src="' + f + '" alt="' + eq.nro + '" draggable="false" data-idx="' + i + '" loading="' + (i > 0 ? 'lazy' : 'eager') + '" onload="this.previousElementSibling.remove()" onerror="this.parentElement.innerHTML=\'<div class=\\\'sin-foto\\\'><div class=\\\'icon\\\'><i class=\\\'ph ph-camera-slash\\\'></i></div>Foto no disponible</div>\'"></div>').join('');
     let dotsHtml = '';
