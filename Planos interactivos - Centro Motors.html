@@ -276,7 +276,7 @@ body.modo-profesional .logo-sub { color: #111; }
 
     function toggleTema(guardar) {
       const body = document.body;
-      const btn = document.querySelector('.switch-tema');
+      const btn = document.getElementById('switch-tema-btn');
       body.classList.toggle('modo-profesional');
       if (body.classList.contains('modo-profesional')) {
         btn.innerHTML = '<i class="ph ph-sun"></i>';
