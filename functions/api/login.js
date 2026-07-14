@@ -13,7 +13,7 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ success: false, error: 'Email y contraseña requeridos' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
 
     const db = context.env.DB;
-    const user = await db.prepare('SELECT email, password_hash, tipo, activo FROM usuarios WHERE email = ?').bind(email.toLowerCase().trim()).first();
+    const user = await db.prepare('SELECT email, password_hash, tipo, activo FROM usuarios WHERE LOWER(email) = ?').bind(email.toLowerCase().trim()).first();
 
     if (!user || !user.activo || !bcrypt.compareSync(password, user.password_hash))
       return new Response(JSON.stringify({ success: false, error: 'Credenciales inválidas' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
