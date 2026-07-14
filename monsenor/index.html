@@ -803,11 +803,20 @@ function clamps() {
   panY = Math.max(minPY, Math.min(maxPY, panY));
 }
 
+let minimapaDirty = false;
+function solicitarMinimapa() {
+  if (minimapaDirty) return;
+  minimapaDirty = true;
+  requestAnimationFrame(() => {
+    minimapaDirty = false;
+    dibujarMinimapa();
+  });
+}
 function aplicarTransform() {
   clamps();
   container.style.transform = 'scale(' + zoom + ') translate(' + panX + 'px, ' + panY + 'px)';
   zoomLevelEl.textContent = Math.round(zoom * 100) + '%';
-  dibujarMinimapa();
+  solicitarMinimapa();
 }
 
 function fitToScreen() {
@@ -1108,8 +1117,8 @@ function initCarousel() {
   track.parentNode.replaceChild(newTrack, track);
   carruselTrack = newTrack;
 
-  const dots = document.querySelectorAll('.carousel-dot');
   const actualizarDot = () => {
+    const dots = document.querySelectorAll('.carousel-dot');
     if (dots.length < 2) return;
     const idx = Math.round(carruselTrack.scrollLeft / carruselTrack.clientWidth);
     dots.forEach(d => d.classList.remove('activo'));
@@ -1266,7 +1275,8 @@ img.addEventListener('load', () => {
   }
 });
 
-window.addEventListener('resize', fitToScreen);
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitToScreen, 100); });
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
@@ -1559,12 +1569,10 @@ function renderLista() {
   });
 }
 
-function filtrarBusqueda(texto) {
-  renderizarMarcadores();
-}
-
+let searchDebounce;
 function onSearchInput(texto) {
-  filtrarBusqueda(texto);
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(renderizarMarcadores, 150);
   const cont = document.getElementById('search-suggestions');
   cont.innerHTML = '';
   if (!texto.trim()) { cont.classList.remove('show'); return; }
@@ -1719,8 +1727,7 @@ function syncData() {
       btn.innerHTML = '<i class="ph ph-check"></i>';
       setTimeout(() => { btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i>'; btn.classList.remove('syncing'); }, 2000);
     })
-    .catch(err => {
-      console.error('Sync error:', err);
+    .catch(() => {
       btn.innerHTML = '<i class="ph ph-x"></i>';
       setTimeout(() => { btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i>'; btn.classList.remove('syncing'); }, 3000);
     });

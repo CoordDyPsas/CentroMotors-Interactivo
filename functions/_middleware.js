@@ -50,7 +50,7 @@ export async function onRequest(context) {
       const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || '0';
       const ua = request.headers.get('User-Agent') || '';
       const fp = await hashFingerprint(ip, ua);
-      await db.prepare('INSERT INTO page_views (email, tipo_usuario, ruta, fingerprint) VALUES (?, ?, ?, ?)').bind(user.email, user.tipo, path, fp).run().catch(() => {});
+      context.waitUntil(db.prepare('INSERT INTO page_views (email, tipo_usuario, ruta, fingerprint) VALUES (?, ?, ?, ?)').bind(user.email, user.tipo, path, fp).run().catch(() => {}));
     }
 
     return await next();
