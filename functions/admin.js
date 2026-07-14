@@ -27,6 +27,9 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
 .logout{display:inline-block;margin-top:20px;color:#ff6900;text-decoration:none;font-size:13px;font-weight:600}
 .logout:hover{text-decoration:underline}
 .loading{color:#999;font-size:13px;padding:12px}
+.btn-cerrar{background:#e63946;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600}
+.btn-cerrar:hover{background:#c1121f}
+.btn-cerrar:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -84,9 +87,9 @@ async function loadStats() {
     document.getElementById('clicks').textContent = d.clicksHoy;
 
     if (d.sesionesVisitantes && d.sesionesVisitantes.length) {
-      let h = '<table><tr><th>Email</th><th>Nombre</th><th>Fingerprint</th><th>Último acceso</th></tr>';
+      let h = '<table><tr><th>Email</th><th>Nombre</th><th>Fingerprint</th><th>Último acceso</th><th>Acción</th></tr>';
       d.sesionesVisitantes.forEach(s => {
-        h += '<tr><td>' + esc(s.email) + '</td><td>' + esc(s.nombre||'-') + '</td><td style="font-size:11px;font-family:monospace">' + esc(s.fingerprint.slice(0,16)) + '...</td><td>' + ago(s.ultimo_acceso) + '</td></tr>';
+        h += '<tr><td>' + esc(s.email) + '</td><td>' + esc(s.nombre||'-') + '</td><td style="font-size:11px;font-family:monospace">' + esc(s.fingerprint.slice(0,16)) + '...</td><td>' + ago(s.ultimo_acceso) + '</td><td><button class="btn-cerrar" onclick="cerrarSesion(\'' + esc(s.email) + '\',this)">Cerrar</button></td></tr>';
       });
       h += '</table>';
       document.getElementById('sesionesContent').innerHTML = h;
@@ -118,6 +121,19 @@ async function loadStats() {
   } catch(e) {
     document.querySelectorAll('.loading').forEach(el => el.innerHTML = '<span style="color:#e63946">Error al cargar datos</span>');
   }
+}
+async function cerrarSesion(email, btn) {
+  if (!confirm('¿Cerrar todas las sesiones de ' + email + '?')) return;
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const r = await fetch('/api/admin/cerrar-sesion', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const d = await r.json();
+    if (d.success) { btn.textContent = '✓'; setTimeout(loadStats, 500); }
+    else { btn.textContent = 'Error'; }
+  } catch { btn.textContent = 'Error'; }
 }
 loadStats();
 setInterval(loadStats, 10000);
