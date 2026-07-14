@@ -764,6 +764,43 @@ function formatearFecha(str) {
   return dd + '/' + mm + '/' + a + ' <span class="fecha-rel">— ' + relativo + '</span>';
 }
 
+function calcularProximoService(str) {
+  if (!str || str === '-' || str === '—' || str === 'No funciona') return { html: '-', cls: '' };
+  const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!partes) return { html: str, cls: '' };
+  const [_, d, m, a] = partes;
+  const ultimo = new Date(+a, +m - 1, +d);
+  const proximo = new Date(ultimo);
+  proximo.setMonth(proximo.getMonth() + 6);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  ultimo.setHours(0, 0, 0, 0);
+  proximo.setHours(0, 0, 0, 0);
+  const diffMs = proximo - hoy;
+  const diffDias = Math.round(diffMs / 86400000);
+  let relativo, cls;
+  if (diffDias < 0) {
+    const atraso = Math.abs(diffDias);
+    if (atraso === 0) relativo = 'Vencido hoy'; else if (atraso < 30) relativo = 'Vencido hace ' + atraso + ' d\u00edas'; else if (atraso < 365) relativo = 'Vencido hace ' + Math.floor(atraso / 30) + ' meses'; else relativo = 'Vencido hace ' + Math.floor(atraso / 365) + ' a\u00f1os';
+    cls = '#e63946';
+  } else if (diffDias === 0) {
+    relativo = 'Vence hoy';
+    cls = '#e63946';
+  } else if (diffDias <= 30) {
+    relativo = 'Vence en ' + diffDias + ' d\u00edas';
+    cls = '#ff6900';
+  } else if (diffDias <= 90) {
+    relativo = 'Vence en ' + Math.floor(diffDias / 30) + ' meses';
+    cls = '#ff6900';
+  } else {
+    relativo = 'Vence en ' + Math.floor(diffDias / 30) + ' meses';
+    cls = '#2ecc71';
+  }
+  const dd = String(proximo.getDate()).padStart(2, '0');
+  const mm = String(proximo.getMonth() + 1).padStart(2, '0');
+  const aa = proximo.getFullYear();
+  return { html: dd + '/' + mm + '/' + aa + ' <span class="fecha-rel" style="color:' + cls + '">\u2014 ' + relativo + '</span>', cls };
+}
 function clamps() {
   const wr = wrapper.getBoundingClientRect();
   const minVis = 100;
@@ -974,6 +1011,7 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + badgeTexto + '</span></div></div></div>' +
       '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service).html + '</div></div></div>' +
     '</div>';
 
   initCarousel();
