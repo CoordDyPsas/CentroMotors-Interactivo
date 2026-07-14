@@ -1,8 +1,7 @@
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode('dyp-demo-secret-key-2026-cambiame-en-produccion');
-
 export async function onRequest(context) {
+  const SECRET = new TextEncoder().encode(context.env.JWT_SECRET || 'dyp-demo-secret-key-2026-cambiame-en-produccion');
   const cookie = context.request.headers.get('Cookie') || '';
   const match = cookie.match(/dyp_token=([^;]+)/);
   if (!match)

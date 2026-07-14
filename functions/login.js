@@ -1,6 +1,9 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
-  const redirect = url.searchParams.get('r') || '/';
+  let redirect = url.searchParams.get('r') || '/';
+  // Validate same-origin path to prevent XSS / open redirect
+  if (!redirect.startsWith('/') || redirect.includes('://')) redirect = '/';
+  redirect = redirect.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   const html = `<!DOCTYPE html>
 <html lang="es">

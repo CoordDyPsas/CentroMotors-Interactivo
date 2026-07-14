@@ -1,9 +1,8 @@
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
 
-const SECRET = new TextEncoder().encode('dyp-demo-secret-key-2026-cambiame-en-produccion');
-
 export async function onRequest(context) {
+  const SECRET = new TextEncoder().encode(context.env.JWT_SECRET || 'dyp-demo-secret-key-2026-cambiame-en-produccion');
   if (context.request.method !== 'POST')
     return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
 

@@ -58,9 +58,10 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
 <a class="logout" href="/api/logout">Cerrar sesión</a>
 
 <script>
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function badge(tipo) {
   const map = {admin:'admin',propio:'propio',visitante:'visitante'};
-  return '<span class="badge badge-' + (map[tipo]||'visitante') + '">' + tipo + '</span>';
+  return '<span class="badge badge-' + (map[tipo]||'visitante') + '">' + esc(tipo) + '</span>';
 }
 
 function ago(ts) {
@@ -85,7 +86,7 @@ async function loadStats() {
     if (d.sesionesVisitantes && d.sesionesVisitantes.length) {
       let h = '<table><tr><th>Email</th><th>Nombre</th><th>Fingerprint</th><th>Último acceso</th></tr>';
       d.sesionesVisitantes.forEach(s => {
-        h += '<tr><td>' + s.email + '</td><td>' + (s.nombre||'-') + '</td><td style="font-size:11px;font-family:monospace">' + s.fingerprint.slice(0,16) + '...</td><td>' + ago(s.ultimo_acceso) + '</td></tr>';
+        h += '<tr><td>' + esc(s.email) + '</td><td>' + esc(s.nombre||'-') + '</td><td style="font-size:11px;font-family:monospace">' + esc(s.fingerprint.slice(0,16)) + '...</td><td>' + ago(s.ultimo_acceso) + '</td></tr>';
       });
       h += '</table>';
       document.getElementById('sesionesContent').innerHTML = h;
@@ -96,7 +97,7 @@ async function loadStats() {
     if (d.actividadReciente && d.actividadReciente.length) {
       let h = '<table><tr><th>Hora</th><th>Email</th><th>Tipo</th><th>Ruta</th></tr>';
       d.actividadReciente.slice(0,20).forEach(a => {
-        h += '<tr><td style="white-space:nowrap">' + ago(a.timestamp) + '</td><td>' + a.email + '</td><td>' + badge(a.tipo) + '</td><td>' + a.ruta + '</td></tr>';
+        h += '<tr><td style="white-space:nowrap">' + ago(a.timestamp) + '</td><td>' + esc(a.email) + '</td><td>' + badge(a.tipo) + '</td><td>' + esc(a.ruta) + '</td></tr>';
       });
       h += '</table>';
       document.getElementById('paginasContent').innerHTML = h;
@@ -107,7 +108,7 @@ async function loadStats() {
     if (d.clicksRecientes && d.clicksRecientes.length) {
       let h = '<table><tr><th>Hora</th><th>Email</th><th>Tipo</th><th>Sucursal</th><th>Equipo</th><th>Acción</th></tr>';
       d.clicksRecientes.slice(0,20).forEach(c => {
-        h += '<tr><td style="white-space:nowrap">' + ago(c.timestamp) + '</td><td>' + c.email + '</td><td>' + badge(c.tipo) + '</td><td>' + c.branch + '</td><td>' + (c.equipo_nro || '-') + '</td><td>' + c.accion + (c.detalle ? ' (' + c.detalle + ')' : '') + '</td></tr>';
+        h += '<tr><td style="white-space:nowrap">' + ago(c.timestamp) + '</td><td>' + esc(c.email) + '</td><td>' + badge(c.tipo) + '</td><td>' + esc(c.branch) + '</td><td>' + esc(c.equipo_nro || '-') + '</td><td>' + esc(c.accion) + (c.detalle ? ' (' + esc(c.detalle) + ')' : '') + '</td></tr>';
       });
       h += '</table>';
       document.getElementById('clicksContent').innerHTML = h;

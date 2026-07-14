@@ -1,6 +1,6 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQmzSSzvInJvvFDV-D_BTi7p5VrhUjfB3ja6uAy8v44epabHqWsOb6SZvnCMCVQCLnrZYFGoIOfKLnt/pub?gid=359397000&single=true&output=csv';
-const BK = ['monsenor', 'colon', 'sagrada-familia'];
-const BO = { colon: 0, 'sagrada-familia': 8, monsenor: 16 };
+const BK = ['monsenor', 'colon', 'sagrada-familia', 'hino'];
+const BO = { colon: 0, 'sagrada-familia': 8, monsenor: 16, hino: 24 };
 
 function parseAll(csv) {
   const rows = csv.split('\n').map(l => l.trim()).filter(Boolean).map(l => {

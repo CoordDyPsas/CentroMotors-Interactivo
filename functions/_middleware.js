@@ -1,10 +1,9 @@
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode('dyp-demo-secret-key-2026-cambiame-en-produccion');
-const WHITELIST = ['/login', '/api/login', '/api/logout'];
 const ADMIN_ROUTES = ['/admin', '/api/admin'];
 
 export async function onRequest(context) {
+  const SECRET = new TextEncoder().encode(context.env.JWT_SECRET || 'dyp-demo-secret-key-2026-cambiame-en-produccion');
   const { request, next, env } = context;
   const url = new URL(request.url);
   const path = url.pathname;

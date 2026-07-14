@@ -1,8 +1,7 @@
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode('dyp-demo-secret-key-2026-cambiame-en-produccion');
-
 export async function onRequest(context) {
+  const SECRET = new TextEncoder().encode(context.env.JWT_SECRET || 'dyp-demo-secret-key-2026-cambiame-en-produccion');
   const cookie = context.request.headers.get('Cookie') || '';
   const match = cookie.match(/dyp_token=([^;]+)/);
   if (!match)
@@ -14,8 +13,8 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ error: 'Acceso denegado' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
 
     const db = context.env.DB;
-    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-    const todayStart = now.slice(0, 10) + ' 00:00:00';
+    const ar = new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const todayStart = ar.slice(0, 10) + ' 00:00:00';
 
     const [visitantesActivos, paginasHoy, clicksHoy, activosRecientes, actividad, sessionesVisitantes] = await Promise.all([
       db.prepare("SELECT COUNT(DISTINCT s.fingerprint) as count FROM sesiones s JOIN usuarios u ON s.email = u.email WHERE u.tipo = 'visitante' AND julianday('now') - julianday(s.ultimo_acceso) < 0.02").first(),
