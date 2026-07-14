@@ -186,8 +186,7 @@ body.modo-profesional .logo-sub { color: #111; }
     <div class="logo-sub">Aire Acondicionado y Calefacción</div>
   </div>
     <h1>Planos <span>Interactivos</span></h1>
-    <button class="switch-tema" onclick="toggleTema()"><i class="ph ph-sun"></i></button>
-    <button class="switch-tema" id="admin-btn" onclick="window.location.href='/admin'" title="Dashboard administrador" style="display:none"><i class="ph ph-chart-bar"></i></button>
+    <button class="switch-tema" id="switch-tema-btn" onclick="toggleTema()"><i class="ph ph-sun"></i></button>
   </div>
   <div class="main">
     <p class="subtitle"><i class="ph ph-snowflake" style="color:#ff6900"></i> Aires acondicionados — Seleccioná una sucursal</p>
@@ -288,7 +287,7 @@ body.modo-profesional .logo-sub { color: #111; }
     function trackClick(accion, detalle) {
       fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion,branch:'root',detalle:detalle||null})}).catch(()=>{});
     }
-    fetch('/api/me').then(r=>r.json()).then(u=>{if(u.tipo==='admin')document.getElementById('admin-btn').style.display=''}).catch(()=>{});
+    fetch('/api/me').then(r=>r.json()).then(u=>{if(u.tipo==='admin'){var b=document.createElement('button');b.className='switch-tema';b.innerHTML='<i class="ph ph-chart-bar"></i>';b.title='Dashboard administrador';b.onclick=function(){window.location.href='/admin'};document.getElementById('switch-tema-btn').after(b);}}).catch(()=>{});
     if (localStorage.getItem('dyp_tema') === 'oscuro') toggleTema(false);
     (function tick() {
       document.getElementById('sync-time').textContent = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
