@@ -129,8 +129,6 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .marker.necesita::after { border-color: #e94560; }
 .marker.ok::after { border-color: #2ecc71; }
 .marker.nofunciona::after { border-color: #666; }
-.marker.has-fotos::after { content: '\01F4F7'; font-size: 12px; position: absolute; top: -6px; right: -6px; background: none; border: none; inset: auto; }
-.marker.has-fotos:hover::after { transform: none; opacity: 1; }
 @keyframes pulse-necesita {
   0%, 100% { box-shadow: 0 0 12px rgba(233,69,96,0.6), 0 2px 8px rgba(0,0,0,0.6); }
   50% { box-shadow: 0 0 20px rgba(233,69,96,0.9), 0 2px 12px rgba(0,0,0,0.6); }
@@ -954,9 +952,8 @@ function renderizarMarcadores() {
     if (!matchTexto) return;
     const cls = estadoClase(eq.estado);
     if (filtroEstado && cls !== filtroEstado) return;
-    const hasFotos = (eq.fotos || []).length > 0;
     const m = document.createElement('div');
-    m.className = 'marker ' + estadoClase(eq.estado) + (hasFotos ? ' has-fotos' : '');
+    m.className = 'marker ' + estadoClase(eq.estado);
     m.dataset.nro = eq.nro;
     m.style.left = eq.x + 'px';
     m.style.top = eq.y + 'px';
@@ -967,7 +964,6 @@ function renderizarMarcadores() {
     if (eq.marca) tt += '<br><span class="tt-label">Marca</span><br>' + eq.marca;
     if (eq.capacidad) tt += '<br><span class="tt-label">Capacidad</span><br>' + eq.capacidad;
     if (eq.ultimo_service) tt += '<br><span class="tt-label">&Uacute;ltimo service</span><br>' + eq.ultimo_service;
-    if (hasFotos) tt += '<br><span class="tt-label">Fotos</span><br>' + eq.fotos.length;
     m.innerHTML = eq.nro + '<div class="tooltip">' + tt + '</div>';
     m.addEventListener('click', (e) => {
       e.stopPropagation();
