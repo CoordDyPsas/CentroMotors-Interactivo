@@ -247,7 +247,7 @@ body.modo-profesional .logo-sub { color: #111; }
         const fotoText = s.fotos ? ' · ' + s.fotos + ' con foto' : '';
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = function(){ window.location.href = s.id + '/index.html'; };
+        card.onclick = function(){ trackClick('navegar', s.id); window.location.href = s.id + '/index.html'; };
         card.innerHTML =
           '<div class="icon"><i class="ph ' + s.icon + '"></i></div>' +
           '<h2>' + s.nombre + '</h2>' +
@@ -283,6 +283,9 @@ body.modo-profesional .logo-sub { color: #111; }
         btn.innerHTML = '<i class="ph ph-moon"></i>';
         if (guardar !== false) localStorage.setItem('dyp_tema', 'oscuro');
       }
+    }
+    function trackClick(accion, detalle) {
+      fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion,branch:'root',detalle:detalle||null})}).catch(()=>{});
     }
     if (localStorage.getItem('dyp_tema') === 'oscuro') toggleTema(false);
     (function tick() {

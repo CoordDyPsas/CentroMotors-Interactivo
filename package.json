@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "dependencies": {
+    "jose": "^5.9.0",
+    "bcryptjs": "^2.4.3"
+  }
+}

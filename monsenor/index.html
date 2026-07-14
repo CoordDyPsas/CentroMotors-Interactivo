@@ -952,6 +952,7 @@ function renderizarMarcadores() {
     m.innerHTML = eq.nro + '<div class="tooltip">' + tt + '</div>';
     m.addEventListener('click', (e) => {
       e.stopPropagation();
+      trackClick('marker', eq.nro);
       mostrarEquipo(eq.nro);
       flashMarker(eq.nro);
     });
@@ -961,10 +962,14 @@ function renderizarMarcadores() {
   dibujarMinimapa();
 }
 
+function trackClick(accion, equipoNro, detalle) {
+  fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion,branch:'monsenor',equipo_nro:equipoNro||null,detalle:detalle||null})}).catch(()=>{});
+}
 function mostrarEquipo(nro) {
   const eq = EQUIPOS.find(e => e.nro === nro);
   if (!eq) return;
   equipoSeleccionado = eq;
+  trackClick('panel', nro);
   document.getElementById('panel-titulo').textContent = '#' + eq.nro + ' - ' + eq.ubicacion;
 
   let fotoHtml;
@@ -1014,6 +1019,7 @@ document.getElementById('panel').addEventListener('click', (e) => {
   const img = e.target.closest('.carousel-slide img');
   if (img && carruselEq) {
     const idx = parseInt(img.dataset.idx) || 0;
+    trackClick('lightbox', carruselEq.nro);
     abrirLightbox(carruselEq, idx);
   }
 });
@@ -1450,6 +1456,7 @@ function actualizarHashFiltros() {
 function toggleFiltro(cls) {
   if (filtroEstado === cls) filtroEstado = null;
   else filtroEstado = cls;
+  trackClick('filtro', null, cls);
   actualizarHashFiltros();
   renderizarMarcadores();
   // Flash all visible markers matching the filter
@@ -1490,6 +1497,7 @@ function limpiarFiltros() {
   renderizarMarcadores();
 }
 function exportarCSV() {
+  trackClick('exportar_csv');
   function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   const colores = { 'OK':'#2ecc71','Necesita service':'#ff6900','No funciona':'#666' };
   let rows = '<tr style="background:#ff6900;color:#fff"><th>Nro</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último Service</th><th>OT</th><th>URL OT</th><th>Piso</th></tr>';
@@ -1541,6 +1549,7 @@ function renderLista() {
       '<span class="ub">' + eq.ubicacion + '</span>' +
       '<span class="estado-tag" style="background:' + tagColor + ';color:#fff">' + eq.estado + '</span>';
     d.addEventListener('click', () => {
+      trackClick('lista', eq.nro);
       toggleLista();
       mostrarEquipo(eq.nro);
       centrarEnMarker(eq);
@@ -1575,6 +1584,7 @@ function onSearchInput(texto) {
     d.innerHTML = '<span class="sug-dot" style="background:' + dotColor + '"></span><span class="sug-nro">#' + eq.nro + '</span><span class="sug-ub">' + eq.ubicacion + '</span>';
     d.addEventListener('mousedown', (e) => {
       e.preventDefault();
+      trackClick('search', eq.nro, document.getElementById('search-input').value);
       document.getElementById('search-input').value = eq.nro;
       cont.classList.remove('show');
       mostrarEquipo(eq.nro);
