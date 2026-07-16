@@ -17,7 +17,6 @@ body{font-family:Inter,sans-serif;background:#000;min-height:100vh;display:flex;
 body::before{content:'';position:fixed;inset:0;background:url('/Logo/Dise\u00f1o%20sin%20t\u00edtulo%20(1).jpg') center/contain no-repeat;opacity:.4;pointer-events:none}
 .card{background:rgba(255,105,0,.55);border-radius:16px;padding:48px 40px 40px;width:380px;text-align:center;position:relative;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 .logo{margin-bottom:24px}
-.logo svg{width:100px;height:41px}
 h1{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
 p.sub{font-size:13px;color:rgba(255,255,255,.8);margin-bottom:28px}
 .form-group{text-align:left;margin-bottom:16px}
@@ -34,13 +33,6 @@ input:focus{border-color:#fff;background:rgba(255,255,255,.25)}
 </head>
 <body>
 <div class="card">
-<div class="logo">
-<svg viewBox="0 0 100 41" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0 0h27.2c9.1 0 16 2.7 20.3 7.8 3.8 4.5 5.8 10 5.8 16.4 0 6.4-2 12-5.8 16.4C43.1 45.8 36.3 48 27.2 48H0V0zm10.3 9.7v28.6h16c5.6 0 10-1.8 13-5.2 3-3.4 4.6-7.8 4.6-13.1 0-5.4-1.6-9.7-4.8-12.9-3-3-7.2-4.6-12.4-4.6H10.3z" fill="#fff"/>
-<path d="M59.6 48l12.5-20.5L60 8h10.3l7.6 13 7.5-13h10L85.4 27.5 98 48H87.4L79 34.5 70.4 48H59.6z" fill="#fff"/>
-<path d="M14.4 17.5h12.4c3.8 0 6.8 1 8.8 2.9 1.8 1.7 2.8 3.9 2.8 6.6 0 3-1 5.4-3 7.3-2 1.8-4.9 2.8-8.4 2.8H14.4V17.5zm0-9.5v38h12.9c5.3 0 9.6-1.5 12.8-4.3 3.2-2.8 4.9-6.6 4.9-11.2 0-4.3-1.5-7.9-4.4-10.6-2.8-2.7-6.8-4.1-11.6-4.1H24.5V8h-10z" fill="#fff"/>
-</svg>
-</div>
 <h1>Planos Interactivos</h1>
 <p class="sub">Centro Motors \u2014 DyP</p>
 <form id="loginForm">
