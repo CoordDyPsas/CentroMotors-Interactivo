@@ -15,7 +15,7 @@ export async function onRequest(context) {
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,sans-serif;background:#000;min-height:100vh;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden}
 body::before{content:'';position:fixed;inset:0;background:url('/Logo/Dise\u00f1o%20sin%20t\u00edtulo%20(1).jpg') center/contain no-repeat;opacity:.12;pointer-events:none}
-.card{background:rgba(255,105,0,.88);border-radius:16px;padding:48px 40px 40px;width:380px;text-align:center;position:relative;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.card{background:rgba(255,105,0,.7);border-radius:16px;padding:48px 40px 40px;width:380px;text-align:center;position:relative;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .logo{margin-bottom:24px}
 .logo svg{width:100px;height:41px}
 h1{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
