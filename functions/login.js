@@ -33,7 +33,7 @@ input:focus{border-color:#fff;background:rgba(255,255,255,.25)}
 </head>
 <body>
 <div class="card">
-<h1>Planos Interactivos</h1>
+<h1>Relevamiento Refrigeraci\u00f3n</h1>
 <p class="sub">Centro Motors \u2014 DyP</p>
 <form id="loginForm">
 <div class="form-group">
