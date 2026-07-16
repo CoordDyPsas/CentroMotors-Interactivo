@@ -1,6 +1,6 @@
 import { jwtVerify } from 'jose';
 
-const WHITELIST = ['/login', '/api/login', '/api/logout'];
+const WHITELIST = ['/login', '/api/login', '/api/logout', '/Logo'];
 const ADMIN_ROUTES = ['/admin', '/api/admin'];
 
 export async function onRequest(context) {
