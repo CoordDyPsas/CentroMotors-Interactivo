@@ -237,10 +237,6 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .info-item .label { font-size: 10px; color: #ff6900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
 .info-item .value { font-size: 15px; font-weight: 600; }
 .info-item.full { grid-column: 1 / -1; }
-.qr-item { grid-column: 1 / -1; text-align: center; padding: 12px 0 4px; }
-.qr-item img { width: 120px; height: 120px; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
-.qr-item img:hover { transform: scale(1.05); }
-.qr-item .qr-label { font-size: 10px; color: #ff6900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 .estado-badge {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 16px; border-radius: 20px;
@@ -1067,7 +1063,6 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
-      '<div class="qr-item"><div class="qr-label"><i class="ph ph-qr-code"></i> Escanear QR</div><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(window.location.origin + window.location.pathname + '#eq-' + eq.nro) + '" alt="QR" loading="lazy" onclick="window.open(\'' + window.location.origin + window.location.pathname + '#eq-' + eq.nro + '\')"></div>' +
     '</div>';
 
   initCarousel();
