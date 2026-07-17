@@ -14,7 +14,7 @@ export async function onRequest(context) {
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,sans-serif;background:#0d0d1a;min-height:100vh;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden}
-body::before{content:'';position:fixed;inset:0;background:url('/Logo/Dise\u00f1o%20sin%20t\u00edtulo%20(1).jpg') center/contain no-repeat;opacity:.4;pointer-events:none}
+body::before{content:'';position:fixed;inset:0;background:url('/Logo/DyPgris.png') center/contain no-repeat;opacity:.4;pointer-events:none}
 .card{background:rgba(255,105,0,.55);border-radius:16px;padding:48px 40px 40px;width:380px;text-align:center;position:relative;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 .logo{margin-bottom:24px}
 h1{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
