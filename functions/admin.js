@@ -30,6 +30,7 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
 .btn-cerrar{background:#e63946;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600}
 .btn-cerrar:hover{background:#c1121f}
 .btn-cerrar:disabled{opacity:.5;cursor:not-allowed}
+#cards{transition:opacity .3s}
 </style>
 </head>
 <body>
@@ -82,6 +83,7 @@ async function loadStats() {
     if (!r.ok) throw new Error('No autorizado');
     const d = await r.json();
 
+    document.getElementById('cards').style.opacity = '1';
     document.getElementById('visitantes').textContent = d.visitantesActivos;
     document.getElementById('paginas').textContent = d.paginasHoy;
     document.getElementById('clicks').textContent = d.clicksHoy;
@@ -119,7 +121,10 @@ async function loadStats() {
       document.getElementById('clicksContent').innerHTML = '<p style="color:#999;font-size:13px">Sin actividad</p>';
     }
   } catch(e) {
-    document.querySelectorAll('.loading').forEach(el => el.innerHTML = '<span style="color:#e63946">Error al cargar datos</span>');
+    document.querySelectorAll('.loading').forEach(el => {
+      if (el.innerHTML === 'Cargando...')
+        el.innerHTML = '<span style="color:#e63946">Error: ' + esc(e.message) + '</span>';
+    });
   }
 }
 async function cerrarSesion(email, btn) {
