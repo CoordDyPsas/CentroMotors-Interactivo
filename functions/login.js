@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   let redirect = url.searchParams.get('r') || '/';
-  if (!redirect.startsWith('/') || redirect.includes('://')) redirect = '/';
+  if (!redirect.startsWith('/') || redirect.includes('://') || redirect.startsWith('//')) redirect = '/';
   redirect = redirect.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   const html = `<!DOCTYPE html>
@@ -16,9 +16,6 @@ export async function onRequest(context) {
 body{font-family:Inter,sans-serif;background:#515151;min-height:100vh;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden}
 body::before{content:'';position:fixed;inset:0;background:url('/Logo/Dise\u00f1o%20sin%20t\u00edtulo%20(1).jpg') center/contain no-repeat;opacity:.4;pointer-events:none}
 .card{background:rgba(255,105,0,.55);border-radius:16px;padding:48px 40px 40px;width:380px;text-align:center;position:relative;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-.logo{margin-bottom:24px}
-h1{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
-p.sub{font-size:13px;color:rgba(255,255,255,.8);margin-bottom:28px}
 .form-group{text-align:left;margin-bottom:16px}
 label{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:4px}
 input{width:100%;padding:10px 14px;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;font-size:14px;outline:none;transition:border-color .2s,background .2s;background:rgba(255,255,255,.15);color:#fff}

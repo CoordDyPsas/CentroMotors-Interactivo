@@ -236,6 +236,7 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .info-item > div { min-width: 0; flex: 1; }
 .info-item .label { font-size: 10px; color: #ff6900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
 .info-item .value { font-size: 15px; font-weight: 600; }
+.info-item .value .fecha-rel { font-weight: 400; color: #999; font-size: 13px; }
 .info-item.full { grid-column: 1 / -1; }
 .estado-badge {
   display: inline-flex; align-items: center; gap: 6px;
@@ -820,7 +821,7 @@ function calcularProximoService(str, intervaloMeses) {
   let relativo, cls;
   if (diffDias < 0) {
     const atraso = Math.abs(diffDias);
-    if (atraso === 0) relativo = 'Vencido hoy'; else if (atraso < 30) relativo = 'Vencido hace ' + atraso + ' d\u00edas'; else if (atraso < 365) relativo = 'Vencido hace ' + Math.floor(atraso / 30) + ' meses'; else relativo = 'Vencido hace ' + Math.floor(atraso / 365) + ' a\u00f1os';
+    if (atraso < 30) relativo = 'Vencido hace ' + atraso + ' d\u00edas'; else if (atraso < 365) relativo = 'Vencido hace ' + Math.floor(atraso / 30) + ' meses'; else relativo = 'Vencido hace ' + Math.floor(atraso / 365) + ' a\u00f1os';
     cls = '#e63946';
   } else if (diffDias === 0) {
     relativo = 'Vence hoy';
@@ -910,8 +911,9 @@ function zoomIn() { zoomCentrado(1.4); }
 function zoomOut() { zoomCentrado(1/1.4); }
 function resetView() { fitToScreen(); }
 
+const minimapaCanvas = document.getElementById('minimapa');
 function dibujarMinimapa() {
-  const c = document.getElementById('minimapa');
+  const c = minimapaCanvas;
   if (!c) return;
   const ctx = c.getContext('2d');
   const cw = c.width, ch = c.height;
@@ -1490,9 +1492,8 @@ function equiposFiltrados() {
 }
 function actualizarStats() {
   const equipos = equiposFiltrados();
-  const necesita = equipos.filter(e => estadoClase(e.estado) === 'necesita').length;
-  const ok = equipos.filter(e => estadoClase(e.estado) === 'ok').length;
-  const nofunciona = equipos.filter(e => estadoClase(e.estado) === 'nofunciona').length;
+  let necesita = 0, ok = 0, nofunciona = 0;
+  equipos.forEach(e => { const c = estadoClase(e.estado); if (c==='necesita') necesita++; else if (c==='ok') ok++; else if (c==='nofunciona') nofunciona++; });
   const totalPiso = EQUIPOS.filter(e => e.piso === pisoActual).length;
   const mostrados = equipos.length;
   const filtrosActivos = filtroMarca || filtroCapacidad || filtroEstado;
@@ -1742,7 +1743,7 @@ function cargarEquipos() {
         renderizarMarcadores();
         actualizarStats();
         poblarFiltros();
-        if (document.getElementById('lista-overlay').classList.contains('activo')) renderLista();
+      if (document.getElementById('lista-overlay').classList.contains('activo')) renderLista();
       }
     } catch(e) {}
   };
@@ -1771,6 +1772,7 @@ function syncData() {
       actualizarStats();
       poblarFiltros();
       if (document.getElementById('lista-overlay').classList.contains('activo')) renderLista();
+      if (equipoSeleccionado) mostrarEquipo(equipoSeleccionado.nro);
       document.getElementById('sync-time').textContent = new Date(data.timestamp).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
       btn.innerHTML = '<i class="ph ph-check"></i>';
       setTimeout(() => { btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i>'; btn.classList.remove('syncing'); }, 2000);
