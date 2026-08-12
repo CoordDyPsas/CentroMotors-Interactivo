@@ -31,7 +31,7 @@ export async function onRequest(context) {
     const r = await fetch(CSV_URL + '&_cb=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
     const equipos = parseCSV(await r.text(), branch);
     if (!equipos) return new Response(JSON.stringify({ error: 'Branch not found: ' + branch }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-    return new Response(JSON.stringify(equipos), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'Access-Control-Allow-Origin': '*' } });
+    return new Response(JSON.stringify(equipos), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' } });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   }

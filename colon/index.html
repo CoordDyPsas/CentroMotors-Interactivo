@@ -247,6 +247,49 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .estado-badge.ok { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.4); }
 .estado-badge.nofunciona { background: rgba(102,102,102,0.2); color: #999; border: 1px solid rgba(102,102,102,0.4); }
 
+.comentarios-sec { margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 12px; }
+.comentarios-titulo { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ff6900; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.comentarios-titulo .contador { margin-left: auto; background: #ff6900; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; }
+.comentarios-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 280px; overflow-y: auto; }
+.comentario-item { background: #515151; border-radius: 6px; padding: 10px 12px; border-left: 3px solid #ff6900; }
+.comentario-item.resuelto { opacity: 0.72; border-left-color: #2ecc71; }
+.comentario-item.resuelto .comentario-texto { text-decoration: line-through; color: #aaa; }
+.comentario-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.comentario-nombre { font-weight: 700; font-size: 13px; }
+.comentario-tipo { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 1px 7px; border-radius: 8px; font-weight: 600; }
+.comentario-tipo.admin { background: rgba(255,105,0,0.25); color: #ff6900; }
+.comentario-tipo.propio { background: rgba(46,204,113,0.15); color: #2ecc71; }
+.comentario-tipo.visitante { background: rgba(102,102,102,0.25); color: #bbb; }
+.comentario-fecha { font-size: 11px; color: #999; margin-left: auto; }
+.comentario-del { background: none; border: none; color: #999; cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+.comentario-del:hover { color: #e63946; }
+.comentario-texto { font-size: 13px; line-height: 1.5; color: #eee; white-space: pre-wrap; word-break: break-word; }
+.comentario-vacio { color: #888; font-size: 12px; text-align: center; padding: 10px; font-style: italic; }
+.comentario-acciones { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.comentario-responder { background: none; border: none; color: #ff6900; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 0; }
+.comentario-responder:hover { text-decoration: underline; }
+.comentario-resuelto { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #aaa; cursor: pointer; user-select: none; }
+.comentario-resuelto input { accent-color: #2ecc71; width: 14px; height: 14px; cursor: pointer; margin: 0; }
+.comentario-resuelto.chequeado { color: #2ecc71; }
+.comentario-respuestas { margin-left: 14px; padding-left: 10px; border-left: 2px solid rgba(255,105,0,0.35); display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.comentario-respuesta-form { margin-top: 8px; }
+.comentario-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 1px 7px; border-radius: 8px; font-weight: 600; }
+.comentario-badge.archivado { background: rgba(255,255,255,0.15); color: #bbb; }
+.comentarios-acciones { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.comentario-btn { background: none; border: 1px solid rgba(255,255,255,0.22); color: #ddd; border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.comentario-btn:hover { border-color: #ff6900; color: #ff6900; }
+.comentario-btn.activo { background: #ff6900; border-color: #ff6900; color: #fff; }
+.comentario-btn[hidden] { display: none; }
+.comentario-vacio-archivados { color: #888; font-size: 12px; text-align: center; padding: 10px; font-style: italic; }
+.comentario-form { display: flex; flex-direction: column; gap: 6px; }
+.comentario-form textarea { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; padding: 8px 10px; font-size: 13px; resize: vertical; font-family: inherit; min-height: 48px; }
+.comentario-form textarea:focus { outline: none; border-color: #ff6900; }
+.comentario-form button { align-self: flex-end; background: #ff6900; border: none; color: #fff; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.comentario-form button:hover { background: #ff8533; }
+.comentario-form button:disabled { opacity: 0.5; cursor: default; }
+body.modo-profesional .comentario-item { background: rgba(10,10,10,0.95); }
+body.modo-profesional .comentario-form textarea { background: rgba(10,10,10,0.95); color: #fff; }
+
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
 ::-webkit-scrollbar-thumb { background: #ff6900; border-radius: 4px; }
@@ -670,14 +713,14 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
 
 <script>
 const EQUIPOS = [
-  {"nro":1,"ubicacion":"Sala exhibición","marca":"BGH","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":871,"y":532},
+  {"nro":1,"ubicacion":"Sala exhibición","marca":"BGH","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"","fotos":["Equipo 1.jpeg"],"piso":"pb","x":871,"y":532},
   {"nro":2,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":["Equipo 2.jpeg"],"piso":"pb","x":674,"y":556},
-  {"nro":3,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":[],"piso":"pb","x":675,"y":640},
-  {"nro":4,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6441","fotos":[],"piso":"pb","x":674,"y":775},
-  {"nro":5,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6438","fotos":[],"piso":"pb","x":673,"y":831},
-  {"nro":6,"ubicacion":"GR","marca":"Midea","capacidad":"Piso techo","ultimo_service":"20/04/2026","estado":"OK","ot":"","fotos":[],"piso":"pb","x":674,"y":950},
+  {"nro":3,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":["Equipo 3.jpeg"],"piso":"pb","x":675,"y":640},
+  {"nro":4,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6441","fotos":["Equipo 4.jpeg"],"piso":"pb","x":674,"y":775},
+  {"nro":5,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6438","fotos":["Equipo 5.jpeg"],"piso":"pb","x":673,"y":831},
+  {"nro":6,"ubicacion":"GR","marca":"Midea","capacidad":"Piso techo","ultimo_service":"20/04/2026","estado":"OK","ot":"","fotos":["Equipo 6.jpeg","Equipo 6b.jpeg"],"piso":"pb","x":674,"y":950},
   {"nro":7,"ubicacion":"GR","marca":"Midea","capacidad":"7000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6588","fotos":["Equipo 7.jpeg"],"piso":"pb","x":735,"y":1013},
-  {"nro":8,"ubicacion":"Sala entrega","marca":"Midea","capacidad":"Piso techo","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":866,"y":945},
+  {"nro":8,"ubicacion":"Sala entrega","marca":"Midea","capacidad":"Piso techo","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 8.jpeg","Equipo 8b.jpeg","Equipo 8c.jpeg"],"piso":"pb","x":866,"y":945},
   {"nro":9,"ubicacion":"Sala estar","marca":"Philco","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6617","fotos":["Equipo 9.jpeg"],"piso":"pb","x":909,"y":1020},
   {"nro":10,"ubicacion":"Sala estar","marca":"Midea","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6617","fotos":["Equipo 10.jpeg"],"piso":"pb","x":986,"y":1021},
   {"nro":11,"ubicacion":"Sala estar","marca":"Philco","capacidad":"Piso techo","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6616","fotos":["Equipo 11.jpeg"],"piso":"pb","x":1146,"y":1003},
@@ -687,7 +730,7 @@ const EQUIPOS = [
   {"nro":15,"ubicacion":"Deposito Repuestos","marca":"Hitachi","capacidad":"4500","ultimo_service":"-","estado":"OK","ot":"","fotos":[],"piso":"pb","x":1148,"y":717},
   {"nro":16,"ubicacion":"Deposito Repuestos","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"28/03/2026","estado":"OK","ot":"7931","fotos":["Equipo 16.jpeg"],"piso":"pb","x":1086,"y":657},
   {"nro":17,"ubicacion":"Deposito Repuestos","marca":"Surrey","capacidad":"5000","ultimo_service":"28/03/2026","estado":"OK","ot":"7931","fotos":["Equipo 17.jpeg"],"piso":"pb","x":1184,"y":640},
-  {"nro":18,"ubicacion":"Call planta alta","marca":"Midea","capacidad":"5000","ultimo_service":"21/03/2026","estado":"OK","ot":"7929","fotos":[],"piso":"pa","x":1452,"y":1167},
+  {"nro":18,"ubicacion":"Call planta alta","marca":"Midea","capacidad":"5000","ultimo_service":"21/03/2026","estado":"OK","ot":"7929","fotos":["Equipo 18.jpeg"],"piso":"pa","x":1452,"y":1167},
   {"nro":19,"ubicacion":"Tesorería","marca":"Kelvinator","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1005,"y":791},
   {"nro":20,"ubicacion":"Caja","marca":"Philco","capacidad":"3000","ultimo_service":"24/10/2025","estado":"Necesita service","ot":"6522","fotos":["Equipo 20.jpeg","Equipo 20b.jpeg"],"piso":"pb","x":1004,"y":826},
   {"nro":21,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","fotos":["Equipo 21.jpeg"],"piso":"pb","x":1003,"y":742},
@@ -697,19 +740,19 @@ const EQUIPOS = [
   {"nro":25,"ubicacion":"Gerente ventas","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":["Equipo 25.jpeg"],"piso":"pb","x":885,"y":516},
   {"nro":26,"ubicacion":"Ventas","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":700},
   {"nro":27,"ubicacion":"Ventas","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":642},
-  {"nro":28,"ubicacion":"Archivo","marca":"Midea","capacidad":"4500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1427,"y":819},
+  {"nro":28,"ubicacion":"Archivo","marca":"Midea","capacidad":"4500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"","fotos":["Equipo 28.jpeg"],"piso":"pa","x":1427,"y":819},
   {"nro":29,"ubicacion":"Oficina Berrondo","marca":"Hitachi","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 29.jpeg"],"piso":"pa","x":1769,"y":1062},
-  {"nro":30,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":[],"piso":"pa","x":1449,"y":1025},
-  {"nro":31,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":[],"piso":"pa","x":1451,"y":880},
-  {"nro":32,"ubicacion":"Reunion","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 32.jpeg"],"piso":"pa","x":1649,"y":797},
-  {"nro":33,"ubicacion":"Datos","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1769,"y":879},
-  {"nro":34,"ubicacion":"Comedor","marca":"Midea","capacidad":"7500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1844,"y":727},
-  {"nro":35,"ubicacion":"RRHH","marca":"Midea","capacidad":"5500","ultimo_service":"20/08/2025","estado":"Necesita service","ot":"5927","fotos":[],"piso":"pa","x":1831,"y":1276},
+  {"nro":30,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":["Equipo 30.jpeg"],"piso":"pa","x":1449,"y":1025},
+  {"nro":31,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":["Equipo 31.jpeg"],"piso":"pa","x":1451,"y":880},
+  {"nro":32,"ubicacion":"Reunion","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 32.jpeg","Equipo 32b.jpeg"],"piso":"pa","x":1649,"y":797},
+  {"nro":33,"ubicacion":"Datos","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"9245","fotos":["Equipo 33.jpeg"],"piso":"pa","x":1769,"y":879},
+  {"nro":34,"ubicacion":"Comedor","marca":"Midea","capacidad":"7500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 34.jpeg"],"piso":"pa","x":1844,"y":727},
+  {"nro":35,"ubicacion":"RRHH","marca":"Midea","capacidad":"5500","ultimo_service":"20/08/2025","estado":"Necesita service","ot":"5927","fotos":["Equipo 35.jpeg","Equipo 35b.jpeg"],"piso":"pa","x":1831,"y":1276},
   {"nro":36,"ubicacion":"Garantías","marca":"Midea","capacidad":"2500","ultimo_service":"28/03/2026","estado":"OK","ot":"7966","fotos":["Equipo 36.jpeg"],"piso":"pb","x":1404,"y":639},
   {"nro":37,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1420,"y":432},
   {"nro":38,"ubicacion":"Servidor","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1344,"y":391},
   {"nro":39,"ubicacion":"Presidencia","marca":"Midea","capacidad":"Piso techo","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6940","fotos":["Equipo 39.jpeg"],"piso":"pa","x":1191,"y":394},
-  {"nro":40,"ubicacion":"Sala Reunión","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pa","x":1426,"y":967},
+  {"nro":40,"ubicacion":"Sala Reunión","marca":"Midea","capacidad":"4500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 40.jpeg","Equipo 40b.jpeg"],"piso":"pa","x":1426,"y":967},
   {"nro":41,"ubicacion":"Ventas usados","marca":"Audinac","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1745,"intervalo_meses":3},
   {"nro":42,"ubicacion":"Ventas usados","marca":"Hisense","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1841,"intervalo_meses":3},
   {"nro":43,"ubicacion":"Sala caja de cambios","marca":"","capacidad":"Ventana Grande","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1510,"y":541,"intervalo_meses":3},
@@ -746,6 +789,7 @@ const img = document.getElementById('plano');
   if (!mc) return;
   mc.width = 160; mc.height = 113;
   mc.addEventListener('click', (e) => {
+    e.stopPropagation();
     const rect = mc.getBoundingClientRect();
     const mx = (e.clientX - rect.left) / mc.offsetWidth * IMG_W;
     const my = (e.clientY - rect.top) / mc.offsetHeight * IMG_H;
@@ -784,7 +828,7 @@ function estadoClase(estado) {
 function formatearFecha(str) {
   if (!str || str === '—' || str === 'No funciona') return str || '—';
   const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!partes) return str;
+  if (!partes) return escaparHTML(str);
   const [_, d, m, a] = partes;
   const fecha = new Date(+a, +m - 1, +d);
   const hoy = new Date();
@@ -804,9 +848,9 @@ function formatearFecha(str) {
 }
 
 function calcularProximoService(str, intervaloMeses) {
-  if (!str || str === '-' || str === '—' || str === 'No funciona') return { html: '-', cls: '' };
+  if (!str || str === '-' || str === '—' || str === 'No funciona') return { html: escaparHTML(str), cls: '' };
   const partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!partes) return { html: str, cls: '' };
+  if (!partes) return { html: escaparHTML(str), cls: '' };
   const [_, d, m, a] = partes;
   const ultimo = new Date(+a, +m - 1, +d);
   const hoy = new Date();
@@ -998,11 +1042,11 @@ function renderizarMarcadores() {
     m.style.top = eq.y + 'px';
     const es = (eq.estado || '').toLowerCase();
     const dotColor = es === 'ok' ? '#2ecc71' : es === 'no funciona' ? '#666' : '#ff6900';
-    let tt = '<span class="tt-label">Ubicaci&oacute;n</span><br>' + eq.ubicacion + '<br>' +
-             '<span class="tt-label">Estado</span><br><span class="tt-dot" style="background:' + dotColor + '"></span>' + eq.estado;
-    if (eq.marca) tt += '<br><span class="tt-label">Marca</span><br>' + eq.marca;
-    if (eq.capacidad) tt += '<br><span class="tt-label">Capacidad</span><br>' + eq.capacidad;
-    if (eq.ultimo_service) tt += '<br><span class="tt-label">&Uacute;ltimo service</span><br>' + eq.ultimo_service;
+    let tt = '<span class="tt-label">Ubicaci&oacute;n</span><br>' + escaparHTML(eq.ubicacion) + '<br>' +
+             '<span class="tt-label">Estado</span><br><span class="tt-dot" style="background:' + dotColor + '"></span>' + escaparHTML(eq.estado);
+    if (eq.marca) tt += '<br><span class="tt-label">Marca</span><br>' + escaparHTML(eq.marca);
+    if (eq.capacidad) tt += '<br><span class="tt-label">Capacidad</span><br>' + escaparHTML(eq.capacidad);
+    if (eq.ultimo_service) tt += '<br><span class="tt-label">&Uacute;ltimo service</span><br>' + escaparHTML(eq.ultimo_service);
     m.innerHTML = eq.nro + '<div class="tooltip">' + tt + '</div>';
     m.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1031,7 +1075,7 @@ function mostrarEquipo(nro) {
   const fi = document.getElementById('panel-foto-indicator');
   if (fotos.length > 0) {
     fi.className = 'foto-indicator';
-    fi.onclick = () => { const track = document.querySelector('.foto-track'); if (track && track.querySelector('img')) { const img = track.querySelector('img'); abrirLightbox(eq, parseInt(img.dataset.idx) || 0); } };
+    fi.onclick = () => { const track = document.querySelector('.foto-track'); if (track) { const imgs = track.querySelectorAll('img'); let idx = 0; if (imgs.length > 1) idx = Math.max(0, Math.min(imgs.length - 1, Math.round(track.scrollLeft / (imgs[0].clientWidth || 1)))); abrirLightbox(eq, idx); } };
     fi.innerHTML = '<i class="ph ph-camera"></i> <span>' + fotos.length + ' foto' + (fotos.length > 1 ? 's' : '') + '</span>';
   } else {
     fi.className = 'foto-indicator no-fotos';
@@ -1058,14 +1102,29 @@ function mostrarEquipo(nro) {
   document.getElementById('panel-body').innerHTML =
     fotoHtml +
     '<div class="info-grid">' +
-      '<div class="info-item"><i class="ph ph-map-pin label-icon"></i><div><div class="label">Ubicación</div><div class="value">' + eq.ubicacion + '</div></div></div>' +
-      '<div class="info-item"><i class="ph ph-trademark label-icon"></i><div><div class="label">Marca</div><div class="value">' + eq.marca + '</div></div></div>' +
-      '<div class="info-item"><i class="ph ph-lightning label-icon"></i><div><div class="label">Capacidad</div><div class="value">' + eq.capacidad + '</div></div></div>' +
-      '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + badgeTexto + '</span></div></div></div>' +
-      '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + eq.ot + ');return false" class="ot-link">' + eq.ot + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
+      '<div class="info-item"><i class="ph ph-map-pin label-icon"></i><div><div class="label">Ubicación</div><div class="value">' + escaparHTML(eq.ubicacion) + '</div></div></div>' +
+      '<div class="info-item"><i class="ph ph-trademark label-icon"></i><div><div class="label">Marca</div><div class="value">' + escaparHTML(eq.marca) + '</div></div></div>' +
+      '<div class="info-item"><i class="ph ph-lightning label-icon"></i><div><div class="label">Capacidad</div><div class="value">' + escaparHTML(eq.capacidad) + '</div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-info label-icon"></i><div><div class="label">Estado</div><div class="value"><span class="estado-badge ' + badgeClase + '">' + badgeIcono + ' ' + escaparHTML(badgeTexto) + '</span></div></div></div>' +
+      '<div class="info-item full"><i class="ph ph-download-simple label-icon"></i><div><div class="label">OT</div><div class="value">' + (eq.ot ? '<a href="#" onclick="abrirOT(' + escJS(eq.ot) + ');return false" class="ot-link">' + escaparHTML(eq.ot) + ' <i class="ph ph-file-pdf"></i></a>' : '—') + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
+    '</div>' +
+    '<div class="comentarios-sec">' +
+      '<div class="comentarios-titulo"><i class="ph ph-chats"></i> Comentarios <span class="contador" id="comentarios-contador">0</span>' +
+        '<span class="comentarios-acciones">' +
+          '<button class="comentario-btn" id="comentarios-ver-btn" onclick="toggleVerArchivados()" title="Mostrar u ocultar comentarios archivados"><i class="ph ph-archive"></i> <span id="comentarios-ver-label">Ver archivados</span></button>' +
+          '<button class="comentario-btn" id="comentarios-archivar-btn" onclick="archivarResueltos()" title="Archivar los comentarios resueltos"><i class="ph ph-tray-arrow-down"></i> Archivar resueltos</button>' +
+        '</span>' +
+      '</div>' +
+      '<div class="comentarios-lista" id="comentarios-lista"></div>' +
+      '<div class="comentario-form">' +
+        '<textarea id="comentario-input" placeholder="Dejá una nota, observación o pregunta..."></textarea>' +
+        '<button onclick="enviarComentario()"><i class="ph ph-paper-plane-tilt"></i> Comentar</button>' +
+      '</div>' +
     '</div>';
+
+  cargarComentarios(eq.nro);
 
   initCarousel();
   carruselEq = eq;
@@ -1159,6 +1218,185 @@ function copiarEquipo() {
     const btn = document.querySelector('.panel-copy');
     if (btn) { btn.innerHTML = '<i class="ph ph-check"></i>'; setTimeout(() => { btn.innerHTML = '<i class="ph ph-copy"></i>'; }, 1500); }
   }).catch(() => {});
+}
+
+let usuarioActual = { email: null, nombre: null, tipo: null };
+let comentariosVerArchivados = false;
+
+function cargarComentarios(nro) {
+  const lista = document.getElementById('comentarios-lista');
+  if (!lista || nro == null) return;
+  const reqNro = nro;
+  lista.innerHTML = '<div class="comentario-vacio">Cargando...</div>';
+  fetch('/api/comentarios?branch=' + BRANCH_KEY + '&equipo=' + reqNro)
+    .then(r => r.json())
+    .then(d => {
+      if (!equipoSeleccionado || equipoSeleccionado.nro !== reqNro) return;
+      renderComentarios(d.comments || []);
+    })
+    .catch(() => {
+      if (equipoSeleccionado && equipoSeleccionado.nro === reqNro)
+        lista.innerHTML = '<div class="comentario-vacio">No se pudieron cargar los comentarios.</div>';
+    });
+}
+
+function renderComentarios(list) {
+  const lista = document.getElementById('comentarios-lista');
+  if (!lista) return;
+  const visibles = list.filter(c => comentariosVerArchivados ? c.archivado : !c.archivado);
+  const contador = document.getElementById('comentarios-contador');
+  if (contador) contador.textContent = visibles.length;
+  const verBtn = document.getElementById('comentarios-ver-btn');
+  if (verBtn) {
+    verBtn.classList.toggle('activo', comentariosVerArchivados);
+    const label = document.getElementById('comentarios-ver-label');
+    if (label) label.textContent = comentariosVerArchivados ? 'Ocultar archivados' : 'Ver archivados';
+  }
+  const archBtn = document.getElementById('comentarios-archivar-btn');
+  if (archBtn) {
+    const hayResueltos = list.some(c => c.resuelto && !c.archivado);
+    archBtn.hidden = !hayResueltos;
+  }
+  if (!visibles.length) {
+    lista.innerHTML = comentariosVerArchivados
+      ? '<div class="comentario-vacio-archivados">No hay comentarios archivados.</div>'
+      : '<div class="comentario-vacio">Sin comentarios todavía. Dejá el primero.</div>';
+    return;
+  }
+  const porId = {};
+  list.forEach(c => { c.hijos = []; porId[c.id] = c; });
+  const raices = [];
+  visibles.forEach(c => {
+    if (c.parent_id && porId[c.parent_id] && visibles.indexOf(porId[c.parent_id]) !== -1) porId[c.parent_id].hijos.push(c);
+    else raices.push(c);
+  });
+  const itemHtml = (c) => {
+    const propio = usuarioActual.email && c.email === usuarioActual.email;
+    const puedeGestionar = propio || usuarioActual.tipo === 'admin';
+    const tipoLabel = c.tipo === 'admin' ? 'Admin' : c.tipo === 'propio' ? 'Propio' : 'Visitante';
+    const hijos = (c.hijos || []).map(itemHtml).join('');
+    const respuestas = hijos ? '<div class="comentario-respuestas">' + hijos + '</div>' : '';
+    const acciones = c.archivado
+      ? (puedeGestionar ? '<button class="comentario-responder" onclick="restaurarComentario(' + c.id + ')" title="Restaurar"><i class="ph ph-tray-arrow-up"></i> Restaurar</button>' : '')
+      : '<button class="comentario-responder" onclick="toggleRespuesta(' + c.id + ')" title="Responder"><i class="ph ph-reply"></i> Responder</button>' +
+        (puedeGestionar ? '<label class="comentario-resuelto' + (c.resuelto ? ' chequeado' : '') + '"><input type="checkbox"' + (c.resuelto ? ' checked' : '') + ' onchange="toggleResuelto(' + c.id + ', this.checked)"> Resuelto</label>' : '');
+    return '<div class="comentario-item' + (c.resuelto ? ' resuelto' : '') + '">' +
+      '<div class="comentario-meta">' +
+        '<span class="comentario-nombre">' + escaparHTML(c.nombre || c.email) + '</span>' +
+        '<span class="comentario-tipo ' + c.tipo + '">' + tipoLabel + '</span>' +
+        (c.archivado ? '<span class="comentario-badge archivado">Archivado</span>' : '') +
+        '<span class="comentario-fecha">' + formatearFechaComentario(c.creado) + '</span>' +
+        (puedeGestionar ? '<button class="comentario-del" onclick="eliminarComentario(' + c.id + ')" title="Eliminar"><i class="ph ph-trash"></i></button>' : '') +
+      '</div>' +
+      '<div class="comentario-texto">' + escaparHTML(c.texto) + '</div>' +
+      (acciones ? '<div class="comentario-acciones">' + acciones + '</div>' : '') +
+      '<div class="comentario-respuesta-form" id="respuesta-form-' + c.id + '"></div>' +
+      respuestas +
+    '</div>';
+  };
+  lista.innerHTML = raices.map(itemHtml).join('');
+}
+
+function escaparHTML(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function escJS(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+}
+
+function formatearFechaComentario(str) {
+  if (!str) return '';
+  const s = String(str).trim();
+  const f = new Date(s.includes('T') ? s : s.replace(' ', 'T') + 'Z');
+  if (isNaN(f.getTime())) return s;
+  const dd = String(f.getDate()).padStart(2, '0');
+  const mm = String(f.getMonth() + 1).padStart(2, '0');
+  const hh = String(f.getHours()).padStart(2, '0');
+  const mi = String(f.getMinutes()).padStart(2, '0');
+  return dd + '/' + mm + '/' + f.getFullYear() + ' ' + hh + ':' + mi;
+}
+
+function enviarComentario(parentId) {
+  const eq = equipoSeleccionado;
+  if (!eq) return;
+  const input = parentId ? document.getElementById('respuesta-input-' + parentId) : document.getElementById('comentario-input');
+  if (!input) return;
+  const texto = (input.value || '').trim();
+  if (!texto) return;
+  const btn = input.parentNode.querySelector('button');
+  btn.disabled = true;
+  const body = { branch: BRANCH_KEY, equipo_nro: eq.nro, texto };
+  if (parentId) body.parent_id = parentId;
+  fetch('/api/comentarios', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) { input.value = ''; cargarComentarios(eq.nro); }
+      else alert(d.error || 'No se pudo guardar el comentario.');
+    })
+    .catch(() => alert('Error de red al guardar el comentario.'))
+    .finally(() => { btn.disabled = false; });
+}
+
+function toggleRespuesta(id) {
+  const cont = document.getElementById('respuesta-form-' + id);
+  if (!cont) return;
+  if (cont.innerHTML) { cont.innerHTML = ''; return; }
+  cont.innerHTML = '<div class="comentario-form">' +
+    '<textarea id="respuesta-input-' + id + '" placeholder="Escribí una respuesta..." onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey))enviarComentario(' + id + ')"></textarea>' +
+    '<button onclick="enviarComentario(' + id + ')"><i class="ph ph-paper-plane-tilt"></i> Responder</button>' +
+  '</div>';
+  const ta = document.getElementById('respuesta-input-' + id);
+  if (ta) ta.focus();
+}
+
+function toggleResuelto(id, checked) {
+  fetch('/api/comentarios', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, resuelto: checked ? 1 : 0 }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) cargarComentarios(equipoSeleccionado ? equipoSeleccionado.nro : null);
+      else alert(d.error || 'No se pudo actualizar el estado.');
+    })
+    .catch(() => alert('Error de red al actualizar el estado.'));
+}
+
+function eliminarComentario(id) {
+  if (!confirm('¿Eliminar este comentario y sus respuestas?')) return;
+  fetch('/api/comentarios?id=' + id, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) cargarComentarios(equipoSeleccionado ? equipoSeleccionado.nro : null);
+      else alert(d.error || 'No se pudo eliminar el comentario.');
+    })
+    .catch(() => alert('Error de red al eliminar el comentario.'));
+}
+
+function archivarResueltos() {
+  const eq = equipoSeleccionado;
+  if (!eq) return;
+  if (!confirm('¿Archivar todos los comentarios resueltos de este equipo?')) return;
+  fetch('/api/comentarios', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'archivar_resueltos', branch: BRANCH_KEY, equipo_nro: eq.nro }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) { cargarComentarios(eq.nro); if (comentariosVerArchivados) toggleVerArchivados(); }
+      else alert(d.error || 'No se pudo archivar.');
+    })
+    .catch(() => alert('Error de red al archivar.'));
+}
+
+function toggleVerArchivados() {
+  comentariosVerArchivados = !comentariosVerArchivados;
+  const eq = equipoSeleccionado;
+  if (eq) cargarComentarios(eq.nro);
+}
+
+function restaurarComentario(id) {
+  fetch('/api/comentarios', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, archivado: 0 }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) cargarComentarios(equipoSeleccionado ? equipoSeleccionado.nro : null);
+      else alert(d.error || 'No se pudo restaurar el comentario.');
+    })
+    .catch(() => alert('Error de red al restaurar el comentario.'));
 }
 
 let carruselDrag = false, carruselStartX = 0, carruselScrollLeft = 0, carruselMoved = false;
@@ -1296,7 +1534,9 @@ wrapper.addEventListener('click', (e) => {
   if (e.button === 0) cerrarPanelCompleto();
 });
 
-img.addEventListener('load', () => {
+let planoInicializado = false;
+let pendienteEq = null;
+function planoCargado() {
   container.style.width = IMG_W + 'px';
   container.style.height = IMG_H + 'px';
   const wr = wrapper.getBoundingClientRect();
@@ -1305,14 +1545,20 @@ img.addEventListener('load', () => {
   container.style.opacity = '1';
   aplicarTransform();
   renderizarMarcadores();
+  if (planoInicializado) {
+    if (pendienteEq != null) { const n = pendienteEq; pendienteEq = null; mostrarEquipo(n); }
+    return;
+  }
+  planoInicializado = true;
   poblarFiltros();
   cargarEquipos();
   // URL hash — primero #eq-N, luego filtros
   if (location.hash.startsWith('#eq-')) {
     const nro = parseInt(location.hash.slice(4));
     if (nro && EQUIPOS.some(e => e.nro === nro)) {
-      cambiarPiso(EQUIPOS.find(e => e.nro === nro).piso);
-      mostrarEquipo(nro);
+      const eq = EQUIPOS.find(e => e.nro === nro);
+      if (eq.piso === pisoActual) mostrarEquipo(nro);
+      else { pendienteEq = nro; cambiarPiso(eq.piso); }
     }
     history.replaceState(null, '', window.location.pathname + window.location.search);
   } else if (location.hash.length > 1) {
@@ -1326,12 +1572,19 @@ img.addEventListener('load', () => {
     if (m || c || e) renderizarMarcadores();
     history.replaceState(null, '', window.location.pathname + window.location.search);
   }
-});
+}
+if (img.complete) planoCargado();
+else img.addEventListener('load', planoCargado);
 
 let resizeTimer;
 window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitToScreen, 100); });
 
 document.addEventListener('keydown', (e) => {
+  const editable = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
+  if (editable) {
+    if (e.key === 'Escape' && document.getElementById('lightbox').classList.contains('activo')) cerrarLightbox();
+    return;
+  }
   if (e.key === 'Escape') {
     if (document.getElementById('lightbox').classList.contains('activo')) cerrarLightbox();
     else if (panelAbierto) cerrarPanelCompleto();
@@ -1387,8 +1640,8 @@ function actualizarLbInfo() {
   const badgeClase = estadoClase(eq.estado);
   document.getElementById('lb-info').innerHTML =
     '<span class="nro">#' + eq.nro + '</span>' +
-    '<span class="ub">' + eq.ubicacion + '</span>' +
-    '<span class="badge ' + badgeClase + '">' + eq.estado + '</span>';
+    '<span class="ub">' + escaparHTML(eq.ubicacion) + '</span>' +
+    '<span class="badge ' + badgeClase + '">' + escaparHTML(eq.estado) + '</span>';
 }
 
 function actualizarLbCounter() {
@@ -1483,10 +1736,12 @@ document.addEventListener('mouseup', () => {
 });
 
 function equiposFiltrados() {
+  const texto = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
   return EQUIPOS.filter(e => e.piso === pisoActual).filter(e => {
     if (filtroMarca && e.marca !== filtroMarca) return false;
     if (filtroCapacidad && e.capacidad !== filtroCapacidad) return false;
     if (filtroEstado && estadoClase(e.estado) !== filtroEstado) return false;
+    if (texto && !String(e.nro).includes(texto) && !(e.ubicacion || '').toLowerCase().includes(texto)) return false;
     return true;
   });
 }
@@ -1542,8 +1797,8 @@ function poblarFiltros() {
   const capacidades = [...new Set(EQUIPOS.map(e => e.capacidad).filter(Boolean))].sort();
   const mSel = document.getElementById('filtro-marca');
   const cSel = document.getElementById('filtro-capacidad');
-  mSel.innerHTML = '<option value="">Marca: todas</option>' + marcas.map(m => '<option value="' + m.replace(/"/g,'&quot;') + '">' + m + '</option>').join('');
-  cSel.innerHTML = '<option value="">Capacidad: todas</option>' + capacidades.map(c => '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>').join('');
+  mSel.innerHTML = '<option value="">Marca: todas</option>' + marcas.map(m => '<option value="' + escaparHTML(m) + '">' + escaparHTML(m) + '</option>').join('');
+  cSel.innerHTML = '<option value="">Capacidad: todas</option>' + capacidades.map(c => '<option value="' + escaparHTML(c) + '">' + escaparHTML(c) + '</option>').join('');
 }
 function limpiarFiltros() {
   filtroMarca = null;
@@ -1564,7 +1819,7 @@ function exportarCSV() {
     const c = colores[eq.estado] || '#999';
     const otId = eq.ot || '';
     const otUrl = otId ? OT_URL_BASE + otId : '';
-    rows += '<tr><td style="font-weight:600;text-align:center">' + eq.nro + '</td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca||'-') + '</td><td>' + esc(eq.capacidad||'-') + '</td><td style="background:' + c + ';color:#fff;font-weight:600;text-align:center">' + esc(eq.estado) + '</td><td>' + esc(eq.ultimo_service||'-') + '</td><td>' + esc(otId||'-') + '</td><td>' + (otUrl ? '<a href="' + otUrl + '" style="color:#ff6900;font-weight:600">Descargar OT</a>' : '-') + '</td><td style="text-align:center">' + eq.piso.toUpperCase() + '</td></tr>';
+    rows += '<tr><td style="font-weight:600;text-align:center">' + eq.nro + '</td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca||'-') + '</td><td>' + esc(eq.capacidad||'-') + '</td><td style="background:' + c + ';color:#fff;font-weight:600;text-align:center">' + esc(eq.estado) + '</td><td>' + esc(eq.ultimo_service||'-') + '</td><td>' + esc(otId||'-') + '</td><td>' + (otUrl ? '<a href="' + esc(otUrl) + '" style="color:#ff6900;font-weight:600">Descargar OT</a>' : '-') + '</td><td style="text-align:center">' + eq.piso.toUpperCase() + '</td></tr>';
   });
   const html = '<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;font-family:Inter,Arial,sans-serif;font-size:13px}td,th{border:1px solid #ccc;padding:6px 10px}th{background:#ff6900;color:#fff;font-weight:700}tr:nth-child(even){background:#f5f5f5}</style></head><body><table>' + rows + '</table></body></html>';
   const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
@@ -1605,8 +1860,8 @@ function renderLista() {
     d.innerHTML =
       '<span class="dot" style="background:' + dotColor + '"></span>' +
       '<span class="nro">#' + eq.nro + '</span>' +
-      '<span class="ub">' + eq.ubicacion + '</span>' +
-      '<span class="estado-tag" style="background:' + tagColor + ';color:#fff">' + eq.estado + '</span>';
+      '<span class="ub">' + escaparHTML(eq.ubicacion) + '</span>' +
+      '<span class="estado-tag" style="background:' + tagColor + ';color:#fff">' + escaparHTML(eq.estado) + '</span>';
     d.addEventListener('click', () => {
       trackClick('lista', eq.nro);
       toggleLista();
@@ -1638,7 +1893,7 @@ function onSearchInput(texto) {
     d.className = 'search-suggestion';
     const cls = estadoClase(eq.estado);
     const dotColor = cls === 'necesita' ? '#ff6900' : cls === 'ok' ? '#2ecc71' : '#666';
-    d.innerHTML = '<span class="sug-dot" style="background:' + dotColor + '"></span><span class="sug-nro">#' + eq.nro + '</span><span class="sug-ub">' + eq.ubicacion + '</span>';
+    d.innerHTML = '<span class="sug-dot" style="background:' + dotColor + '"></span><span class="sug-nro">#' + eq.nro + '</span><span class="sug-ub">' + escaparHTML(eq.ubicacion) + '</span>';
     d.addEventListener('mousedown', (e) => {
       e.preventDefault();
       trackClick('search', eq.nro, document.getElementById('search-input').value);
@@ -1783,7 +2038,7 @@ function syncData() {
     });
 }
 
-fetch('/api/me').then(r=>r.json()).then(u=>{if(u.tipo==='admin'){var b=document.createElement('button');b.className='sync-btn';b.innerHTML='<i class="ph ph-chart-bar"></i>';b.title='Dashboard administrador';b.onclick=function(){window.location.href='/admin'};document.getElementById('sync-btn').after(b);}}).catch(()=>{});
+fetch('/api/me').then(r=>r.json()).then(u=>{if(u&&u.tipo){usuarioActual={email:u.email,nombre:u.nombre,tipo:u.tipo};}if(u&&u.tipo==='admin'){var b=document.createElement('button');b.className='sync-btn';b.innerHTML='<i class="ph ph-chart-bar"></i>';b.title='Dashboard administrador';b.onclick=function(){window.location.href='/admin'};document.getElementById('sync-btn').after(b);}}).catch(()=>{});
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }

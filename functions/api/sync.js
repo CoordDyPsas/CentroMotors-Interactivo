@@ -33,8 +33,13 @@ export async function onRequest(context) {
     const r = await fetch(CSV_URL + '&_cb=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
     const branches = parseAll(await r.text());
     if (!branches) return new Response(JSON.stringify({ success: false, output: 'Could not parse CSV' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    const user = context.data && context.data.user;
+    if (!user || user.tipo !== 'admin') {
+      delete branches.colon;
+      delete branches.monsenor;
+    }
     const d = new Date();
-    return new Response(JSON.stringify({ success: true, output: 'OK', branches, timestamp: d.toISOString() }), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    return new Response(JSON.stringify({ success: true, output: 'OK', branches, timestamp: d.toISOString() }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (e) {
     return new Response(JSON.stringify({ success: false, output: e.message }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   }

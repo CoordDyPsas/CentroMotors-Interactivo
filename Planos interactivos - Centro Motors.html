@@ -207,72 +207,89 @@ body.modo-profesional .logo-sub { color: #111; }
   </div>
   <script>
     const SUCURSALES = [
-      { id: 'monsenor', nombre: 'Monseñor', icon: 'ph-buildings', equipos: [
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'No funciona' }, { estado: 'OK' }
-      ], fotos: 21 },
-      { id: 'colon', nombre: 'Colón', icon: 'ph-buildings', equipos: [
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
-        { estado: 'Necesita service' }, { estado: 'OK' }
-      ], fotos: 21 },
       { id: 'sagrada-familia', nombre: 'Sagrada Familia', icon: 'ph-buildings', equipos: [
         { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
         { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
         { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
         { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }
-      ], fotos: 18 }
+      ], fotos: 18 },
+      { id: 'monsenor', nombre: 'Monseñor', icon: 'ph-buildings' },
+      { id: 'colon', nombre: 'Colón', icon: 'ph-buildings' }
     ];
     function estadoClase(estado) {
       if (!estado || estado === 'No funciona') return 'nofunciona';
       if (estado === 'OK') return 'ok';
       return 'necesita';
     }
-    function renderDashboard() {
-      const cont = document.getElementById('sucursales');
-      SUCURSALES.forEach(s => {
-        const total = s.equipos.length;
-        const necesita = s.equipos.filter(e => estadoClase(e.estado) === 'necesita').length;
-        const ok = s.equipos.filter(e => estadoClase(e.estado) === 'ok').length;
-        const nofunciona = s.equipos.filter(e => estadoClase(e.estado) === 'nofunciona').length;
-        const fotoText = s.fotos ? ' · ' + s.fotos + ' con foto' : '';
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = function(){ trackClick('navegar', s.id); window.location.href = s.id + '/index.html'; };
-        card.innerHTML =
-          '<div class="icon"><i class="ph ' + s.icon + '"></i></div>' +
-          '<h2>' + s.nombre + '</h2>' +
-          '<p class="count">' + total + ' equipos' + fotoText + '</p>' +
-          '<div class="stats-row">' +
-          '<span class="stat-pill ok"><span class="d" style="background:#2ecc71"></span> ' + ok + '</span>' +
-          '<span class="stat-pill necesita"><span class="d" style="background:#ff6900"></span> ' + necesita + '</span>' +
-          '<span class="stat-pill nofunciona"><span class="d" style="background:#666"></span> ' + nofunciona + '</span>' +
-          '</div>' +
-          '<span class="badge listo"><i class="ph ph-eye"></i> Ver plano</span>';
-        cont.appendChild(card);
-      });
-      // HINO card
-      const hino = document.createElement('div');
-      hino.className = 'card disabled';
-      hino.innerHTML =
-        '<div class="icon"><i class="ph ph-map-pin"></i></div>' +
-        '<h2>HINO</h2>' +
-        '<p class="count">Próximamente</p>' +
-        '<span class="badge pendiente"><i class="ph ph-clock"></i> En desarrollo</span>';
-      cont.appendChild(hino);
+    function crearCardActiva(s) {
+      const total = s.equipos.length;
+      const necesita = s.equipos.filter(e => estadoClase(e.estado) === 'necesita').length;
+      const ok = s.equipos.filter(e => estadoClase(e.estado) === 'ok').length;
+      const nofunciona = s.equipos.filter(e => estadoClase(e.estado) === 'nofunciona').length;
+      const fotoText = s.fotos ? ' · ' + s.fotos + ' con foto' : '';
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = function(){ trackClick('navegar', s.id); window.location.href = s.id + '/index.html'; };
+      card.innerHTML =
+        '<div class="icon"><i class="ph ' + s.icon + '"></i></div>' +
+        '<h2>' + s.nombre + '</h2>' +
+        '<p class="count">' + total + ' equipos' + fotoText + '</p>' +
+        '<div class="stats-row">' +
+        '<span class="stat-pill ok"><span class="d" style="background:#2ecc71"></span> ' + ok + '</span>' +
+        '<span class="stat-pill necesita"><span class="d" style="background:#ff6900"></span> ' + necesita + '</span>' +
+        '<span class="stat-pill nofunciona"><span class="d" style="background:#666"></span> ' + nofunciona + '</span>' +
+        '</div>' +
+        '<span class="badge listo"><i class="ph ph-eye"></i> Ver plano</span>';
+      return card;
     }
-    renderDashboard();
+    function cardProximamente(nombre, icon) {
+      const card = document.createElement('div');
+      card.className = 'card disabled';
+      card.innerHTML =
+        '<div class="icon"><i class="ph ' + icon + '"></i></div>' +
+        '<h2>' + nombre + '</h2>' +
+        '<p class="count">Próximamente</p>' +
+        '<span class="badge pendiente"><i class="ph ph-clock"></i> Próximamente</span>';
+      return card;
+    }
+    function renderDashboard(tipo) {
+      const cont = document.getElementById('sucursales');
+      const esAdmin = tipo === 'admin';
+      SUCURSALES.forEach(s => {
+        if (s.equipos) {
+          cont.appendChild(crearCardActiva(s));
+          return;
+        }
+        if (!esAdmin) {
+          cont.appendChild(cardProximamente(s.nombre, s.icon));
+          return;
+        }
+        const ph = document.createElement('div');
+        ph.className = 'card';
+        ph.style.opacity = '0.6';
+        ph.innerHTML = '<div class="icon"><i class="ph ' + s.icon + '"></i></div><h2>' + s.nombre + '</h2><p class="count">Cargando...</p>';
+        cont.appendChild(ph);
+        fetch('/api/equipos/' + s.id)
+          .then(r => r.json())
+          .then(list => {
+            const card = crearCardActiva({ id: s.id, nombre: s.nombre, icon: s.icon, equipos: Array.isArray(list) ? list : [], fotos: 0 });
+            ph.replaceWith(card);
+          })
+          .catch(() => ph.replaceWith(cardProximamente(s.nombre, s.icon)));
+      });
+      cont.appendChild(cardProximamente('HINO', 'ph-map-pin'));
+    }
+    fetch('/api/me').then(r => r.json()).then(u => {
+      renderDashboard(u.tipo);
+      if (u.tipo === 'admin') {
+        var b = document.createElement('button');
+        b.className = 'switch-tema';
+        b.innerHTML = '<i class="ph ph-chart-bar"></i>';
+        b.title = 'Dashboard administrador';
+        b.onclick = function(){ window.location.href = '/admin' };
+        document.getElementById('switch-tema-btn').before(b);
+      }
+    }).catch(() => renderDashboard(null));
 
     function toggleTema(guardar) {
       const body = document.body;
@@ -289,7 +306,6 @@ body.modo-profesional .logo-sub { color: #111; }
     function trackClick(accion, detalle) {
       fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion,branch:'root',detalle:detalle||null})}).catch(()=>{});
     }
-    fetch('/api/me').then(r=>r.json()).then(u=>{if(u.tipo==='admin'){var b=document.createElement('button');b.className='switch-tema';b.innerHTML='<i class="ph ph-chart-bar"></i>';b.title='Dashboard administrador';b.onclick=function(){window.location.href='/admin'};document.getElementById('switch-tema-btn').before(b);}}).catch(()=>{});
     if (localStorage.getItem('dyp_tema') === 'oscuro') toggleTema(false);
     (function tick() {
       document.getElementById('sync-time').textContent = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });

@@ -11,7 +11,9 @@ async function runOrNull(promise, label, timeoutMs = 12000) {
 }
 
 export async function onRequest(context) {
-  const SECRET = new TextEncoder().encode(context.env.JWT_SECRET || 'dyp-demo-secret-key-2026-cambiame-en-produccion');
+  const SECRET = context.env.JWT_SECRET;
+  if (!SECRET)
+    return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
   if (context.request.method !== 'POST')
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
 
@@ -21,7 +23,7 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 
   try {
-    const { payload } = await jwtVerify(match[1], SECRET);
+    const { payload } = await jwtVerify(match[1], new TextEncoder().encode(SECRET));
     const { accion, branch, equipo_nro, detalle } = await context.request.json();
 
     if (!accion || !branch)

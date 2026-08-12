@@ -30,17 +30,16 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
 .btn-cerrar{background:#e63946;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600}
 .btn-cerrar:hover{background:#c1121f}
 .btn-cerrar:disabled{opacity:.5;cursor:not-allowed}
-#cards{transition:opacity .3s}
 </style>
 </head>
 <body>
 <a href="javascript:history.back()" style="display:inline-flex;align-items:center;gap:6px;color:#ff6900;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:10px">&larr; Volver</a>
 <h1>Dashboard</h1>
-<p class="sub">Panel de administración — Planos Interactivos DyP</p>
+<p class="sub">Panel de administracion — Planos Interactivos DyP</p>
 
 <div class="cards" id="cards">
   <div class="card"><div class="num" id="visitantes">-</div><div class="lbl">Visitantes activos</div></div>
-  <div class="card"><div class="num" id="paginas">-</div><div class="lbl">Páginas hoy</div></div>
+  <div class="card"><div class="num" id="paginas">-</div><div class="lbl">Paginas hoy</div></div>
   <div class="card"><div class="num" id="clicks">-</div><div class="lbl">Clicks hoy</div></div>
 </div>
 
@@ -50,7 +49,7 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
 </div>
 
 <div class="section">
-  <h2>Actividad reciente (páginas)</h2>
+  <h2>Actividad reciente (paginas)</h2>
   <div id="paginasContent" class="loading">Cargando...</div>
 </div>
 
@@ -59,92 +58,89 @@ td{padding:8px 12px;font-size:13px;border-top:1px solid #eee}
   <div id="clicksContent" class="loading">Cargando...</div>
 </div>
 
-<a class="logout" href="/api/logout">Cerrar sesión</a>
+<div class="section">
+  <h2>Sesiones visitantes</h2>
+  <div id="visitantesContent" class="loading">Cargando...</div>
+</div>
+
+<a class="logout" href="/api/logout">Cerrar sesion</a>
 
 <script>
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+document.getElementById('visitantes').textContent = '...';
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function badge(tipo) {
-  const map = {admin:'admin',propio:'propio',visitante:'visitante'};
+  var map = {admin:'admin',propio:'propio',visitante:'visitante'};
   return '<span class="badge badge-' + (map[tipo]||'visitante') + '">' + esc(tipo) + '</span>';
 }
 
 function ago(ts) {
   if (!ts) return '-';
-  const diff = Math.floor((Date.now() - new Date(ts + 'Z').getTime()) / 1000);
+  var diff = Math.floor((Date.now() - new Date(ts + 'Z').getTime()) / 1000);
   if (diff < 60) return 'hace ' + diff + 's';
-  if (diff < 3600) return 'hace ' + Math.floor(diff / 60) + 'm';
-  if (diff < 86400) return 'hace ' + Math.floor(diff / 3600) + 'h';
-  return 'hace ' + Math.floor(diff / 86400) + 'd';
+  if (diff < 3600) return 'hace ' + Math.floor(diff/60) + 'm';
+  if (diff < 86400) return 'hace ' + Math.floor(diff/3600) + 'h';
+  return 'hace ' + Math.floor(diff/86400) + 'd';
 }
 
-async function loadStats() {
-  try {
-    const r = await fetch('/api/admin/stats');
-    if (!r.ok) throw new Error('No autorizado');
-    const d = await r.json();
+fetch('/api/admin/stats').then(function(r) {
+  if (!r.ok) throw new Error('Status ' + r.status);
+  return r.json();
+}).then(function(d) {
+  document.getElementById('visitantes').textContent = d.visitantesActivos;
+  document.getElementById('paginas').textContent = d.paginasHoy;
+  document.getElementById('clicks').textContent = d.clicksHoy;
 
-    document.getElementById('cards').style.opacity = '1';
-    document.getElementById('visitantes').textContent = d.visitantesActivos;
-    document.getElementById('paginas').textContent = d.paginasHoy;
-    document.getElementById('clicks').textContent = d.clicksHoy;
-
-    if (d.sesionesVisitantes && d.sesionesVisitantes.length) {
-      let h = '<table><tr><th>Email</th><th>Nombre</th><th>Fingerprint</th><th>Último acceso</th><th>Acción</th></tr>';
-      d.sesionesVisitantes.forEach(s => {
-        h += '<tr><td>' + esc(s.email) + '</td><td>' + esc(s.nombre||'-') + '</td><td style="font-size:11px;font-family:monospace">' + esc(s.fingerprint.slice(0,16)) + '...</td><td>' + ago(s.ultimo_acceso) + '</td><td><button class="btn-cerrar" onclick="cerrarSesion(\'' + esc(s.email) + '\',this)">Cerrar</button></td></tr>';
-      });
-      h += '</table>';
-      document.getElementById('sesionesContent').innerHTML = h;
-    } else {
-      document.getElementById('sesionesContent').innerHTML = '<p style="color:#999;font-size:13px">Sin sesiones activas</p>';
-    }
-
-    if (d.actividadReciente && d.actividadReciente.length) {
-      let h = '<table><tr><th>Hora</th><th>Email</th><th>Tipo</th><th>Ruta</th></tr>';
-      d.actividadReciente.slice(0,20).forEach(a => {
-        h += '<tr><td style="white-space:nowrap">' + ago(a.timestamp) + '</td><td>' + esc(a.email) + '</td><td>' + badge(a.tipo) + '</td><td>' + esc(a.ruta) + '</td></tr>';
-      });
-      h += '</table>';
-      document.getElementById('paginasContent').innerHTML = h;
-    } else {
-      document.getElementById('paginasContent').innerHTML = '<p style="color:#999;font-size:13px">Sin actividad</p>';
-    }
-
-    if (d.clicksRecientes && d.clicksRecientes.length) {
-      let h = '<table><tr><th>Hora</th><th>Email</th><th>Tipo</th><th>Sucursal</th><th>Equipo</th><th>Acción</th></tr>';
-      d.clicksRecientes.slice(0,20).forEach(c => {
-        h += '<tr><td style="white-space:nowrap">' + ago(c.timestamp) + '</td><td>' + esc(c.email) + '</td><td>' + badge(c.tipo) + '</td><td>' + esc(c.branch) + '</td><td>' + esc(c.equipo_nro || '-') + '</td><td>' + esc(c.accion) + (c.detalle ? ' (' + esc(c.detalle) + ')' : '') + '</td></tr>';
-      });
-      h += '</table>';
-      document.getElementById('clicksContent').innerHTML = h;
-    } else {
-      document.getElementById('clicksContent').innerHTML = '<p style="color:#999;font-size:13px">Sin actividad</p>';
-    }
-  } catch(e) {
-    document.querySelectorAll('.loading').forEach(el => {
-      if (el.innerHTML === 'Cargando...')
-        el.innerHTML = '<span style="color:#e63946">Error: ' + esc(e.message) + '</span>';
+  if (d.sesionesVisitantes && d.sesionesVisitantes.length) {
+    var h = '<table><tr><th>Email</th><th>Nombre</th><th>Fingerprint</th><th>Ultimo acceso</th></tr>';
+    d.sesionesVisitantes.forEach(function(s) {
+      h += '<tr><td>' + esc(s.email) + '</td><td>' + esc(s.nombre||'-') + '</td><td style="font-size:11px;font-family:monospace">' + esc(s.fingerprint.slice(0,16)) + '...</td><td>' + ago(s.ultimo_acceso) + '</td></tr>';
     });
+    h += '</table>';
+    document.getElementById('sesionesContent').innerHTML = h;
+  } else {
+    document.getElementById('sesionesContent').innerHTML = '<p style="color:#999;font-size:13px">Sin sesiones activas</p>';
   }
-}
-async function cerrarSesion(email, btn) {
-  if (!confirm('¿Cerrar todas las sesiones de ' + email + '?')) return;
-  btn.disabled = true; btn.textContent = '...';
-  try {
-    const r = await fetch('/api/admin/cerrar-sesion', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+
+  if (d.actividadReciente && d.actividadReciente.length) {
+    var h = '<table><tr><th>Hora</th><th>Email</th><th>Tipo</th><th>Ruta</th></tr>';
+    d.actividadReciente.slice(0,20).forEach(function(a) {
+      h += '<tr><td style="white-space:nowrap">' + ago(a.timestamp) + '</td><td>' + esc(a.email) + '</td><td>' + badge(a.tipo) + '</td><td>' + esc(a.ruta) + '</td></tr>';
     });
-    const d = await r.json();
-    if (d.success) { btn.textContent = '✓'; setTimeout(loadStats, 500); }
-    else { btn.textContent = 'Error'; }
-  } catch { btn.textContent = 'Error'; }
-}
-loadStats();
-setInterval(loadStats, 10000);
+    h += '</table>';
+    document.getElementById('paginasContent').innerHTML = h;
+  } else {
+    document.getElementById('paginasContent').innerHTML = '<p style="color:#999;font-size:13px">Sin actividad</p>';
+  }
+
+  if (d.clicksRecientes && d.clicksRecientes.length) {
+    var h = '<table><tr><th>Hora</th><th>Email</th><th>Tipo</th><th>Sucursal</th><th>Equipo</th><th>Accion</th></tr>';
+    d.clicksRecientes.slice(0,20).forEach(function(c) {
+      h += '<tr><td style="white-space:nowrap">' + ago(c.timestamp) + '</td><td>' + esc(c.email) + '</td><td>' + badge(c.tipo) + '</td><td>' + esc(c.branch) + '</td><td>' + esc(c.equipo_nro || '-') + '</td><td>' + esc(c.accion) + (c.detalle ? ' (' + esc(c.detalle) + ')' : '') + '</td></tr>';
+    });
+    h += '</table>';
+    document.getElementById('clicksContent').innerHTML = h;
+  } else {
+    document.getElementById('clicksContent').innerHTML = '<p style="color:#999;font-size:13px">Sin actividad</p>';
+  }
+
+  var sesUnicas = {};
+  if (d.sesionesVisitantes) {
+    d.sesionesVisitantes.forEach(function(s) { sesUnicas[s.email] = true; });
+  }
+  document.getElementById('visitantesContent').innerHTML = '<p style="color:#999;font-size:13px">Visitantes unicos con sesion activa: ' + Object.keys(sesUnicas).length + '</p>';
+}).catch(function(e) {
+  var msg = e.message || String(e);
+  document.querySelectorAll('.loading').forEach(function(el) {
+    if (el.innerHTML === 'Cargando...')
+      el.innerHTML = '<span style="color:#e63946">Error: ' + esc(msg) + '</span>';
+  });
+});
 </script>
 </body>
 </html>`;
-
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
