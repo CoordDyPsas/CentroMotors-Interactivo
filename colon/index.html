@@ -64,6 +64,15 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
   display: flex; align-items: center; justify-content: center;
 }
 .reporte-cerrar:hover { background: rgba(255,105,0,0.2); }
+.reporte-enviar {
+  background: #ff6900; color: #fff; border: none; border-radius: 6px;
+  padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.reporte-enviar:hover { background: #e65c00; }
+.reporte-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
+.reporte-enviar.enviado { background: #2ecc71; }
+.reporte-enviar.error { background: #e63946; }
 .reporte-body {
   flex: 1; overflow-y: auto; padding: 16px 20px;
 }
@@ -728,7 +737,8 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
   <div class="reporte-panel" onclick="event.stopPropagation()">
     <div class="reporte-header">
       <span>Reporte de urgencia — Colón<span class="fecha-gen" id="reporte-fecha"></span></span>
-      <button class="reporte-cerrar" onclick="cerrarReporte()"><i class="ph ph-x"></i></button>
+      <div style="display:flex;gap:8px;align-items:center"><button class="reporte-enviar" id="reporte-enviar" style="display:none" onclick="enviarReporte('colon','Colón')"><i class="ph ph-envelope-simple"></i> Enviar por mail</button>
+      <button class="reporte-cerrar" onclick="cerrarReporte()"><i class="ph ph-x"></i></button></div>
     </div>
     <div class="reporte-body" id="reporte-body"></div>
   </div>
@@ -2179,6 +2189,15 @@ function abrirReporte() {
   var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
   var now = new Date();
   document.getElementById('reporte-fecha').textContent = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  var enviarBtn = document.getElementById('reporte-enviar');
+  if (usuarioActual && (usuarioActual.tipo === 'admin' || usuarioActual.tipo === 'propio')) {
+    enviarBtn.style.display = 'inline-flex';
+    enviarBtn.className = 'reporte-enviar';
+    enviarBtn.innerHTML = '<i class="ph ph-envelope-simple"></i> Enviar por mail';
+    enviarBtn.disabled = false;
+  } else {
+    enviarBtn.style.display = 'none';
+  }
   var h = '<table class="reporte-tabla"><thead><tr><th>#</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>';
   ranking.forEach(function(item, i) {
     var eq = item.eq;
@@ -2193,6 +2212,39 @@ function abrirReporte() {
 
 function cerrarReporte() {
   document.getElementById('reporte-overlay').classList.remove('activo');
+}
+
+function enviarReporte(branch, branchName) {
+  var btn = document.getElementById('reporte-enviar');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner"></i> Enviando...';
+  btn.className = 'reporte-enviar';
+  var ranking = generarRanking(EQUIPOS);
+  var rows = ranking.map(function(item) {
+    var eq = item.eq;
+    var s = (eq.ultimo_service || '').trim();
+    var fechaStr = item.sinFecha ? 'Sin registro' : s;
+    return { nro: eq.nro, ubicacion: eq.ubicacion, marca: eq.marca || '', capacidad: eq.capacidad || '', estado: eq.estado, ultimo_service: fechaStr };
+  });
+  fetch('/api/reporte', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ branch: branch, branchName: branchName, rows: rows })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      btn.className = 'reporte-enviar enviado';
+      btn.innerHTML = '<i class="ph ph-check"></i> Enviado ✓';
+      setTimeout(function() { btn.disabled = false; btn.className = 'reporte-enviar'; btn.innerHTML = '<i class="ph ph-envelope-simple"></i> Enviar por mail'; }, 3000);
+    } else {
+      btn.className = 'reporte-enviar error';
+      btn.innerHTML = '<i class="ph ph-x"></i> ' + (data.error || 'Error');
+      setTimeout(function() { btn.disabled = false; btn.className = 'reporte-enviar'; btn.innerHTML = '<i class="ph ph-envelope-simple"></i> Enviar por mail'; }, 4000);
+    }
+  }).catch(function() {
+    btn.className = 'reporte-enviar error';
+    btn.innerHTML = '<i class="ph ph-x"></i> Error de red';
+    setTimeout(function() { btn.disabled = false; btn.className = 'reporte-enviar'; btn.innerHTML = '<i class="ph ph-envelope-simple"></i> Enviar por mail'; }, 4000);
+  });
 }
 function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
