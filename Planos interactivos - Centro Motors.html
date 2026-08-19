@@ -390,6 +390,7 @@ body.modo-profesional .logo-sub { color: #111; }
       var sinFecha = [];
       var conFecha = [];
       equipos.forEach(function(eq) {
+        if (eq.estado === 'OK') return;
         var s = (eq.ultimo_service || '').trim();
         if (!s || s === '\u2014' || s === '-') { sinFecha.push(eq); return; }
         var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);

@@ -2081,6 +2081,7 @@ function generarRanking(equipos) {
   var sinFecha = [];
   var conFecha = [];
   equipos.forEach(function(eq) {
+    if (eq.estado === 'OK') return;
     var s = (eq.ultimo_service || '').trim();
     if (!s || s === '—' || s === '-') { sinFecha.push(eq); return; }
     var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
