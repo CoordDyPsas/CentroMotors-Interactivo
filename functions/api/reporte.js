@@ -3,11 +3,10 @@ function json(data, status) {
 }
 
 function buildMIME(to, subject, htmlBody) {
-  const from = 'DyP Reportes <coordinacionst.dypsas@gmail.com>';
   const boundary = '----=_Part_' + Date.now();
   const lines = [
-    'From: ' + from,
     'To: ' + to,
+    'Reply-To: coordinacionst.dypsas@gmail.com',
     'Subject: =?UTF-8?B?' + btoa(unescape(encodeURIComponent(subject))) + '?=',
     'MIME-Version: 1.0',
     'Content-Type: multipart/alternative; boundary="' + boundary + '"',
@@ -35,29 +34,28 @@ function buildEmailHTML(branchName, rows) {
   let tableRows = '';
   rows.forEach(function(r, i) {
     const c = colores[r.estado] || '#999';
-    tableRows += '<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;font-weight:700">' + (i + 1) + '</td>'
-      + '<td style="padding:6px 10px;border-bottom:1px solid #eee">' + esc(r.nro) + '</td>'
-      + '<td style="padding:6px 10px;border-bottom:1px solid #eee">' + esc(r.ubicacion) + '</td>'
-      + '<td style="padding:6px 10px;border-bottom:1px solid #eee">' + esc(r.marca || '-') + '</td>'
-      + '<td style="padding:6px 10px;border-bottom:1px solid #eee">' + esc(r.capacidad || '-') + '</td>'
-      + '<td style="padding:6px 10px;border-bottom:1px solid #eee;background:' + c + ';color:#fff;font-weight:600;text-align:center;border-radius:4px">' + esc(r.estado) + '</td>'
-      + '<td style="padding:6px 10px;border-bottom:1px solid #eee">' + esc(r.ultimo_service || '-') + '</td></tr>';
+    tableRows += '<tr>'
+      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#888;width:30px">' + (i + 1) + '</td>'
+      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;word-wrap:break-word;overflow-wrap:break-word">' + esc(r.ubicacion) + '</td>'
+      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;white-space:nowrap">' + esc(r.marca || '-') + '</td>'
+      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;white-space:nowrap">' + esc(r.capacidad || '-') + '</td>'
+      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;background:' + c + ';color:#fff;font-weight:600;text-align:center;border-radius:4px;white-space:nowrap;font-size:11px">' + esc(r.estado) + '</td>'
+      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;white-space:nowrap;font-size:12px">' + esc(r.ultimo_service || '-') + '</td></tr>';
   });
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;padding:20px">'
-    + '<div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)">'
-    + '<div style="background:#ff6900;padding:20px 24px;color:#fff"><h1 style="margin:0;font-size:20px">Reporte de urgencia de service</h1>'
-    + '<p style="margin:4px 0 0;opacity:0.9;font-size:13px">' + esc(branchName) + ' — ' + now + '</p></div>'
-    + '<div style="padding:20px 24px"><table style="width:100%;border-collapse:collapse;font-size:13px">'
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;padding:16px;-webkit-text-size-adjust:100%">'
+    + '<div style="max-width:100%;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden">'
+    + '<div style="background:#ff6900;padding:16px 18px;color:#fff"><h1 style="margin:0;font-size:18px;line-height:1.3">Reporte de urgencia de service</h1>'
+    + '<p style="margin:4px 0 0;opacity:0.9;font-size:12px">' + esc(branchName) + ' — ' + now + '</p></div>'
+    + '<div style="padding:12px 14px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:auto">'
     + '<thead><tr style="background:#ff6900;color:#fff">'
-    + '<th style="padding:8px 10px;text-align:left">#</th>'
-    + '<th style="padding:8px 10px;text-align:left">Nro</th>'
-    + '<th style="padding:8px 10px;text-align:left">Ubicación</th>'
-    + '<th style="padding:8px 10px;text-align:left">Marca</th>'
-    + '<th style="padding:8px 10px;text-align:left">Capacidad</th>'
-    + '<th style="padding:8px 10px;text-align:left">Estado</th>'
-    + '<th style="padding:8px 10px;text-align:left">Último service</th>'
+    + '<th style="padding:6px 6px;text-align:left;font-size:11px">#</th>'
+    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Ubicación</th>'
+    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Marca</th>'
+    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Cap.</th>'
+    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Estado</th>'
+    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Últ. service</th>'
     + '</tr></thead><tbody>' + tableRows + '</tbody></table></div>'
-    + '<div style="padding:12px 24px;background:#f9f9f9;font-size:11px;color:#999;text-align:center;border-top:1px solid #eee">'
+    + '<div style="padding:10px 18px;background:#f9f9f9;font-size:10px;color:#999;text-align:center;border-top:1px solid #eee">'
     + 'DyP — Desarrollos y Proyectos | Centro Motors</div></div></body></html>';
 }
 
