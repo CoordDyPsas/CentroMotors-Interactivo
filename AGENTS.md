@@ -3,6 +3,11 @@
 ## Goal
 - Create interactive HTML building plans for Toyota Centro Motors branches with AC unit markers, photo carousel, detail panel, DyP branding, and toggleable design modes.
 
+## Agent Rules (OBLIGATORIAS)
+- **Mantener `GUIA-AGENTES.md` al día en CADA intervención.** Todo agente que toque este proyecto (código, deploy, D1, datos, URLs, credenciales, flujos, features o troubleshooting) DEBE actualizar `GUIA-AGENTES.md` con la información nueva y registrar el cambio en su sección **"Registro de actualizaciones"**. Una tarea NO está terminada hasta que la guía quede documentada.
+- **Mantener `AGENTS.md` (sección Progress) al día** con las features/decisiones nuevas, en el mismo estilo de las entradas existentes.
+- La guía es la fuente de verdad operativa para futuros agentes: si algo del entorno cambió (nuevo comando, nueva tabla, nuevo endpoint, cambios de deploy), documentarlo en el mismo paso en que se hace el cambio.
+
 ## Constraints & Preferences
 - Activation: hover (tooltip preview) + click (full panel with photo + info)
 - Each branch in its own subfolder under `C:\Users\Usuario\Desktop\TOYOTA\Interactivo\`
@@ -17,6 +22,7 @@
 - Lightbox: full-screen carousel with drag, arrows, counter, info tooltip, keyboard arrows
 - Marker auto-center on click, flash animation on selected marker
 - Equipment list overlay, copy-to-clipboard button in panel, minimap in corner
+- **Reporte de urgencia de service**: botón en header → overlay con tabla rankeada (sin fecha = más urgente, luego fecha más vieja). Menú raíz: botón por tarjeta, fetcha de API.
 - Design modes: **Modo Claro** (default, gray/light theme, `.modo-profesional` class active on `<body>`) and **Modo oscuro** (toggled, dark theme, `.modo-profesional` removed). Button shows ☀️ "Modo Claro" / 🌙 "Modo oscuro". CSS unchanged: `.modo-profesional` still holds the gray-theme styles.
 - DyP logo: **inline SVG with traced paths from DyPgris.png** (D: 11 outer + 8 hole pts, Y: 9 pts, P: 18 pts — open counter, no hole), viewBox `0 0 100 41`, fill classes `.d-path`/`.y-path`/`.p-path` invert between modes
 - Logo in Modo Claro: badge bg `#fff`, D+P `#111`, subtitle `#111`. Modo oscuro: badge bg `rgba(255,255,255,0.92)`, D+P `#444`, subtitle `#444`.
@@ -110,6 +116,15 @@
 ### In Progress
 - HINO: user does not have the plans yet
 
+### Recently Done (Ago 2026)
+- **Historial de OTs**: tabla `ot_historial` (branch, equipo_nro, ot, agregado; PK compuesta) en D1 (`db/ot_historial.sql`), endpoint `functions/api/ot-historial.js` (GET por branch/equipo, restringido para no-admin en colon/monsenor), y `registrarHistorialOT()` en `/api/sync` que inserta `INSERT OR IGNORE` las OTs numéricas vigentes en cada sync.
+- **Tarjeta "Historial OT" colapsable**: en las 3 sucursales, tarjeta aparte bajo la grilla de info (`.ot-historial-card`), contraída por defecto, click para desplegar (`.ot-historial-card.abierto`), contador en badge, pills de OT clicables que abren el PDF. El contenido abre con `max-height:320px` + scroll interno para que muchas OTs no estiren el panel. Se oculta si no hay historial.
+- **OT actual incluida en la tarjeta**: se quitó el filtro que excluía la OT actual del listado (sin datos históricos la tarjeta quedaba invisible); ahora muestra todas las OTs registradas del equipo y crece con los syncs.
+- **Deploy a Cloudflare Pages con OAuth**: `npx wrangler login` guarda la sesión en `C:\Users\Usuario\.wrangler\config\default.toml` (sin token manual). Deploy: `npx wrangler pages deploy . --project-name relevamientocm --branch main`. D1: `npx wrangler d1 execute dyp-tracking --remote --file db/ot_historial.sql`.
+- **Seed del historial**: se sembró `ot_historial` con las OTs vigentes de la planilla (74 filas reconciliadas contra Google Sheets). Se eliminó una fila de prueba falsa `(sagrada-familia, 2, 6163)` que el agente anterior había insertado a mano (la OT 6163 solo corresponde a los equipos 4, 5, 7, 8 de Sagrada Familia).
+- **GUIA-AGENTES.md**: manual operativo para agentes (conexión a GitHub/Cloudflare, deploy, D1, arquitectura, troubleshooting). Regla: actualizarla en cada intervención (ver sección Agent Rules).
+- **Reporte de urgencia de service (Fase 1)**: botón "Reporte" (`ph-chart-bar`) en header de las 3 sucursales (junto a Lista y CSV). Overlay/modal con tabla rankeada por urgencia de service: sin fecha primero, luego fecha más vieja. Columnas: #, Ubicación, Marca, Capacidad, Estado (badge), Último service (fecha + relativo "hace X"). Escape cierra. Menú raíz: botón "Reporte" en cada tarjeta activa, fetcha `/api/equipos/[branch]` con error controlado para colon/monsenor. CSS: `.reporte-overlay`, `.reporte-panel`, `.reporte-tabla`, `.estado-badge`, ambos modos de diseño. Funciones: `generarRanking()`, `formatearFechaCorta()`, `abrirReporte()`, `cerrarReporte()`. Fase 2 (email) pendiente.
+
 ### Recently Done (Jul 2026)
 - **Filtros avanzados**: `<select>` for Marca and Capacidad in all 3 branches. `equiposFiltrados()` centralizes filtering. Filters apply to markers, stats, search suggestions, equipment list, minimap.
 - **Exportar CSV**: Button next to Lista in all 3 branches. Downloads CSV with all columns (Nro, Ubicación, Marca, Capacidad, Estado, Último Service, OT, URL OT, Piso).
@@ -167,6 +182,7 @@
 - No server or build step required; all assets local
 
 ## Relevant Files
+- `C:\Users\Usuario\Desktop\TOYOTA\Interactivo\GUIA-AGENTES.md` — MANUAL OPERATIVO para agentes: cómo conectarse a GitHub y Cloudflare (wrangler login, deploy, D1), arquitectura, implementaciones y troubleshooting. LEER ANTES de intervenir.
 - `C:\Users\Usuario\Desktop\TOYOTA\Interactivo\Planos interactivos - Centro Motors.html` — MENÚ root (full DyP branding with SVG logo + theme toggle)
 - `C:\Users\Usuario\Desktop\TOYOTA\Interactivo\monsenor\index.html` — Monseñor (reference branch, all features)
 - `C:\Users\Usuario\Desktop\TOYOTA\Interactivo\colon\index.html` — Colón (fully upgraded)

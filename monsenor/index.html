@@ -42,6 +42,46 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
   background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
 }
 .lista-overlay.activo { display: flex; }
+.reporte-overlay {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
+}
+.reporte-overlay.activo { display: flex; }
+.reporte-panel {
+  background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
+  width: 92%; max-width: 780px; max-height: 85vh; display: flex;
+  flex-direction: column; overflow: hidden;
+}
+.reporte-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: rgba(10,10,10,0.95);
+  border-bottom: 2px solid #ff6900; font-size: 16px; font-weight: 700;
+}
+.reporte-header .fecha-gen { font-weight: 400; font-size: 12px; color: #888; margin-left: 8px; }
+.reporte-cerrar {
+  background: none; border: none; color: #ff6900; font-size: 22px;
+  cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.reporte-cerrar:hover { background: rgba(255,105,0,0.2); }
+.reporte-body {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+}
+.reporte-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.reporte-tabla th {
+  background: #ff6900; color: #fff; font-weight: 700; padding: 8px 10px;
+  text-align: left; position: sticky; top: 0; white-space: nowrap;
+}
+.reporte-tabla td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.reporte-tabla tr:hover td { background: rgba(255,105,0,0.08); }
+.reporte-tabla .num { text-align: center; font-weight: 700; }
+.reporte-tabla .fecha-rel-rpt { color: #ff6900; font-size: 11px; margin-left: 4px; }
+.reporte-tabla .estado-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap;
+}
+body.modo-profesional .reporte-panel { background: rgba(10,10,10,0.95); border-color: rgba(255,255,255,0.08); }
+body.modo-profesional .reporte-header { background: rgba(81,81,81,0.85); }
 .lista-panel {
   background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
   width: 90%; max-width: 500px; max-height: 80vh; display: flex;
@@ -262,6 +302,17 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .comentarios-titulo { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ff6900; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
 .comentarios-titulo .contador { margin-left: auto; background: #ff6900; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; }
 .comentarios-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 240px; overflow-y: auto; }
+.ot-historial-card { margin-top: 12px; background: #515151; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
+body.modo-profesional .ot-historial-card { background: rgba(10,10,10,0.95); }
+.ot-historial-titulo { width: 100%; display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: transparent; border: none; cursor: pointer; color: #ff6900; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; text-align: left; }
+.ot-historial-titulo .ot-historial-count { margin-left: auto; background: #ff6900; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; }
+.ot-historial-titulo .ot-historial-flecha { transition: transform 0.25s; font-size: 14px; color: #999; }
+.ot-historial-card.abierto .ot-historial-flecha { transform: rotate(180deg); }
+.ot-historial-contenido { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.ot-historial-card.abierto .ot-historial-contenido { max-height: 320px; overflow-y: auto; }
+.ot-historial-lista { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 14px 14px; }
+.ot-historial-ot { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,105,0,0.4); color: #ff6900; border-radius: 14px; padding: 4px 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.ot-historial-ot:hover { background: rgba(255,105,0,0.15); }
 .comentario-item { background: #515151; border-radius: 6px; padding: 10px 12px; border-left: 3px solid #ff6900; }
 .comentario-item.resuelto { opacity: 0.72; border-left-color: #2ecc71; }
 .comentario-item.resuelto .comentario-texto { text-decoration: line-through; color: #aaa; }
@@ -660,6 +711,7 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
     <button class="piso-btn" data-piso="pa" onclick="cambiarPiso('pa')">PA</button>
     <button class="piso-btn lista-btn" onclick="toggleLista()" title="Lista de equipos"><i class="ph ph-list"></i></button>
     <button class="piso-btn lista-btn" onclick="exportarCSV()" title="Exportar CSV" style="font-size:14px"><i class="ph ph-download-simple"></i></button>
+    <button class="piso-btn lista-btn reporte-btn" onclick="abrirReporte()" title="Reporte de urgencia"><i class="ph ph-chart-bar"></i></button>
   </div>
   <div class="header-busqueda">
     <input type="text" id="search-input" placeholder="Buscar equipo..." oninput="onSearchInput(this.value)" onblur="setTimeout(()=>cerrarSug(),200)" onfocus="onSearchInput(this.value)">
@@ -680,6 +732,16 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
       <button class="lista-cerrar" onclick="toggleLista()"><i class="ph ph-x"></i></button>
     </div>
     <div class="lista-body" id="lista-body"></div>
+  </div>
+</div>
+
+<div class="reporte-overlay" id="reporte-overlay" onclick="cerrarReporte()">
+  <div class="reporte-panel" onclick="event.stopPropagation()">
+    <div class="reporte-header">
+      <span>Reporte de urgencia — Monseñor<span class="fecha-gen" id="reporte-fecha"></span></span>
+      <button class="reporte-cerrar" onclick="cerrarReporte()"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="reporte-body" id="reporte-body"></div>
   </div>
 </div>
 
@@ -803,6 +865,31 @@ function abrirOT(nro) {
       setTimeout(function() { URL.revokeObjectURL(a.href); }, 1000);
     })
     .catch(function() { window.open(OT_URL_BASE + nro, '_blank', 'noopener'); });
+}
+
+function cargarHistorialOT(nro, otActual) {
+  var card = document.getElementById('ot-historial-card');
+  if (!card) return;
+  card.classList.remove('abierto');
+  var cont = document.getElementById('ot-historial-lista');
+  var contador = document.getElementById('ot-historial-count');
+  fetch('/api/ot-historial?branch=' + BRANCH_KEY + '&equipo=' + nro)
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function(data) {
+      var hist = data.historial || [];
+      if (!hist.length) { card.style.display = 'none'; return; }
+      card.style.display = '';
+      contador.textContent = hist.length;
+      cont.innerHTML = hist.map(function(h) {
+        return '<a href="#" onclick="abrirOT(' + escJS(h.ot) + ');return false" class="ot-historial-ot"><i class="ph ph-file-pdf"></i> ' + escaparHTML(h.ot) + '</a>';
+      }).join('');
+    })
+    .catch(function() { card.style.display = 'none'; });
+}
+
+function toggleHistorialOT() {
+  var card = document.getElementById('ot-historial-card');
+  if (card) card.classList.toggle('abierto');
 }
 
 function estadoClase(estado) {
@@ -1106,6 +1193,10 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
     '</div>' +
+    '<div class="ot-historial-card" id="ot-historial-card">' +
+      '<button class="ot-historial-titulo" onclick="toggleHistorialOT()"><i class="ph ph-clock-counter-clockwise"></i> Historial OT <span class="ot-historial-count" id="ot-historial-count">0</span> <i class="ph ph-caret-down ot-historial-flecha"></i></button>' +
+      '<div class="ot-historial-contenido"><div class="ot-historial-lista" id="ot-historial-lista"></div></div>' +
+    '</div>' +
     '<div class="comentarios-sec">' +
       '<div class="comentarios-titulo"><i class="ph ph-chats"></i> Comentarios <span class="contador" id="comentarios-contador">0</span>' +
         '<span class="comentarios-acciones">' +
@@ -1121,6 +1212,7 @@ function mostrarEquipo(nro) {
     '</div>';
 
   cargarComentarios(eq.nro);
+  cargarHistorialOT(eq.nro, eq.ot);
 
   initCarousel();
   carruselEq = eq;
@@ -1589,6 +1681,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     if (document.getElementById('lightbox').classList.contains('activo')) cerrarLightbox();
+    else if (document.getElementById('reporte-overlay').classList.contains('activo')) cerrarReporte();
     else if (panelAbierto) cerrarPanelCompleto();
   }
   if (e.key === '+' || e.key === '=') zoomIn();
@@ -2046,6 +2139,66 @@ fetch('/api/me').then(r=>r.json()).then(u=>{if(u&&u.tipo){usuarioActual={email:u
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+function generarRanking(equipos) {
+  var sinFecha = [];
+  var conFecha = [];
+  equipos.forEach(function(eq) {
+    var s = (eq.ultimo_service || '').trim();
+    if (!s || s === '—' || s === '-') { sinFecha.push(eq); return; }
+    var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!partes) { sinFecha.push(eq); return; }
+    var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+    conFecha.push({ eq: eq, fecha: f });
+  });
+  sinFecha.sort(function(a, b) { return a.nro - b.nro; });
+  conFecha.sort(function(a, b) { return a.fecha - b.fecha; });
+  var result = sinFecha.map(function(eq) { return { eq: eq, sinFecha: true }; });
+  conFecha.forEach(function(item) { result.push({ eq: item.eq, sinFecha: false }); });
+  return result;
+}
+
+function formatearFechaCorta(str) {
+  if (!str || str === '—' || str === '-') return '—';
+  var partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!partes) return str;
+  var dd = partes[1].padStart(2, '0');
+  var mm = partes[2].padStart(2, '0');
+  var fecha = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+  var hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  fecha.setHours(0, 0, 0, 0);
+  var diff = Math.round((hoy - fecha) / 86400000);
+  var rel = '';
+  if (diff === 0) rel = 'hoy';
+  else if (diff === 1) rel = 'ayer';
+  else if (diff < 30) rel = 'hace ' + diff + ' días';
+  else if (diff < 365) rel = 'hace ' + Math.floor(diff / 30) + ' meses';
+  else rel = 'hace ' + Math.floor(diff / 365) + ' años';
+  return dd + '/' + mm + '/' + partes[3] + '<span class="fecha-rel-rpt">' + rel + '</span>';
+}
+
+function abrirReporte() {
+  var ranking = generarRanking(EQUIPOS);
+  var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
+  var now = new Date();
+  document.getElementById('reporte-fecha').textContent = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  var h = '<table class="reporte-tabla"><thead><tr><th>#</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>';
+  ranking.forEach(function(item, i) {
+    var eq = item.eq;
+    var c = colores[eq.estado] || '#999';
+    var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCorta(eq.ultimo_service);
+    h += '<tr><td class="num">' + eq.nro + '</td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + esc(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  document.getElementById('reporte-body').innerHTML = h;
+  document.getElementById('reporte-overlay').classList.add('activo');
+}
+
+function cerrarReporte() {
+  document.getElementById('reporte-overlay').classList.remove('activo');
+}
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 
 <div id="lightbox" class="lightbox" onclick="cerrarLightbox()">

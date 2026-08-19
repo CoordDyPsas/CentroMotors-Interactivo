@@ -42,6 +42,46 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
   background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
 }
 .lista-overlay.activo { display: flex; }
+.reporte-overlay {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
+}
+.reporte-overlay.activo { display: flex; }
+.reporte-panel {
+  background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
+  width: 92%; max-width: 780px; max-height: 85vh; display: flex;
+  flex-direction: column; overflow: hidden;
+}
+.reporte-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: rgba(10,10,10,0.95);
+  border-bottom: 2px solid #ff6900; font-size: 16px; font-weight: 700;
+}
+.reporte-header .fecha-gen { font-weight: 400; font-size: 12px; color: #888; margin-left: 8px; }
+.reporte-cerrar {
+  background: none; border: none; color: #ff6900; font-size: 22px;
+  cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.reporte-cerrar:hover { background: rgba(255,105,0,0.2); }
+.reporte-body {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+}
+.reporte-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.reporte-tabla th {
+  background: #ff6900; color: #fff; font-weight: 700; padding: 8px 10px;
+  text-align: left; position: sticky; top: 0; white-space: nowrap;
+}
+.reporte-tabla td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.reporte-tabla tr:hover td { background: rgba(255,105,0,0.08); }
+.reporte-tabla .num { text-align: center; font-weight: 700; }
+.reporte-tabla .fecha-rel-rpt { color: #ff6900; font-size: 11px; margin-left: 4px; }
+.reporte-tabla .estado-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap;
+}
+body.modo-profesional .reporte-panel { background: rgba(10,10,10,0.95); border-color: rgba(255,255,255,0.08); }
+body.modo-profesional .reporte-header { background: rgba(81,81,81,0.85); }
 .lista-panel {
   background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
   width: 90%; max-width: 500px; max-height: 80vh; display: flex;
@@ -251,6 +291,17 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .comentarios-titulo { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ff6900; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
 .comentarios-titulo .contador { margin-left: auto; background: #ff6900; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; }
 .comentarios-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 280px; overflow-y: auto; }
+.ot-historial-card { margin-top: 12px; background: #515151; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
+body.modo-profesional .ot-historial-card { background: rgba(10,10,10,0.95); }
+.ot-historial-titulo { width: 100%; display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: transparent; border: none; cursor: pointer; color: #ff6900; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; text-align: left; }
+.ot-historial-titulo .ot-historial-count { margin-left: auto; background: #ff6900; color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; }
+.ot-historial-titulo .ot-historial-flecha { transition: transform 0.25s; font-size: 14px; color: #999; }
+.ot-historial-card.abierto .ot-historial-flecha { transform: rotate(180deg); }
+.ot-historial-contenido { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.ot-historial-card.abierto .ot-historial-contenido { max-height: 320px; overflow-y: auto; }
+.ot-historial-lista { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 14px 14px; }
+.ot-historial-ot { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,105,0,0.4); color: #ff6900; border-radius: 14px; padding: 4px 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.ot-historial-ot:hover { background: rgba(255,105,0,0.15); }
 .comentario-item { background: #515151; border-radius: 6px; padding: 10px 12px; border-left: 3px solid #ff6900; }
 .comentario-item.resuelto { opacity: 0.72; border-left-color: #2ecc71; }
 .comentario-item.resuelto .comentario-texto { text-decoration: line-through; color: #aaa; }
@@ -649,6 +700,7 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
     <button class="piso-btn" data-piso="pa" onclick="cambiarPiso('pa')">PA</button>
     <button class="piso-btn lista-btn" onclick="toggleLista()" title="Lista de equipos"><i class="ph ph-list"></i></button>
     <button class="piso-btn lista-btn" onclick="exportarCSV()" title="Exportar CSV" style="font-size:14px"><i class="ph ph-download-simple"></i></button>
+    <button class="piso-btn lista-btn reporte-btn" onclick="abrirReporte()" title="Reporte de urgencia"><i class="ph ph-chart-bar"></i></button>
   </div>
   <div class="header-busqueda">
     <input type="text" id="search-input" placeholder="Buscar equipo..." oninput="onSearchInput(this.value)" onblur="setTimeout(()=>cerrarSug(),200)" onfocus="onSearchInput(this.value)">
@@ -669,6 +721,16 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
       <button class="lista-cerrar" onclick="toggleLista()"><i class="ph ph-x"></i></button>
     </div>
     <div class="lista-body" id="lista-body"></div>
+  </div>
+</div>
+
+<div class="reporte-overlay" id="reporte-overlay" onclick="cerrarReporte()">
+  <div class="reporte-panel" onclick="event.stopPropagation()">
+    <div class="reporte-header">
+      <span>Reporte de urgencia — Colón<span class="fecha-gen" id="reporte-fecha"></span></span>
+      <button class="reporte-cerrar" onclick="cerrarReporte()"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="reporte-body" id="reporte-body"></div>
   </div>
 </div>
 
@@ -714,10 +776,10 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
 <script>
 const EQUIPOS = [
   {"nro":1,"ubicacion":"Sala exhibición","marca":"BGH","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"","fotos":["Equipo 1.jpeg"],"piso":"pb","x":871,"y":532},
-  {"nro":2,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":["Equipo 2.jpeg"],"piso":"pb","x":674,"y":556},
-  {"nro":3,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6439","fotos":["Equipo 3.jpeg"],"piso":"pb","x":675,"y":640},
-  {"nro":4,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6441","fotos":["Equipo 4.jpeg"],"piso":"pb","x":674,"y":775},
-  {"nro":5,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"18/10/2025","estado":"Necesita service","ot":"6438","fotos":["Equipo 5.jpeg"],"piso":"pb","x":673,"y":831},
+  {"nro":2,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"15/08/2026","estado":"OK","ot":"9408","fotos":["Equipo 2.jpeg"],"piso":"pb","x":674,"y":556},
+  {"nro":3,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"15/08/2026","estado":"OK","ot":"9410","fotos":["Equipo 3.jpeg"],"piso":"pb","x":675,"y":640},
+  {"nro":4,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"15/08/2026","estado":"OK","ot":"9411","fotos":["Equipo 4.jpeg"],"piso":"pb","x":674,"y":775},
+  {"nro":5,"ubicacion":"Sala exhibición","marca":"Surrey","capacidad":"Piso techo","ultimo_service":"15/08/2026","estado":"OK","ot":"9409","fotos":["Equipo 5.jpeg"],"piso":"pb","x":673,"y":831},
   {"nro":6,"ubicacion":"GR","marca":"Midea","capacidad":"Piso techo","ultimo_service":"20/04/2026","estado":"OK","ot":"","fotos":["Equipo 6.jpeg","Equipo 6b.jpeg"],"piso":"pb","x":674,"y":950},
   {"nro":7,"ubicacion":"GR","marca":"Midea","capacidad":"7000","ultimo_service":"1/11/2025","estado":"Necesita service","ot":"6588","fotos":["Equipo 7.jpeg"],"piso":"pb","x":735,"y":1013},
   {"nro":8,"ubicacion":"Sala entrega","marca":"Midea","capacidad":"Piso techo","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 8.jpeg","Equipo 8b.jpeg","Equipo 8c.jpeg"],"piso":"pb","x":866,"y":945},
@@ -733,19 +795,19 @@ const EQUIPOS = [
   {"nro":18,"ubicacion":"Call planta alta","marca":"Midea","capacidad":"5000","ultimo_service":"21/03/2026","estado":"OK","ot":"7929","fotos":["Equipo 18.jpeg"],"piso":"pa","x":1452,"y":1167},
   {"nro":19,"ubicacion":"Tesorería","marca":"Kelvinator","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1005,"y":791},
   {"nro":20,"ubicacion":"Caja","marca":"Philco","capacidad":"3000","ultimo_service":"24/10/2025","estado":"Necesita service","ot":"6522","fotos":["Equipo 20.jpeg","Equipo 20b.jpeg"],"piso":"pb","x":1004,"y":826},
-  {"nro":21,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","fotos":["Equipo 21.jpeg"],"piso":"pb","x":1003,"y":742},
-  {"nro":22,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6974","fotos":["Equipo 22.jpeg"],"piso":"pb","x":1004,"y":615},
+  {"nro":21,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6974","fotos":["Equipo 21.jpeg"],"piso":"pb","x":1003,"y":742},
+  {"nro":22,"ubicacion":"Administración","marca":"Surrey","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6974","fotos":["Equipo 22.jpeg"],"piso":"pb","x":1004,"y":615},
   {"nro":23,"ubicacion":"Oficina Ramonda","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":["Equipo 23.jpeg"],"piso":"pb","x":984,"y":507},
   {"nro":24,"ubicacion":"Planeamiento","marca":"Philco","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":["Equipo 24.jpeg"],"piso":"pb","x":938,"y":507},
   {"nro":25,"ubicacion":"Gerente ventas","marca":"Hitachi","capacidad":"2500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6938","fotos":["Equipo 25.jpeg"],"piso":"pb","x":885,"y":516},
-  {"nro":26,"ubicacion":"Ventas","marca":"Surrey","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":700},
-  {"nro":27,"ubicacion":"Ventas","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":642},
-  {"nro":28,"ubicacion":"Archivo","marca":"Midea","capacidad":"4500","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"","fotos":["Equipo 28.jpeg"],"piso":"pa","x":1427,"y":819},
-  {"nro":29,"ubicacion":"Oficina Berrondo","marca":"Hitachi","capacidad":"3000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 29.jpeg"],"piso":"pa","x":1769,"y":1062},
-  {"nro":30,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":["Equipo 30.jpeg"],"piso":"pa","x":1449,"y":1025},
-  {"nro":31,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6969","fotos":["Equipo 31.jpeg"],"piso":"pa","x":1451,"y":880},
-  {"nro":32,"ubicacion":"Reunion","marca":"Midea","capacidad":"5000","ultimo_service":"6/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 32.jpeg","Equipo 32b.jpeg"],"piso":"pa","x":1649,"y":797},
-  {"nro":33,"ubicacion":"Datos","marca":"Hitachi","capacidad":"2500","ultimo_service":"","estado":"Necesita service","ot":"9245","fotos":["Equipo 33.jpeg"],"piso":"pa","x":1769,"y":879},
+  {"nro":26,"ubicacion":"Ventas","marca":"Surrey","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":700},
+  {"nro":27,"ubicacion":"Ventas","marca":"Midea","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6963","fotos":[],"piso":"pb","x":915,"y":642},
+  {"nro":28,"ubicacion":"Archivo","marca":"Midea","capacidad":"4500","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"","fotos":["Equipo 28.jpeg"],"piso":"pa","x":1427,"y":819},
+  {"nro":29,"ubicacion":"Oficina Berrondo","marca":"Hitachi","capacidad":"3000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 29.jpeg"],"piso":"pa","x":1769,"y":1062},
+  {"nro":30,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6969","fotos":["Equipo 30.jpeg"],"piso":"pa","x":1449,"y":1025},
+  {"nro":31,"ubicacion":"Administración Planta Alta","marca":"Midea","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6969","fotos":["Equipo 31.jpeg"],"piso":"pa","x":1451,"y":880},
+  {"nro":32,"ubicacion":"Reunion","marca":"Midea","capacidad":"5000","ultimo_service":"8/12/2025","estado":"Necesita service","ot":"6970","fotos":["Equipo 32.jpeg","Equipo 32b.jpeg"],"piso":"pa","x":1649,"y":797},
+  {"nro":33,"ubicacion":"Datos","marca":"Hitachi","capacidad":"2500","ultimo_service":"29/07/2026","estado":"OK","ot":"9245","fotos":["Equipo 33.jpeg"],"piso":"pa","x":1769,"y":879},
   {"nro":34,"ubicacion":"Comedor","marca":"Midea","capacidad":"7500","ultimo_service":"","estado":"Necesita service","ot":"","fotos":["Equipo 34.jpeg"],"piso":"pa","x":1844,"y":727},
   {"nro":35,"ubicacion":"RRHH","marca":"Midea","capacidad":"5500","ultimo_service":"20/08/2025","estado":"Necesita service","ot":"5927","fotos":["Equipo 35.jpeg","Equipo 35b.jpeg"],"piso":"pa","x":1831,"y":1276},
   {"nro":36,"ubicacion":"Garantías","marca":"Midea","capacidad":"2500","ultimo_service":"28/03/2026","estado":"OK","ot":"7966","fotos":["Equipo 36.jpeg"],"piso":"pb","x":1404,"y":639},
@@ -757,7 +819,7 @@ const EQUIPOS = [
   {"nro":42,"ubicacion":"Ventas usados","marca":"Hisense","capacidad":"3000","ultimo_service":"10/11/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2080,"y":1841,"intervalo_meses":3},
   {"nro":43,"ubicacion":"Sala caja de cambios","marca":"","capacidad":"Ventana Grande","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1510,"y":541,"intervalo_meses":3},
   {"nro":44,"ubicacion":"Lavadero","marca":"Midea","capacidad":"4500","ultimo_service":"21/10/2025","estado":"Necesita service","ot":"6479","fotos":[],"piso":"pb","x":1914,"y":1244,"intervalo_meses":3},
-  {"nro":45,"ubicacion":"Garita Playa","marca":"Hitachi","capacidad":"2250","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":1622,"y":603,"intervalo_meses":3},
+  {"nro":45,"ubicacion":"Garita Playa","marca":"Hitachi","capacidad":"2250","ultimo_service":"9/01/2026","estado":"Necesita service","ot":"7281","fotos":[],"piso":"pb","x":1622,"y":603,"intervalo_meses":3},
   {"nro":46,"ubicacion":"Pre entrega Accesorios","marca":"Midea","capacidad":"3000","ultimo_service":"","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2278,"y":859,"intervalo_meses":3},
   {"nro":47,"ubicacion":"Electrica","marca":"Midea","capacidad":"5000","ultimo_service":"21/12/2025","estado":"Necesita service","ot":"","fotos":[],"piso":"pb","x":2110,"y":842,"intervalo_meses":3},
   {"nro":48,"ubicacion":"Alistaje","marca":"Midea","capacidad":"5000","ultimo_service":"9/01/2026","estado":"Necesita service","ot":"7281","fotos":[],"piso":"pb","x":2210,"y":859,"intervalo_meses":3},
@@ -816,6 +878,31 @@ function abrirOT(nro) {
       setTimeout(function() { URL.revokeObjectURL(a.href); }, 1000);
     })
     .catch(function() { window.open(OT_URL_BASE + nro, '_blank', 'noopener'); });
+}
+
+function cargarHistorialOT(nro, otActual) {
+  var card = document.getElementById('ot-historial-card');
+  if (!card) return;
+  card.classList.remove('abierto');
+  var cont = document.getElementById('ot-historial-lista');
+  var contador = document.getElementById('ot-historial-count');
+  fetch('/api/ot-historial?branch=' + BRANCH_KEY + '&equipo=' + nro)
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function(data) {
+      var hist = data.historial || [];
+      if (!hist.length) { card.style.display = 'none'; return; }
+      card.style.display = '';
+      contador.textContent = hist.length;
+      cont.innerHTML = hist.map(function(h) {
+        return '<a href="#" onclick="abrirOT(' + escJS(h.ot) + ');return false" class="ot-historial-ot"><i class="ph ph-file-pdf"></i> ' + escaparHTML(h.ot) + '</a>';
+      }).join('');
+    })
+    .catch(function() { card.style.display = 'none'; });
+}
+
+function toggleHistorialOT() {
+  var card = document.getElementById('ot-historial-card');
+  if (card) card.classList.toggle('abierto');
 }
 
 function estadoClase(estado) {
@@ -1110,6 +1197,10 @@ function mostrarEquipo(nro) {
       '<div class="info-item full"><i class="ph ph-wrench label-icon"></i><div><div class="label">Último Service</div><div class="value">' + formatearFecha(eq.ultimo_service) + '</div></div></div>' +
       '<div class="info-item full"><i class="ph ph-calendar label-icon"></i><div><div class="label">Próximo Service</div><div class="value">' + calcularProximoService(eq.ultimo_service, eq.intervalo_meses || 6).html + '</div></div></div>' +
     '</div>' +
+    '<div class="ot-historial-card" id="ot-historial-card">' +
+      '<button class="ot-historial-titulo" onclick="toggleHistorialOT()"><i class="ph ph-clock-counter-clockwise"></i> Historial OT <span class="ot-historial-count" id="ot-historial-count">0</span> <i class="ph ph-caret-down ot-historial-flecha"></i></button>' +
+      '<div class="ot-historial-contenido"><div class="ot-historial-lista" id="ot-historial-lista"></div></div>' +
+    '</div>' +
     '<div class="comentarios-sec">' +
       '<div class="comentarios-titulo"><i class="ph ph-chats"></i> Comentarios <span class="contador" id="comentarios-contador">0</span>' +
         '<span class="comentarios-acciones">' +
@@ -1125,6 +1216,7 @@ function mostrarEquipo(nro) {
     '</div>';
 
   cargarComentarios(eq.nro);
+  cargarHistorialOT(eq.nro, eq.ot);
 
   initCarousel();
   carruselEq = eq;
@@ -1587,6 +1679,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     if (document.getElementById('lightbox').classList.contains('activo')) cerrarLightbox();
+    else if (document.getElementById('reporte-overlay').classList.contains('activo')) cerrarReporte();
     else if (panelAbierto) cerrarPanelCompleto();
   }
   if (e.key === '+' || e.key === '=') zoomIn();
@@ -2042,6 +2135,66 @@ fetch('/api/me').then(r=>r.json()).then(u=>{if(u&&u.tipo){usuarioActual={email:u
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+function generarRanking(equipos) {
+  var sinFecha = [];
+  var conFecha = [];
+  equipos.forEach(function(eq) {
+    var s = (eq.ultimo_service || '').trim();
+    if (!s || s === '—' || s === '-') { sinFecha.push(eq); return; }
+    var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!partes) { sinFecha.push(eq); return; }
+    var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+    conFecha.push({ eq: eq, fecha: f });
+  });
+  sinFecha.sort(function(a, b) { return a.nro - b.nro; });
+  conFecha.sort(function(a, b) { return a.fecha - b.fecha; });
+  var result = sinFecha.map(function(eq) { return { eq: eq, sinFecha: true }; });
+  conFecha.forEach(function(item) { result.push({ eq: item.eq, sinFecha: false }); });
+  return result;
+}
+
+function formatearFechaCorta(str) {
+  if (!str || str === '—' || str === '-') return '—';
+  var partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!partes) return str;
+  var dd = partes[1].padStart(2, '0');
+  var mm = partes[2].padStart(2, '0');
+  var fecha = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+  var hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  fecha.setHours(0, 0, 0, 0);
+  var diff = Math.round((hoy - fecha) / 86400000);
+  var rel = '';
+  if (diff === 0) rel = 'hoy';
+  else if (diff === 1) rel = 'ayer';
+  else if (diff < 30) rel = 'hace ' + diff + ' días';
+  else if (diff < 365) rel = 'hace ' + Math.floor(diff / 30) + ' meses';
+  else rel = 'hace ' + Math.floor(diff / 365) + ' años';
+  return dd + '/' + mm + '/' + partes[3] + '<span class="fecha-rel-rpt">' + rel + '</span>';
+}
+
+function abrirReporte() {
+  var ranking = generarRanking(EQUIPOS);
+  var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
+  var now = new Date();
+  document.getElementById('reporte-fecha').textContent = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  var h = '<table class="reporte-tabla"><thead><tr><th>#</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>';
+  ranking.forEach(function(item, i) {
+    var eq = item.eq;
+    var c = colores[eq.estado] || '#999';
+    var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCorta(eq.ultimo_service);
+    h += '<tr><td class="num">' + eq.nro + '</td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + esc(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  document.getElementById('reporte-body').innerHTML = h;
+  document.getElementById('reporte-overlay').classList.add('activo');
+}
+
+function cerrarReporte() {
+  document.getElementById('reporte-overlay').classList.remove('activo');
+}
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 
 <div id="lightbox" class="lightbox" onclick="cerrarLightbox()">

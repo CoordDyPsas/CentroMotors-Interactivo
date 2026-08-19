@@ -28,6 +28,28 @@ function parseAll(csv) {
   return branches;
 }
 
+async function registrarHistorialOT(db, branches) {
+  try {
+    var rows = [];
+    var now = new Date().toISOString();
+    Object.keys(branches).forEach(function(key) {
+      (branches[key] || []).forEach(function(eq) {
+        if (eq.ot && /^\d+$/.test(eq.ot)) rows.push(key, eq.nro, eq.ot, now);
+      });
+    });
+    if (!rows.length) return;
+    var stmts = [];
+    for (var i = 0; i < rows.length; i += 4) {
+      stmts.push(db.prepare('INSERT OR IGNORE INTO ot_historial (branch, equipo_nro, ot, agregado) VALUES (?, ?, ?, ?)').bind(rows[i], rows[i + 1], rows[i + 2], rows[i + 3]));
+    }
+    for (var j = 0; j < stmts.length; j += 95) {
+      await db.batch(stmts.slice(j, j + 95));
+    }
+  } catch (e) {
+    console.error('ot_historial:', e && e.message);
+  }
+}
+
 export async function onRequest(context) {
   try {
     const r = await fetch(CSV_URL + '&_cb=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
@@ -38,6 +60,7 @@ export async function onRequest(context) {
       delete branches.colon;
       delete branches.monsenor;
     }
+    await registrarHistorialOT(context.env.DB, branches);
     const d = new Date();
     return new Response(JSON.stringify({ success: true, output: 'OK', branches, timestamp: d.toISOString() }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (e) {
