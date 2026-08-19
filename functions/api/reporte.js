@@ -31,32 +31,37 @@ function buildMIME(to, subject, htmlBody) {
 function buildEmailHTML(branchName, rows) {
   const now = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
   const colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
-  let tableRows = '';
+  const iconos = { 'OK': '&#9989;', 'Necesita service': '&#9888;&#65039;', 'No funciona': '&#10060;' };
+  let cards = '';
   rows.forEach(function(r, i) {
     const c = colores[r.estado] || '#999';
-    tableRows += '<tr>'
-      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#888;width:30px">' + (i + 1) + '</td>'
-      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;word-wrap:break-word;overflow-wrap:break-word">' + esc(r.ubicacion) + '</td>'
-      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;white-space:nowrap">' + esc(r.marca || '-') + '</td>'
-      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;white-space:nowrap">' + esc(r.capacidad || '-') + '</td>'
-      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;background:' + c + ';color:#fff;font-weight:600;text-align:center;border-radius:4px;white-space:nowrap;font-size:11px">' + esc(r.estado) + '</td>'
-      + '<td style="padding:5px 6px;border-bottom:1px solid #eee;white-space:nowrap;font-size:12px">' + esc(r.ultimo_service || '-') + '</td></tr>';
+    const ic = iconos[r.estado] || '';
+    cards += '<div style="background:#fff;border:1px solid #eee;border-left:4px solid ' + c + ';border-radius:8px;padding:14px 16px;margin-bottom:8px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<span style="font-size:15px;font-weight:700;color:#222">#' + (i + 1) + ' — ' + esc(r.ubicacion) + '</span></div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:#555;margin-bottom:8px">'
+      + '<span><b>Marca:</b> ' + esc(r.marca || '-') + '</span>'
+      + '<span><b>Cap.:</b> ' + esc(r.capacidad || '-') + '</span></div>'
+      + '<div style="display:inline-block;background:' + c + ';color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:6px">' + ic + ' ' + esc(r.estado) + '</div>'
+      + '<div style="font-size:12px;color:#777">Último service: ' + esc(r.ultimo_service || 'Sin registro') + '</div>'
+      + '</div>';
   });
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;margin:0;padding:16px;-webkit-text-size-adjust:100%">'
-    + '<div style="max-width:100%;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden">'
-    + '<div style="background:#ff6900;padding:16px 18px;color:#fff"><h1 style="margin:0;font-size:18px;line-height:1.3">Reporte de urgencia de service</h1>'
-    + '<p style="margin:4px 0 0;opacity:0.9;font-size:12px">' + esc(branchName) + ' — ' + now + '</p></div>'
-    + '<div style="padding:12px 14px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:auto">'
-    + '<thead><tr style="background:#ff6900;color:#fff">'
-    + '<th style="padding:6px 6px;text-align:left;font-size:11px">#</th>'
-    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Ubicación</th>'
-    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Marca</th>'
-    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Cap.</th>'
-    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Estado</th>'
-    + '<th style="padding:6px 6px;text-align:left;font-size:11px">Últ. service</th>'
-    + '</tr></thead><tbody>' + tableRows + '</tbody></table></div>'
-    + '<div style="padding:10px 18px;background:#f9f9f9;font-size:10px;color:#999;text-align:center;border-top:1px solid #eee">'
-    + 'DyP — Desarrollos y Proyectos | Centro Motors</div></div></body></html>';
+  const countOk = rows.filter(function(r) { return r.estado === 'OK'; }).length;
+  const countNec = rows.filter(function(r) { return r.estado === 'Necesita service'; }).length;
+  const countNf = rows.filter(function(r) { return r.estado === 'No funciona'; }).length;
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="font-family:Arial,Helvetica,sans-serif;background:#f0f0f0;margin:0;padding:12px;-webkit-text-size-adjust:100%">'
+    + '<div style="max-width:420px;margin:0 auto">'
+    + '<div style="background:#ff6900;padding:18px 20px;color:#fff;border-radius:10px 10px 0 0">'
+    + '<h1 style="margin:0;font-size:17px;line-height:1.3">Reporte de urgencia</h1>'
+    + '<p style="margin:3px 0 0;opacity:0.9;font-size:12px">' + esc(branchName) + ' — ' + now + '</p></div>'
+    + '<div style="background:#fff;padding:12px 16px;display:flex;gap:12px;border-bottom:1px solid #eee;font-size:12px;font-weight:600">'
+    + '<span style="color:#2ecc71">' + countOk + ' OK</span>'
+    + '<span style="color:#ff6900">' + countNec + ' Necesita</span>'
+    + '<span style="color:#666">' + countNf + ' No funciona</span>'
+    + '<span style="color:#999;margin-left:auto">' + rows.length + ' total</span></div>'
+    + '<div style="padding:12px 16px;background:#f8f8f8;border-radius:0 0 10px 10px">' + cards + '</div>'
+    + '<div style="padding:10px;text-align:center;font-size:10px;color:#aaa">DyP — Desarrollos y Proyectos | Centro Motors</div>'
+    + '</div></body></html>';
 }
 
 function esc(s) {
