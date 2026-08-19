@@ -140,12 +140,19 @@ npx wrangler d1 execute dyp-tracking --local --command "SELECT 1;"
   **La OT actual también se muestra** en la tarjeta (se quitó el filtro que la excluía para
   que la tarjeta sea visible desde el día 1).
 - PWA (manifest + sw.js minimal), View Transitions, atajos de teclado, focus trap en lightbox.
-- **Reporte de urgencia de service** (Fase 1): botón "Reporte" en el header de cada sucursal
+- **Reporte de urgencia de service** (Fase 1+2): botón "Reporte" en el header de cada sucursal
   (junto a Lista y CSV). Abre un overlay/modal con tabla rankeada por urgencia (sin fecha
   primero, luego por fecha más vieja). Columnas: #, Ubicación, Marca, Capacidad, Estado
   (badge), Último service (fecha + relativo). Escape cierra. Menú raíz: botón "Reporte" en
   cada tarjeta activa, fetcha de `/api/equipos/[branch]` (muestra error para no-admin en
-  colon/monsenor). Fase 2 (email) pendiente.
+  colon/monsenor).
+  - **Fase 2 (email vía Gmail API REST)**: `functions/api/reporte.js` — POST endpoint, JWT
+    auth (admin/propio), OAuth token refresh con `GMAIL_REFRESH_TOKEN`, MIME email con tabla
+    HTML inline, envío vía Gmail API REST (`/gmail/v1/users/me/messages/send`). Botón
+    "Enviar por mail" en overlays de las 3 sucursales + menú raíz (solo admin/propio).
+    Cloudflare secrets: `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`,
+    `REPORTE_TO`. CSS: `.reporte-enviar` (branches), `.reporte-enviar-root` (menu).
+    Estados del botón: loading → enviado ✓ / error (auto-reset 3-4s).
 - Modos de diseño con `body.modo-profesional` (Claro) / sin clase (oscuro), persistidos en
   `localStorage` (`dyp_tema`).
 
@@ -216,4 +223,13 @@ npx wrangler d1 execute dyp-tracking --local --command "SELECT 1;"
   fetcha de `/api/equipos/[branch]` con error controlado para colon/monsenor (no-admin).
   CSS: `.reporte-overlay`, `.reporte-panel`, `.reporte-tabla`, `.estado-badge`, ambos modos.
   Funciones: `generarRanking()`, `formatearFechaCorta()`, `abrirReporte()`, `cerrarReporte()`.
-  Fase 2 (email vía Gmail SMTP) pendiente.
+  Fase 2 (email vía Gmail API REST) pendiente.
+- **19/08/2026** — Implementada **Fase 2 del Reporte de Urgencia (email vía Gmail API REST)**.
+  Creado `functions/api/reporte.js` con: POST endpoint, JWT auth (admin/propio), OAuth token
+  refresh, MIME email con tabla HTML, envío vía Gmail API REST. Configurados 4 Cloudflare
+  secrets (`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, `REPORTE_TO`).
+  Agregado botón "Enviar por mail" (`.reporte-enviar` / `.reporte-enviar-root`) en overlays
+  de las 3 sucursales y menú raíz, visible solo para admin/propio. Estados: loading →
+  enviado ✓ / error (auto-reset). OAuth creds: proyecto Google Cloud "dyp-email", Gmail
+  API habilitada, pantalla de consentimiento "DyP Reportes" (externo, usuario test
+  coordinacionst.dypsas@gmail.com).
