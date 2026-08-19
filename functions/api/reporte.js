@@ -38,7 +38,8 @@ function buildEmailHTML(branchName, rows) {
     const ic = iconos[r.estado] || '';
     cards += '<div style="background:#fff;border:1px solid #eee;border-left:4px solid ' + c + ';border-radius:8px;padding:14px 16px;margin-bottom:8px">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-      + '<span style="font-size:15px;font-weight:700;color:#222">#' + (i + 1) + ' — ' + esc(r.ubicacion) + '</span></div>'
+      + '<span style="font-size:15px;font-weight:700;color:#222">Equipo #' + esc(r.nro) + '</span>'
+      + '<span style="font-size:12px;color:#888">' + esc(r.ubicacion) + '</span></div>'
       + '<div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:#555;margin-bottom:8px">'
       + '<span><b>Marca:</b> ' + esc(r.marca || '-') + '</span>'
       + '<span><b>Cap.:</b> ' + esc(r.capacidad || '-') + '</span></div>'
