@@ -15,7 +15,7 @@ function buildMIME(to, subject, htmlBody) {
     'Content-Type: text/plain; charset=UTF-8',
     'Content-Transfer-Encoding: base64',
     '',
-    btoa(unescape(encodeURIComponent('Reporte de urgencia de service — DyP Centro Motors'))),
+    btoa(unescape(encodeURIComponent('Reporte de equipos para service de mantenimiento — DyP Centro Motors'))),
     '',
     '--' + boundary,
     'Content-Type: text/html; charset=UTF-8',
@@ -55,7 +55,7 @@ function buildEmailHTML(branchName, rows) {
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="font-family:Arial,Helvetica,sans-serif;background:#f0f0f0;margin:0;padding:12px;-webkit-text-size-adjust:100%">'
     + '<div style="max-width:420px;margin:0 auto">'
     + '<div style="background:#ff6900;padding:18px 20px;color:#fff;border-radius:10px 10px 0 0">'
-    + '<h1 style="margin:0;font-size:17px;line-height:1.3">Reporte de urgencia</h1>'
+    + '<h1 style="margin:0;font-size:17px;line-height:1.3">Reporte de equipos para service</h1>'
     + '<p style="margin:3px 0 0;opacity:0.9;font-size:12px">' + esc(branchName) + ' — ' + now + '</p></div>'
     + '<div style="background:#fff;padding:12px 16px;display:flex;gap:12px;border-bottom:1px solid #eee;font-size:12px;font-weight:600">'
     + '<span style="color:#2ecc71">' + countOk + ' OK</span>'
@@ -123,7 +123,7 @@ export async function onRequest(context) {
     const to = context.env.REPORTE_TO;
     if (!to) return json({ error: 'Destinatario no configurado' }, 500);
 
-    const subject = 'Reporte de urgencia — ' + branchName;
+    const subject = 'Reporte de equipos para service de mantenimiento — ' + branchName;
     const htmlBody = buildEmailHTML(branchName, rows);
     const mimeMessage = buildMIME(to, subject, htmlBody);
 
