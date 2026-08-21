@@ -456,12 +456,13 @@ body.modo-profesional .logo-sub { color: #111; }
           }
           var ranking = generarRankingRoot(equipos);
           var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
-          var h = '<table class="reporte-tabla-root"><thead><tr><th>#</th><th>Ubicaci\u00f3n</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>\u00daltimo service</th></tr></thead><tbody>';
+          var h = '<table class="reporte-tabla-root"><thead><tr><th>#</th><th>Piso</th><th>Ubicaci\u00f3n</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>\u00daltimo service</th></tr></thead><tbody>';
           ranking.forEach(function(item) {
             var eq = item.eq;
             var c = colores[eq.estado] || '#999';
+            var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
             var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCortaRoot(eq.ultimo_service);
-            h += '<tr><td class="num">' + eq.nro + '</td><td>' + escRoot(eq.ubicacion) + '</td><td>' + escRoot(eq.marca || '-') + '</td><td>' + escRoot(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + escRoot(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
+            h += '<tr><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + escRoot(eq.ubicacion) + '</td><td>' + escRoot(eq.marca || '-') + '</td><td>' + escRoot(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + escRoot(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
           });
           h += '</tbody></table>';
           document.getElementById('reporte-root-body').innerHTML = h;
@@ -492,7 +493,7 @@ body.modo-profesional .logo-sub { color: #111; }
             var eq = item.eq;
             var s = (eq.ultimo_service || '').trim();
             var fechaStr = item.sinFecha ? 'Sin registro' : s;
-            return { nro: eq.nro, ubicacion: eq.ubicacion, marca: eq.marca || '', capacidad: eq.capacidad || '', estado: eq.estado, ultimo_service: fechaStr };
+            return { nro: eq.nro, ubicacion: eq.ubicacion, marca: eq.marca || '', capacidad: eq.capacidad || '', estado: eq.estado, ultimo_service: fechaStr, piso: eq.piso || 'pb' };
           });
           return fetch('/api/reporte', {
             method: 'POST',

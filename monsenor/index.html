@@ -2203,12 +2203,13 @@ function abrirReporte() {
   } else {
     enviarBtn.style.display = 'none';
   }
-  var h = '<table class="reporte-tabla"><thead><tr><th>#</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>';
+  var h = '<table class="reporte-tabla"><thead><tr><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>';
   ranking.forEach(function(item, i) {
     var eq = item.eq;
     var c = colores[eq.estado] || '#999';
+    var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
     var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCorta(eq.ultimo_service);
-    h += '<tr><td class="num">' + eq.nro + '</td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + esc(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
+    h += '<tr><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + esc(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
   });
   h += '</tbody></table>';
   document.getElementById('reporte-body').innerHTML = h;
@@ -2229,7 +2230,7 @@ function enviarReporte(branch, branchName) {
     var eq = item.eq;
     var s = (eq.ultimo_service || '').trim();
     var fechaStr = item.sinFecha ? 'Sin registro' : s;
-    return { nro: eq.nro, ubicacion: eq.ubicacion, marca: eq.marca || '', capacidad: eq.capacidad || '', estado: eq.estado, ultimo_service: fechaStr };
+    return { nro: eq.nro, ubicacion: eq.ubicacion, marca: eq.marca || '', capacidad: eq.capacidad || '', estado: eq.estado, ultimo_service: fechaStr, piso: eq.piso || 'pb' };
   });
   fetch('/api/reporte', {
     method: 'POST',
