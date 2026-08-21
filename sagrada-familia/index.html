@@ -84,6 +84,12 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 .reporte-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
 .reporte-enviar.enviado { background: #2ecc71; }
 .reporte-enviar.error { background: #e63946; }
+.reporte-pdf {
+  background: transparent; color: #ff6900; border: 2px solid #ff6900; border-radius: 6px;
+  padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.reporte-pdf:hover { background: rgba(255,105,0,0.1); }
 .reporte-body {
   flex: 1; overflow-y: auto; padding: 16px 20px;
 }
@@ -734,7 +740,7 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
   <div class="reporte-panel" onclick="event.stopPropagation()">
     <div class="reporte-header">
       <span>Reporte de urgencia — Sagrada Familia<span class="fecha-gen" id="reporte-fecha"></span></span>
-      <div style="display:flex;gap:8px;align-items:center"><button class="reporte-enviar" id="reporte-enviar" style="display:none" onclick="enviarReporte('sagrada-familia','Sagrada Familia')"><i class="ph ph-envelope-simple"></i> Enviar por mail</button>
+      <div style="display:flex;gap:8px;align-items:center"><button class="reporte-pdf" onclick="descargarPDF('Sagrada Familia')"><i class="ph ph-download-simple"></i> PDF</button><button class="reporte-enviar" id="reporte-enviar" style="display:none" onclick="enviarReporte('sagrada-familia','Sagrada Familia')"><i class="ph ph-envelope-simple"></i> Enviar por mail</button>
       <button class="reporte-cerrar" onclick="cerrarReporte()"><i class="ph ph-x"></i></button></div>
     </div>
     <div class="reporte-body" id="reporte-body"></div>
@@ -1606,7 +1612,45 @@ function limpiarFiltros() {
 }
 function exportarCSV() {
   trackClick('exportar_csv');
-  function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function descargarPDF(branchName) {
+  var ranking = generarRanking(EQUIPOS);
+  var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
+  var now = new Date();
+  var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  var rows = '';
+  ranking.forEach(function(item, i) {
+    var eq = item.eq;
+    var c = colores[eq.estado] || '#999';
+    var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
+    var fecha = item.sinFecha ? '<em style="color:#ff6900">Sin registro</em>' : esc(eq.ultimo_service);
+    rows += '<tr><td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center;font-weight:700;color:#555">' + eq.nro + '</td>'
+      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center"><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:3px;background:#fff3e0;color:#ff6900">' + pisoLabel + '</span></td>'
+      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + esc(eq.ubicacion) + '</td>'
+      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + esc(eq.marca || '-') + '</td>'
+      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + esc(eq.capacidad || '-') + '</td>'
+      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center"><span style="background:' + c + ';color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">' + esc(eq.estado) + '</span></td>'
+      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + fecha + '</td></tr>';
+  });
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte — ' + branchName + '</title>'
+    + '<style>@page{margin:15mm}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;color:#333}'
+    + '.header{background:#ff6900;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0}'
+    + '.header h1{margin:0;font-size:18px}.header p{margin:4px 0 0;opacity:0.85;font-size:12px}'
+    + 'table{width:100%;border-collapse:collapse;font-size:12px;margin-top:0}'
+    + 'th{background:#ff6900;color:#fff;padding:8px;text-align:left;font-size:11px}'
+    + '.footer{margin-top:20px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:8px}'
+    + '</style></head><body>'
+    + '<div class="header"><h1>Reporte de equipos para service de mantenimiento</h1>'
+    + '<p>' + branchName + ' — ' + fechaStr + '</p></div>'
+    + '<table><thead><tr><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>'
+    + rows + '</tbody></table>'
+    + '<div class="footer">DyP — Desarrollos y Proyectos | Centro Motors</div>'
+    + '</body></html>';
+  var win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function() { win.print(); }, 400);
+}
   const colores = { 'OK':'#2ecc71','Necesita service':'#ff6900','No funciona':'#666' };
   let rows = '<tr style="background:#ff6900;color:#fff"><th>Nro</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último Service</th><th>OT</th><th>URL OT</th><th>Piso</th></tr>';
   EQUIPOS.slice().sort((a,b) => a.nro - b.nro).forEach(eq => {
