@@ -1,6 +1,6 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQmzSSzvInJvvFDV-D_BTi7p5VrhUjfB3ja6uAy8v44epabHqWsOb6SZvnCMCVQCLnrZYFGoIOfKLnt/pub?gid=359397000&single=true&output=csv';
-const BK = ['monsenor', 'colon', 'sagrada-familia', 'hino'];
-const BO = { colon: 0, 'sagrada-familia': 8, monsenor: 16, hino: 24 };
+const BK = ['monsenor', 'colon', 'sagrada-familia', 'hino', 'lexus'];
+const BO = { colon: 0, 'sagrada-familia': 8, monsenor: 16, hino: 24, lexus: 32 };
 
 function parseAll(csv) {
   const rows = csv.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
@@ -55,11 +55,6 @@ export async function onRequest(context) {
     const r = await fetch(CSV_URL + '&_cb=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
     const branches = parseAll(await r.text());
     if (!branches) return new Response(JSON.stringify({ success: false, output: 'Could not parse CSV' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    const user = context.data && context.data.user;
-    if (!user || user.tipo !== 'admin') {
-      delete branches.colon;
-      delete branches.monsenor;
-    }
     await registrarHistorialOT(context.env.DB, branches);
     const d = new Date();
     return new Response(JSON.stringify({ success: true, output: 'OK', branches, timestamp: d.toISOString() }), { status: 200, headers: { 'Content-Type': 'application/json' } });

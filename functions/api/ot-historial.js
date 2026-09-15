@@ -1,5 +1,4 @@
-const BRANCHES = ['colon', 'monsenor', 'sagrada-familia', 'hino'];
-const RESTRICTED = ['colon', 'monsenor'];
+const BRANCHES = ['colon', 'monsenor', 'sagrada-familia', 'hino', 'lexus'];
 
 export async function onRequest(context) {
   var db = context.env.DB;
@@ -10,8 +9,6 @@ export async function onRequest(context) {
 
   if (!branch || BRANCHES.indexOf(branch) === -1)
     return new Response(JSON.stringify({ error: 'Parametros invalidos (branch requerido)' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-  if (user.tipo !== 'admin' && RESTRICTED.indexOf(branch) !== -1)
-    return new Response(JSON.stringify({ error: 'No disponible' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
 
   try {
     var result;

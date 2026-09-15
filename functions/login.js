@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   let redirect = url.searchParams.get('r') || '/';
-  if (!redirect.startsWith('/') || redirect.includes('://') || redirect.startsWith('//')) redirect = '/';
+  if (redirect.startsWith('//') || !/^\/[a-zA-Z0-9\/_\-.?=&#%+]*$/.test(redirect)) redirect = '/';
   redirect = redirect.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   const html = `<!DOCTYPE html>

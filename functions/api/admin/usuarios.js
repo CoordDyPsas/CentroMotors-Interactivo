@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 export async function onRequest(context) {
   var db = context.env.DB;
   var method = context.request.method;
+  var actor = (context.data && context.data.user) || null;
 
   if (method === 'GET') {
     try {
@@ -45,6 +46,12 @@ export async function onRequest(context) {
       var user = await db.prepare('SELECT email FROM usuarios WHERE LOWER(email) = ?').bind(email).first();
       if (!user) return new Response(JSON.stringify({ error: 'Usuario no encontrado' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
 
+      var esSelf = actor && actor.email === email;
+      if (esSelf && body.activo === false)
+        return new Response(JSON.stringify({ error: 'No podes desactivar tu propia cuenta' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+      if (esSelf && body.tipo && body.tipo !== 'admin')
+        return new Response(JSON.stringify({ error: 'No podes cambiar tu propio rol' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+
       if (body.activo !== undefined) {
         await db.prepare('UPDATE usuarios SET activo = ? WHERE LOWER(email) = ?').bind(body.activo ? 1 : 0, email).run();
       }
@@ -70,6 +77,7 @@ export async function onRequest(context) {
       var email = (body.email || '').toLowerCase().trim();
       if (!email) return new Response(JSON.stringify({ error: 'Email requerido' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
       if (email === 'admin@relevamientocm.com') return new Response(JSON.stringify({ error: 'No se puede eliminar al admin principal' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+      if (actor && actor.email === email) return new Response(JSON.stringify({ error: 'No podes eliminar tu propia cuenta' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
 
       await db.prepare('DELETE FROM sesiones WHERE email = (SELECT email FROM usuarios WHERE LOWER(email) = ?)').bind(email).run();
       var del = await db.prepare('DELETE FROM usuarios WHERE LOWER(email) = ?').bind(email).run();

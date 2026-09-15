@@ -1,19 +1,9 @@
 var WHITELIST = ['/login', '/api/login', '/api/logout', '/Logo'];
 var ADMIN_ROUTES = ['/admin', '/api/admin', '/api/login/diag'];
-var BRANCH_ADMIN_ONLY = ['colon', 'monsenor'];
 
 function isWhitelisted(path) {
   if (path === '/api/login/diag' || path.startsWith('/api/login/diag/')) return false;
   return WHITELIST.some(function(p) { return path === p || path.startsWith(p + '/'); });
-}
-
-function isBranchRestricted(path) {
-  for (var i = 0; i < BRANCH_ADMIN_ONLY.length; i++) {
-    var b = BRANCH_ADMIN_ONLY[i];
-    if (path === '/' + b || path.startsWith('/' + b + '/')) return true;
-    if (path === '/api/equipos/' + b) return true;
-  }
-  return false;
 }
 
 async function verifyToken(token, secret) {
@@ -33,7 +23,8 @@ async function verifyToken(token, secret) {
   var payloadStr = parts[1].replace(/-/g, '+').replace(/_/g, '/');
   while (payloadStr.length % 4) payloadStr += '=';
   var payload = JSON.parse(atob(payloadStr));
-  if (payload.exp && payload.exp * 1000 < Date.now()) throw new Error('Token expired');
+  if (!payload.exp) throw new Error('Token missing exp');
+  if (payload.exp * 1000 < Date.now()) throw new Error('Token expired');
   return payload;
 }
 
@@ -85,12 +76,6 @@ export async function onRequest(context) {
     if (ADMIN_ROUTES.some(function(p) { return path === p || path.startsWith(p + '/'); }) && user.tipo !== 'admin')
       return new Response('Acceso denegado', { status: 403 });
 
-    if (user.tipo !== 'admin' && isBranchRestricted(path)) {
-      if (path.startsWith('/api/'))
-        return new Response(JSON.stringify({ error: 'No disponible' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      return new Response(proximamenteHTML(), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-    }
-
     if (!path.includes('.') && !path.startsWith('/api/')) {
       var ip2 = request.headers.get('CF-Connecting-IP') || '0';
       var ua2 = request.headers.get('User-Agent') || '';
@@ -102,10 +87,6 @@ export async function onRequest(context) {
   } catch(e) {
     return new Response(null, { status: 302, headers: { 'Location': '/login', 'Set-Cookie': 'dyp_token=; Path=/; Max-Age=0' } });
   }
-}
-
-function proximamenteHTML() {
-  return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Próximamente — DyP</title><style>@import url(\'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap\');*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,sans-serif;background:#0d0d1a;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0f0f0;text-align:center;padding:24px}.pin{color:#ff6900;margin-bottom:18px}h1{font-size:32px;font-weight:700;color:#fff;margin-bottom:8px}h1 span{color:#ff6900}p{color:#888;font-size:15px;max-width:420px;line-height:1.6;margin-bottom:28px}.btn{display:inline-flex;align-items:center;gap:8px;background:#ff6900;color:#fff;border:none;border-radius:8px;padding:12px 26px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s}.btn:hover{background:#ff8533}.footer{position:fixed;bottom:18px;font-size:11px;color:rgba(255,255,255,0.4)}</style></head><body><div class="pin"><svg width="56" height="56" viewBox="0 0 256 256" fill="#ff6900"><path d="M128 16a80 80 0 0 0-80 80c0 72 80 144 80 144s80-72 80-144a80 80 0 0 0-80-80zm0 112a32 32 0 1 1 32-32 32 32 0 0 1-32 32z"/></svg></div><h1>Próximamente</h1><p>Este plano interactivo estará disponible próximamente.</p><a class="btn" href="/">Volver al inicio</a><div class="footer">DyP — Aire Acondicionado y Calefacción</div></body></html>';
 }
 
 async function hashFingerprint(ip, ua) {

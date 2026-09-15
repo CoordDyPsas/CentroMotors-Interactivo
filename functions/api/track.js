@@ -1,5 +1,3 @@
-import { jwtVerify } from 'jose';
-
 async function runOrNull(promise, label, timeoutMs = 12000) {
   const timer = new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout: ${label}`)), timeoutMs));
   try {
@@ -11,19 +9,14 @@ async function runOrNull(promise, label, timeoutMs = 12000) {
 }
 
 export async function onRequest(context) {
-  const SECRET = context.env.JWT_SECRET;
-  if (!SECRET)
-    return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
   if (context.request.method !== 'POST')
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
 
-  const cookie = context.request.headers.get('Cookie') || '';
-  const match = cookie.match(/dyp_token=([^;]+)/);
-  if (!match)
+  const user = context.data.user;
+  if (!user)
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 
   try {
-    const { payload } = await jwtVerify(match[1], new TextEncoder().encode(SECRET));
     const { accion, branch, equipo_nro, detalle } = await context.request.json();
 
     if (!accion || !branch)
@@ -32,7 +25,7 @@ export async function onRequest(context) {
     await runOrNull(
       context.env.DB.prepare(
         'INSERT INTO clicks (email, tipo_usuario, branch, equipo_nro, accion, detalle) VALUES (?, ?, ?, ?, ?, ?)'
-      ).bind(payload.email, payload.tipo, branch, equipo_nro || null, accion, detalle || null).run(),
+      ).bind(user.email, user.tipo, branch, equipo_nro || null, accion, detalle || null).run(),
       'track click'
     );
 

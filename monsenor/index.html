@@ -385,6 +385,42 @@ body.modo-profesional .comentario-form textarea { background: rgba(10,10,10,0.95
 .toggle-panel.abierto { right: 380px; }
 .toggle-panel.oculto { display: none; }
 
+.header-busqueda { position: relative; display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.header-busqueda input {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 6px 14px; color: #fff; font-size: 13px;
+  outline: none; width: 160px; transition: 0.2s;
+}
+.header-busqueda input::placeholder { color: rgba(255,255,255,0.3); }
+.header-busqueda input:focus { border-color: #ff6900; background: rgba(255,255,255,0.08); }
+.header-stats {
+  display: flex; align-items: center; gap: 6px; margin-left: 12px;
+}
+.stat-item {
+  display: flex; align-items: center; gap: 3px; font-size: 12px; padding: 2px 8px;
+  border-radius: 10px; background: #515151; cursor: pointer;
+  border: 1px solid transparent; transition: 0.2s;
+}
+.stat-item:hover { background: #666; }
+.stat-item.activo { border-color: #ff6900; background: rgba(255,105,0,0.15); }
+.stat-item .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.filter-select {
+  background: #515151; border: 1px solid rgba(255,255,255,0.08); color: #fff;
+  border-radius: 4px; padding: 4px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
+  cursor: pointer; outline: none; transition: 0.2s;
+}
+.filter-select:hover { border-color: #ff6900; }
+body.modo-profesional .filter-select { background: rgba(10,10,10,0.95); border-color: transparent; }
+.limpiar-btn {
+  width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer;
+  background: #515151; border: 1px solid rgba(255,255,255,0.08);
+  color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: 0.2s; flex-shrink: 0;
+}
+.limpiar-btn:hover { background: #ff6900; color: #fff; }
+body.modo-profesional .limpiar-btn { background: rgba(10,10,10,0.95); border-color: transparent; }
+body.modo-profesional .limpiar-btn:hover { background: #ff6900; }
+
 @media (max-width: 860px) {
   .header { gap: 8px; padding: 8px 10px; }
   .header-busqueda { order: 10; width: 100%; margin-left: 0; }
@@ -521,41 +557,6 @@ body.modo-profesional .comentario-form textarea { background: rgba(10,10,10,0.95
 .lb-info .badge.necesita { background: #ff6900; color: #fff; }
 .lb-info .badge.ok { background: #2ecc71; color: #111; }
 .lb-info .badge.nofunciona { background: #666; color: #fff; }
-.header-busqueda { position: relative; display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.header-busqueda input {
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px; padding: 6px 14px; color: #fff; font-size: 13px;
-  outline: none; width: 160px; transition: 0.2s;
-}
-.header-busqueda input::placeholder { color: rgba(255,255,255,0.3); }
-.header-busqueda input:focus { border-color: #ff6900; background: rgba(255,255,255,0.08); }
-.header-stats {
-  display: flex; align-items: center; gap: 6px; margin-left: 12px;
-}
-.stat-item {
-  display: flex; align-items: center; gap: 3px; font-size: 12px; padding: 2px 8px;
-  border-radius: 10px; background: #515151; cursor: pointer;
-  border: 1px solid transparent; transition: 0.2s;
-}
-.stat-item:hover { background: #666; }
-.stat-item.activo { border-color: #ff6900; background: rgba(255,105,0,0.15); }
-.stat-item .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-.filter-select {
-  background: #515151; border: 1px solid rgba(255,255,255,0.08); color: #fff;
-  border-radius: 4px; padding: 4px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
-  cursor: pointer; outline: none; transition: 0.2s;
-}
-.filter-select:hover { border-color: #ff6900; }
-body.modo-profesional .filter-select { background: rgba(10,10,10,0.95); border-color: transparent; }
-.limpiar-btn {
-  width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer;
-  background: #515151; border: 1px solid rgba(255,255,255,0.08);
-  color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center;
-  transition: 0.2s; flex-shrink: 0;
-}
-.limpiar-btn:hover { background: #ff6900; color: #fff; }
-body.modo-profesional .limpiar-btn { background: rgba(10,10,10,0.95); border-color: transparent; }
-body.modo-profesional .limpiar-btn:hover { background: #ff6900; }
 .search-suggestions {
   position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
   background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 0 0 8px 8px;
@@ -883,15 +884,17 @@ function abrirOT(nro) {
     .catch(function() { window.open(OT_URL_BASE + nro, '_blank', 'noopener'); });
 }
 
-function cargarHistorialOT(nro, otActual) {
+function cargarHistorialOT(nro) {
   var card = document.getElementById('ot-historial-card');
-  if (!card) return;
+  if (!card || nro == null) return;
+  var reqNro = nro;
   card.classList.remove('abierto');
   var cont = document.getElementById('ot-historial-lista');
   var contador = document.getElementById('ot-historial-count');
-  fetch('/api/ot-historial?branch=' + BRANCH_KEY + '&equipo=' + nro)
+  fetch('/api/ot-historial?branch=' + BRANCH_KEY + '&equipo=' + reqNro)
     .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
     .then(function(data) {
+      if (!equipoSeleccionado || equipoSeleccionado.nro !== reqNro) return;
       var hist = data.historial || [];
       if (!hist.length) { card.style.display = 'none'; return; }
       card.style.display = '';
@@ -900,7 +903,7 @@ function cargarHistorialOT(nro, otActual) {
         return '<a href="#" onclick="abrirOT(' + escJS(h.ot) + ');return false" class="ot-historial-ot"><i class="ph ph-file-pdf"></i> ' + escaparHTML(h.ot) + '</a>';
       }).join('');
     })
-    .catch(function() { card.style.display = 'none'; });
+    .catch(function() { if (equipoSeleccionado && equipoSeleccionado.nro === reqNro) card.style.display = 'none'; });
 }
 
 function toggleHistorialOT() {
@@ -1228,7 +1231,7 @@ function mostrarEquipo(nro) {
     '</div>';
 
   cargarComentarios(eq.nro);
-  cargarHistorialOT(eq.nro, eq.ot);
+  cargarHistorialOT(eq.nro);
 
   initCarousel();
   carruselEq = eq;
@@ -1925,48 +1928,7 @@ function limpiarFiltros() {
 }
 function exportarCSV() {
   trackClick('exportar_csv');
-function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function descargarPDF(branchName) {
-  var ranking = generarRanking(EQUIPOS);
-  var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
-  var now = new Date();
-  var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  var rows = '';
-  ranking.forEach(function(item, i) {
-    var eq = item.eq;
-    var c = colores[eq.estado] || '#999';
-    var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
-    var fecha = item.sinFecha ? '<em style="color:#ff6900">Sin registro</em>' : esc(eq.ultimo_service);
-    rows += '<tr><td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center;font-weight:700;color:#555">' + eq.nro + '</td>'
-      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center"><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:3px;background:#fff3e0;color:#ff6900">' + pisoLabel + '</span></td>'
-      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + esc(eq.ubicacion) + '</td>'
-      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + esc(eq.marca || '-') + '</td>'
-      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + esc(eq.capacidad || '-') + '</td>'
-      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center"><span style="background:' + c + ';color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">' + esc(eq.estado) + '</span></td>'
-      + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + fecha + '</td></tr>';
-  });
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte — ' + branchName + '</title>'
-    + '<style>@page{margin:15mm}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;color:#333}'
-    + '.header{background:#ff6900;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0}'
-    + '.header h1{margin:0;font-size:18px}.header p{margin:4px 0 0;opacity:0.85;font-size:12px}'
-    + 'table{width:100%;border-collapse:collapse;font-size:12px;margin-top:0}'
-    + 'th{background:#ff6900;color:#fff;padding:8px;text-align:left;font-size:11px}'
-    + '.footer{margin-top:20px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:8px}'
-    + '</style></head><body>'
-    + '<div class="header"><h1>Reporte de equipos para service de mantenimiento</h1>'
-    + '<p>' + branchName + ' — ' + fechaStr + '</p></div>'
-    + '<table><thead><tr><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>'
-    + rows + '</tbody></table>'
-    + '<div class="footer">DyP — Desarrollos y Proyectos | Centro Motors</div>'
-    + '</body></html>';
-  var iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;border:none;opacity:0';
-  document.body.appendChild(iframe);
-  iframe.contentDocument.open();
-  iframe.contentDocument.write(html);
-  iframe.contentDocument.close();
-  setTimeout(function() { iframe.contentWindow.print(); }, 300);
-}
+  function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   const colores = { 'OK':'#2ecc71','Necesita service':'#ff6900','No funciona':'#666' };
   let rows = '<tr style="background:#ff6900;color:#fff"><th>Nro</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último Service</th><th>OT</th><th>URL OT</th><th>Piso</th></tr>';
   EQUIPOS.slice().sort((a,b) => a.nro - b.nro).forEach(eq => {
@@ -1984,6 +1946,132 @@ function descargarPDF(branchName) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
+}
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function parsearDias(str) {
+  var s = (str || '').trim();
+  if (!s || s === '—' || s === '-') return null;
+  var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!partes) return null;
+  var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+  var hoy = new Date();
+  return Math.floor((hoy - f) / 86400000);
+}
+function clasificarEquipo(eq) {
+  if (eq.estado === 'No funciona') return { color: 'negro', diasSinService: parsearDias(eq.ultimo_service) };
+  var s = (eq.ultimo_service || '').trim();
+  if (!s || s === '—' || s === '-') return { color: 'gris', diasSinService: Infinity };
+  var dias = parsearDias(eq.ultimo_service);
+  if (dias === null) return { color: 'gris', diasSinService: Infinity };
+  if (eq.estado === 'OK') return { color: 'verde', diasSinService: dias };
+  var intervaloDias = (eq.intervalo_meses || 6) * 30;
+  if (dias > intervaloDias) return { color: 'rojo', diasSinService: dias };
+  return { color: 'verde', diasSinService: dias };
+}
+function generarRanking(equipos) {
+  var PRIORIDAD = { rojo: 0, amarillo: 1, gris: 2, verde: 3, negro: 4 };
+  var items = equipos.map(function(eq) {
+    var c = clasificarEquipo(eq);
+    return { eq: eq, color: c.color, diasSinService: c.diasSinService };
+  });
+  var vencidos = items.filter(function(it) { return it.color === 'rojo'; });
+  if (vencidos.length > 1) {
+    var grupos = {};
+    vencidos.forEach(function(it) {
+      var f = it.eq.ultimo_service || '';
+      if (!grupos[f]) grupos[f] = [];
+      grupos[f].push(it);
+    });
+    var fechas = Object.keys(grupos).sort(function(a, b) {
+      var pa = a.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      var pb = b.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (!pa || !pb) return 0;
+      return new Date(+pa[3], +pa[2]-1, +pa[1]) - new Date(+pb[3], +pb[2]-1, +pb[1]);
+    });
+    var mid = Math.ceil(fechas.length / 2);
+    for (var i = mid; i < fechas.length; i++) {
+      grupos[fechas[i]].forEach(function(it) { it.color = 'amarillo'; });
+    }
+  }
+  items.sort(function(a, b) {
+    var pa = PRIORIDAD[a.color], pb = PRIORIDAD[b.color];
+    if (pa !== pb) return pa - pb;
+    if (a.color === 'negro' || a.color === 'gris') return b.diasSinService - a.diasSinService;
+    if (a.color === 'rojo' || a.color === 'amarillo') return b.diasSinService - a.diasSinService;
+    return a.eq.nro - b.eq.nro;
+  });
+  items.forEach(function(it) { it.sinFecha = it.color === 'gris'; });
+  return items;
+}
+function descargarPDF(branchName) {
+  var ranking = generarRanking(EQUIPOS);
+  var now = new Date();
+  var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  var body = [];
+  ranking.forEach(function(item) {
+    var eq = item.eq;
+    var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
+    var fecha = (!eq.ultimo_service || eq.ultimo_service === '—' || eq.ultimo_service === '-') ? 'Sin registro' : eq.ultimo_service;
+    var label = { rojo: 'Vencido', amarillo: 'Vencido', verde: 'OK', negro: 'No funciona', gris: 'Sin registro' }[item.color];
+    body.push([label, eq.nro, pisoLabel, eq.ubicacion, eq.marca || '-', eq.capacidad || '-', fecha]);
+  });
+  var jsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+  if (!jsPDF) { alert('Error: jsPDF no cargado'); return; }
+  var doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(255, 105, 0);
+  doc.text('Reporte de equipos para service de mantenimiento', 14, 18);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(branchName + ' — ' + fechaStr, 14, 25);
+  doc.autoTable({
+    startY: 30,
+    head: [['Semaforo', '#', 'Piso', 'Ubicación', 'Marca', 'Capacidad', 'Último service']],
+    body: body,
+    styles: { fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: [255, 105, 0], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 22, halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+      1: { cellWidth: 10, halign: 'center', fontStyle: 'bold' },
+      2: { cellWidth: 12, halign: 'center' }
+    },
+    margin: { left: 14, right: 14 },
+    didParseCell: function(data) {
+      if (data.section === 'body' && data.column.index === 0) {
+        var rowIdx = data.row.index;
+        var item = ranking[rowIdx];
+        var c = null;
+        if (item) {
+          if (item.color === 'rojo') c = [220, 38, 38];
+          else if (item.color === 'amarillo') c = [234, 179, 8];
+          else if (item.color === 'verde') c = [34, 197, 94];
+          else if (item.color === 'negro') c = [30, 30, 30];
+          else if (item.color === 'gris') c = [156, 163, 175];
+        }
+        if (c) { data.cell.styles.fillColor = c; data.cell.styles.textColor = [255, 255, 255]; }
+        if (item && item.color === 'gris') { data.cell.styles.lineWidth = 0.5; data.cell.styles.lineColor = [220, 38, 38]; }
+      }
+      if (data.section === 'body' && data.column.index === 1) {
+        var rowIdx = data.row.index;
+        var item = ranking[rowIdx];
+        if (item && item.color === 'gris') {
+          for (var ci = 0; ci < data.table.columns.length; ci++) {
+            if (!data.table.body[rowIdx].cells[ci].styles.lineWidth || data.table.body[rowIdx].cells[ci].styles.lineWidth < 0.3) {
+              data.table.body[rowIdx].cells[ci].styles.lineWidth = 0.3;
+              data.table.body[rowIdx].cells[ci].styles.lineColor = [220, 38, 38];
+            }
+          }
+        }
+      }
+    }
+  });
+  var footerY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(8);
+  doc.setTextColor(153, 153, 153);
+  doc.text('DyP — Desarrollos y Proyectos | Centro Motors', 105, footerY, { align: 'center' });
+  doc.save('reporte_' + branchName.toLowerCase().replace(/ /g, '_') + '.pdf');
 }
 function flashMarker(nro) {
   document.querySelectorAll('.marker').forEach(m => {
@@ -2020,7 +2108,6 @@ function renderLista() {
       trackClick('lista', eq.nro);
       toggleLista();
       mostrarEquipo(eq.nro);
-      centrarEnMarker(eq);
       flashMarker(eq.nro);
     });
     body.appendChild(d);
@@ -2054,7 +2141,6 @@ function onSearchInput(texto) {
       document.getElementById('search-input').value = eq.nro;
       cont.classList.remove('show');
       mostrarEquipo(eq.nro);
-      centrarEnMarker(eq);
       flashMarker(eq.nro);
     });
     cont.appendChild(d);
@@ -2197,29 +2283,10 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-function generarRanking(equipos) {
-  var sinFecha = [];
-  var conFecha = [];
-  equipos.forEach(function(eq) {
-    if (eq.estado === 'OK') return;
-    var s = (eq.ultimo_service || '').trim();
-    if (!s || s === '—' || s === '-') { sinFecha.push(eq); return; }
-    var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (!partes) { sinFecha.push(eq); return; }
-    var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
-    conFecha.push({ eq: eq, fecha: f });
-  });
-  sinFecha.sort(function(a, b) { return a.nro - b.nro; });
-  conFecha.sort(function(a, b) { return a.fecha - b.fecha; });
-  var result = conFecha.map(function(item) { return { eq: item.eq, sinFecha: false }; });
-  sinFecha.forEach(function(eq) { result.push({ eq: eq, sinFecha: true }); });
-  return result;
-}
-
 function formatearFechaCorta(str) {
   if (!str || str === '—' || str === '-') return '—';
   var partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!partes) return str;
+  if (!partes) return escaparHTML(str);
   var dd = partes[1].padStart(2, '0');
   var mm = partes[2].padStart(2, '0');
   var fecha = new Date(+partes[3], +partes[2] - 1, +partes[1]);
@@ -2238,7 +2305,8 @@ function formatearFechaCorta(str) {
 
 function abrirReporte() {
   var ranking = generarRanking(EQUIPOS);
-  var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
+  var SEMAFORO_HEX = { rojo: '#dc2626', amarillo: '#eab308', verde: '#22c55e', negro: '#1e1e1e', gris: '#9ca3af' };
+  var SEMAFORO_LABEL = { rojo: 'Vencido', amarillo: 'Vencido', verde: 'OK', negro: 'No funciona', gris: 'Sin registro' };
   var now = new Date();
   document.getElementById('reporte-fecha').textContent = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   var enviarBtn = document.getElementById('reporte-enviar');
@@ -2250,13 +2318,15 @@ function abrirReporte() {
   } else {
     enviarBtn.style.display = 'none';
   }
-  var h = '<table class="reporte-tabla"><thead><tr><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>Último service</th></tr></thead><tbody>';
+  var h = '<table class="reporte-tabla"><thead><tr><th>Semaforo</th><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Último service</th></tr></thead><tbody>';
   ranking.forEach(function(item, i) {
     var eq = item.eq;
-    var c = colores[eq.estado] || '#999';
+    var sc = SEMAFORO_HEX[item.color];
+    var sl = SEMAFORO_LABEL[item.color];
     var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
     var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCorta(eq.ultimo_service);
-    h += '<tr><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + esc(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
+    var borderStyle = item.color === 'gris' ? 'border:2px solid #dc2626;' : '';
+    h += '<tr><td style="text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#fff;background:' + sc + ';' + borderStyle + '">' + esc(sl) + '</span></td><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td>' + fechaHtml + '</td></tr>';
   });
   h += '</tbody></table>';
   document.getElementById('reporte-body').innerHTML = h;
@@ -2299,7 +2369,6 @@ function enviarReporte(branch, branchName) {
     setTimeout(function() { btn.disabled = false; btn.className = 'reporte-enviar'; btn.innerHTML = '<i class="ph ph-envelope-simple"></i> Enviar por mail'; }, 4000);
   });
 }
-function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 
 <div id="lightbox" class="lightbox" onclick="cerrarLightbox()">
@@ -2313,5 +2382,7 @@ function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
     <div class="lb-info" id="lb-info"></div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>

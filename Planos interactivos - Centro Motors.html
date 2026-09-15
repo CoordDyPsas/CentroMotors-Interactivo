@@ -251,6 +251,7 @@ body.modo-profesional .logo-sub { color: #111; }
   </div>
     <h1>Planos <span>Interactivos</span></h1>
     <div class="header-actions" style="display:flex;gap:8px;margin-left:auto;align-items:center">
+    <button class="switch-tema" id="btn-reporte-general" onclick="descargarPDFGeneral()" title="Reporte general de las 3 sucursales" style="background:#ff6900;color:#fff"><i class="ph ph-file-pdf"></i></button>
     <button class="switch-tema" id="switch-tema-btn" onclick="toggleTema()"><i class="ph ph-sun"></i></button>
     </div>
   </div>
@@ -273,7 +274,7 @@ body.modo-profesional .logo-sub { color: #111; }
     <div class="reporte-panel-root" onclick="event.stopPropagation()">
       <div class="reporte-header-root">
         <span id="reporte-root-title">Reporte de urgencia<span class="fecha-gen" id="reporte-root-fecha"></span></span>
-        <div style="display:flex;gap:8px;align-items:center"><button class="reporte-pdf-root" id="reporte-root-pdf" onclick="descargarPDFRoot()"><i class="ph ph-download-simple"></i> PDF</button><button class="reporte-enviar-root" id="reporte-root-enviar" style="display:none" onclick="enviarReporteRoot()"><i class="ph ph-envelope-simple"></i> Enviar por mail</button>
+        <div style="display:flex;gap:8px;align-items:center"><button class="reporte-pdf-root" id="reporte-root-pdf" onclick="descargarPDFRoot(({ 'sagrada-familia': 'Sagrada Familia', 'monsenor': 'Monse\u00f1or', 'colon': 'Col\u00f3n' })[reporteRootBranch] || reporteRootBranch)"><i class="ph ph-download-simple"></i> PDF</button><button class="reporte-enviar-root" id="reporte-root-enviar" style="display:none" onclick="enviarReporteRoot()"><i class="ph ph-envelope-simple"></i> Enviar por mail</button>
         <button class="reporte-cerrar-root" onclick="cerrarReporteRoot()"><i class="ph ph-x"></i></button></div>
       </div>
       <div class="reporte-body-root" id="reporte-root-body"></div>
@@ -287,8 +288,28 @@ body.modo-profesional .logo-sub { color: #111; }
         { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
         { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }
       ], fotos: 18 },
-      { id: 'monsenor', nombre: 'Monseñor', icon: 'ph-buildings' },
-      { id: 'colon', nombre: 'Colón', icon: 'ph-buildings' }
+      { id: 'monsenor', nombre: 'Monseñor', icon: 'ph-buildings', equipos: [
+        { estado: 'OK' }, { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'OK' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'No funciona' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'OK' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }
+      ], fotos: 21 },
+      { id: 'colon', nombre: 'Colón', icon: 'ph-buildings', equipos: [
+        { estado: 'No funciona' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' },
+        { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' },
+        { estado: 'Necesita service' }, { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'No funciona' },
+        { estado: 'OK' }, { estado: 'OK' }, { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'OK' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' }, { estado: 'Necesita service' },
+        { estado: 'Necesita service' }, { estado: 'Necesita service' }
+      ], fotos: 35 },
+      { id: 'hino', nombre: 'Hino / Spilimbergo', icon: 'ph-map-pin', proximamente: true },
+      { id: 'lexus', nombre: 'Lexus', icon: 'ph-map-pin', proximamente: true }
     ];
     function estadoClase(estado) {
       if (!estado || estado === 'No funciona') return 'nofunciona';
@@ -303,6 +324,7 @@ body.modo-profesional .logo-sub { color: #111; }
       const fotoText = s.fotos ? ' · ' + s.fotos + ' con foto' : '';
       const card = document.createElement('div');
       card.className = 'card';
+      card.setAttribute('data-branch', s.id);
       card.onclick = function(){ trackClick('navegar', s.id); window.location.href = s.id + '/index.html'; };
       card.innerHTML =
         '<div class="icon"><i class="ph ' + s.icon + '"></i></div>' +
@@ -327,35 +349,67 @@ body.modo-profesional .logo-sub { color: #111; }
         '<span class="badge pendiente"><i class="ph ph-clock"></i> Próximamente</span>';
       return card;
     }
-    function renderDashboard(tipo) {
+    function renderDashboard() {
       const cont = document.getElementById('sucursales');
-      const esAdmin = tipo === 'admin';
       SUCURSALES.forEach(s => {
-        if (s.equipos) {
-          cont.appendChild(crearCardActiva(s));
-          return;
-        }
-        if (!esAdmin) {
+        if (s.proximamente) {
           cont.appendChild(cardProximamente(s.nombre, s.icon));
-          return;
+        } else {
+          cont.appendChild(crearCardActiva(s));
         }
-        const ph = document.createElement('div');
-        ph.className = 'card';
-        ph.style.opacity = '0.6';
-        ph.innerHTML = '<div class="icon"><i class="ph ' + s.icon + '"></i></div><h2>' + s.nombre + '</h2><p class="count">Cargando...</p>';
-        cont.appendChild(ph);
-        fetch('/api/equipos/' + s.id)
-          .then(r => r.json())
-          .then(list => {
-            const card = crearCardActiva({ id: s.id, nombre: s.nombre, icon: s.icon, equipos: Array.isArray(list) ? list : [], fotos: 0 });
-            ph.replaceWith(card);
-          })
-          .catch(() => ph.replaceWith(cardProximamente(s.nombre, s.icon)));
       });
-      cont.appendChild(cardProximamente('HINO', 'ph-map-pin'));
     }
+    function refrescarCardsDesdePlanilla() {
+      const TTL = 5 * 60 * 1000;
+      SUCURSALES.forEach(s => {
+        if (s.proximamente) return;
+        const cacheKey = 'cards_api_' + s.id;
+        let cached = null;
+        try {
+          const raw = sessionStorage.getItem(cacheKey);
+          if (raw) {
+            const obj = JSON.parse(raw);
+            if (obj && Array.isArray(obj.list) && (Date.now() - obj.ts) < TTL) cached = obj.list;
+          }
+        } catch (e) {}
+        const aplicar = function(list, conFade) {
+          if (!Array.isArray(list) || !list.length) return;
+          const card = document.querySelector('#sucursales .card[data-branch="' + s.id + '"]');
+          if (!card) return;
+          const total = list.length;
+          const necesita = list.filter(e => estadoClase(e.estado) === 'necesita').length;
+          const ok = list.filter(e => estadoClase(e.estado) === 'ok').length;
+          const nofunciona = list.filter(e => estadoClase(e.estado) === 'nofunciona').length;
+          const fotoText = s.fotos ? ' · ' + s.fotos + ' con foto' : '';
+          if (conFade) card.style.opacity = '0.55';
+          card.querySelector('.count').textContent = total + ' equipos' + fotoText;
+          const pills = card.querySelectorAll('.stat-pill');
+          pills[0].lastChild.nodeValue = ' ' + ok;
+          pills[1].lastChild.nodeValue = ' ' + necesita;
+          pills[2].lastChild.nodeValue = ' ' + nofunciona;
+          if (conFade) {
+            card.style.transition = 'opacity .4s';
+            card.style.opacity = '1';
+          }
+        };
+        if (cached) { aplicar(cached, false); return; }
+        fetch('/api/equipos/' + s.id, { headers: { 'Cache-Control': 'no-cache' } })
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(function(list) {
+            aplicar(list, true);
+            try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), list: list })); } catch (e) {}
+          })
+          .catch(() => {});
+      });
+    }
+    function renderDashboardConRefresh() {
+      renderDashboard();
+      refrescarCardsDesdePlanilla();
+    }
+    var usuarioActual = null;
+    renderDashboardConRefresh();
     fetch('/api/me').then(r => r.json()).then(u => {
-      renderDashboard(u.tipo);
+      if (u && u.tipo) usuarioActual = { email: u.email, nombre: u.nombre, tipo: u.tipo };
       if (u.tipo === 'admin') {
         var b = document.createElement('button');
         b.className = 'switch-tema';
@@ -364,7 +418,7 @@ body.modo-profesional .logo-sub { color: #111; }
         b.onclick = function(){ window.location.href = '/admin' };
         document.getElementById('switch-tema-btn').before(b);
       }
-    }).catch(() => renderDashboard(null));
+    }).catch(() => {});
 
     function toggleTema(guardar) {
       const body = document.body;
@@ -392,29 +446,65 @@ body.modo-profesional .logo-sub { color: #111; }
 
     function escRoot(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+    function parsearDiasRoot(str) {
+      var s = (str || '').trim();
+      if (!s || s === '\u2014' || s === '-') return null;
+      var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (!partes) return null;
+      var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+      return Math.floor((Date.now() - f) / 86400000);
+    }
+    function clasificarEquipoRoot(eq) {
+      if (eq.estado === 'No funciona') return { color: 'negro', diasSinService: parsearDiasRoot(eq.ultimo_service) };
+      var s = (eq.ultimo_service || '').trim();
+      if (!s || s === '\u2014' || s === '-') return { color: 'gris', diasSinService: Infinity };
+      var dias = parsearDiasRoot(eq.ultimo_service);
+      if (dias === null) return { color: 'gris', diasSinService: Infinity };
+      if (eq.estado === 'OK') return { color: 'verde', diasSinService: dias };
+      var intervaloDias = (eq.intervalo_meses || 6) * 30;
+      if (dias > intervaloDias) return { color: 'rojo', diasSinService: dias };
+      return { color: 'verde', diasSinService: dias };
+    }
     function generarRankingRoot(equipos) {
-      var sinFecha = [];
-      var conFecha = [];
-      equipos.forEach(function(eq) {
-        if (eq.estado === 'OK') return;
-        var s = (eq.ultimo_service || '').trim();
-        if (!s || s === '\u2014' || s === '-') { sinFecha.push(eq); return; }
-        var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (!partes) { sinFecha.push(eq); return; }
-        var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
-        conFecha.push({ eq: eq, fecha: f });
+      var PRIORIDAD = { rojo: 0, amarillo: 1, gris: 2, verde: 3, negro: 4 };
+      var items = equipos.map(function(eq) {
+        var c = clasificarEquipoRoot(eq);
+        return { eq: eq, color: c.color, diasSinService: c.diasSinService };
       });
-      sinFecha.sort(function(a, b) { return a.nro - b.nro; });
-      conFecha.sort(function(a, b) { return a.fecha - b.fecha; });
-      var result = conFecha.map(function(item) { return { eq: item.eq, sinFecha: false }; });
-      sinFecha.forEach(function(eq) { result.push({ eq: eq, sinFecha: true }); });
-      return result;
+      var vencidos = items.filter(function(it) { return it.color === 'rojo'; });
+      if (vencidos.length > 1) {
+        var grupos = {};
+        vencidos.forEach(function(it) {
+          var f = it.eq.ultimo_service || '';
+          if (!grupos[f]) grupos[f] = [];
+          grupos[f].push(it);
+        });
+        var fechas = Object.keys(grupos).sort(function(a, b) {
+          var pa = a.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          var pb = b.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (!pa || !pb) return 0;
+          return new Date(+pa[3], +pa[2]-1, +pa[1]) - new Date(+pb[3], +pb[2]-1, +pb[1]);
+        });
+        var mid = Math.ceil(fechas.length / 2);
+        for (var i = mid; i < fechas.length; i++) {
+          grupos[fechas[i]].forEach(function(it) { it.color = 'amarillo'; });
+        }
+      }
+      items.sort(function(a, b) {
+        var pa = PRIORIDAD[a.color], pb = PRIORIDAD[b.color];
+        if (pa !== pb) return pa - pb;
+        if (a.color === 'negro' || a.color === 'gris') return b.diasSinService - a.diasSinService;
+        if (a.color === 'rojo' || a.color === 'amarillo') return b.diasSinService - a.diasSinService;
+        return a.eq.nro - b.eq.nro;
+      });
+      items.forEach(function(it) { it.sinFecha = it.color === 'gris'; });
+      return items;
     }
 
     function formatearFechaCortaRoot(str) {
       if (!str || str === '\u2014' || str === '-') return '\u2014';
       var partes = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (!partes) return str;
+      if (!partes) return escRoot(str);
       var dd = partes[1].padStart(2, '0');
       var mm = partes[2].padStart(2, '0');
       var fecha = new Date(+partes[3], +partes[2] - 1, +partes[1]);
@@ -432,7 +522,6 @@ body.modo-profesional .logo-sub { color: #111; }
     }
 
     var reporteRootBranch = null;
-    var reporteRootRanking = null;
 
     function abrirReporteRoot(branchId) {
       reporteRootBranch = branchId;
@@ -462,15 +551,17 @@ body.modo-profesional .logo-sub { color: #111; }
             return;
           }
           var ranking = generarRankingRoot(equipos);
-          reporteRootRanking = { ranking: ranking, branchName: nombres[branchId] || branchId };
-          var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
-          var h = '<table class="reporte-tabla-root"><thead><tr><th>#</th><th>Piso</th><th>Ubicaci\u00f3n</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>\u00daltimo service</th></tr></thead><tbody>';
+          var SEMAFORO_HEX = { rojo: '#dc2626', amarillo: '#eab308', verde: '#22c55e', negro: '#1e1e1e', gris: '#9ca3af' };
+          var SEMAFORO_LABEL = { rojo: 'Vencido', amarillo: 'Vencido', verde: 'OK', negro: 'No funciona', gris: 'Sin registro' };
+          var h = '<table class="reporte-tabla-root"><thead><tr><th>Semaforo</th><th>#</th><th>Piso</th><th>Ubicaci\u00f3n</th><th>Marca</th><th>Capacidad</th><th>\u00daltimo service</th></tr></thead><tbody>';
           ranking.forEach(function(item) {
             var eq = item.eq;
-            var c = colores[eq.estado] || '#999';
+            var sc = SEMAFORO_HEX[item.color];
+            var sl = SEMAFORO_LABEL[item.color];
             var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
             var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCortaRoot(eq.ultimo_service);
-            h += '<tr><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + escRoot(eq.ubicacion) + '</td><td>' + escRoot(eq.marca || '-') + '</td><td>' + escRoot(eq.capacidad || '-') + '</td><td><span class="estado-badge" style="background:' + c + '">' + escRoot(eq.estado) + '</span></td><td>' + fechaHtml + '</td></tr>';
+            var borderStyle = item.color === 'gris' ? 'border:2px solid #dc2626;' : '';
+            h += '<tr><td style="text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#fff;background:' + sc + ';' + borderStyle + '">' + escRoot(sl) + '</span></td><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + escRoot(eq.ubicacion) + '</td><td>' + escRoot(eq.marca || '-') + '</td><td>' + escRoot(eq.capacidad || '-') + '</td><td>' + fechaHtml + '</td></tr>';
           });
           h += '</tbody></table>';
           document.getElementById('reporte-root-body').innerHTML = h;
@@ -484,48 +575,129 @@ body.modo-profesional .logo-sub { color: #111; }
       document.getElementById('reporte-overlay-root').classList.remove('activo');
     }
 
-    function descargarPDFRoot() {
-      if (!reporteRootRanking) return;
-      var ranking = reporteRootRanking.ranking;
-      var branchName = reporteRootRanking.branchName;
-      var colores = { 'OK': '#2ecc71', 'Necesita service': '#ff6900', 'No funciona': '#666' };
-      var now = new Date();
-      var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-      var rows = '';
-      ranking.forEach(function(item, i) {
-        var eq = item.eq;
-        var c = colores[eq.estado] || '#999';
-        var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
-        var fecha = item.sinFecha ? '<em style="color:#ff6900">Sin registro</em>' : escRoot(eq.ultimo_service);
-        rows += '<tr><td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center;font-weight:700;color:#555">' + eq.nro + '</td>'
-          + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center"><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:3px;background:#fff3e0;color:#ff6900">' + pisoLabel + '</span></td>'
-          + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + escRoot(eq.ubicacion) + '</td>'
-          + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + escRoot(eq.marca || '-') + '</td>'
-          + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + escRoot(eq.capacidad || '-') + '</td>'
-          + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:center"><span style="background:' + c + ';color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">' + escRoot(eq.estado) + '</span></td>'
-          + '<td style="padding:6px 8px;border-bottom:1px solid #e0e0e0">' + fecha + '</td></tr>';
-      });
-      var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte — ' + branchName + '</title>'
-        + '<style>@page{margin:15mm}body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;color:#333}'
-        + '.header{background:#ff6900;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0}'
-        + '.header h1{margin:0;font-size:18px}.header p{margin:4px 0 0;opacity:0.85;font-size:12px}'
-        + 'table{width:100%;border-collapse:collapse;font-size:12px;margin-top:0}'
-        + 'th{background:#ff6900;color:#fff;padding:8px;text-align:left;font-size:11px}'
-        + '.footer{margin-top:20px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:8px}'
-        + '</style></head><body>'
-        + '<div class="header"><h1>Reporte de equipos para service de mantenimiento</h1>'
-        + '<p>' + branchName + ' — ' + fechaStr + '</p></div>'
-        + '<table><thead><tr><th>#</th><th>Piso</th><th>Ubicaci\u00f3n</th><th>Marca</th><th>Capacidad</th><th>Estado</th><th>\u00daltimo service</th></tr></thead><tbody>'
-        + rows + '</tbody></table>'
-        + '<div class="footer">DyP — Desarrollos y Proyectos | Centro Motors</div>'
-        + '</body></html>';
-      var iframe = document.createElement('iframe');
-      iframe.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;border:none;opacity:0';
-      document.body.appendChild(iframe);
-      iframe.contentDocument.open();
-      iframe.contentDocument.write(html);
-      iframe.contentDocument.close();
-      setTimeout(function() { iframe.contentWindow.print(); }, 300);
+    function descargarPDFRoot(branchName) {
+      var branchKey = branchName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ /g, '-');
+      fetch('/api/equipos/' + branchKey)
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+          var equipos = Array.isArray(data) ? data : (data.equipos || []);
+          var now = new Date();
+          var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+          function parsearDiasRoot(str) {
+            var s = (str || '').trim();
+            if (!s || s === '—' || s === '-') return null;
+            var partes = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (!partes) return null;
+            var f = new Date(+partes[3], +partes[2] - 1, +partes[1]);
+            return Math.floor((now - f) / 86400000);
+          }
+          var ranking = equipos.map(function(eq) {
+            var color = 'gris';
+            var dias = parsearDiasRoot(eq.ultimo_service);
+            if (eq.estado === 'No funciona') color = 'negro';
+            else if (!eq.ultimo_service || eq.ultimo_service === '\u2014' || eq.ultimo_service === '-') color = 'gris';
+            else if (eq.estado === 'OK') color = 'verde';
+            else {
+              var intervaloDias = (eq.intervalo_meses || 6) * 30;
+              if (dias !== null && dias > intervaloDias) color = 'rojo';
+              else color = 'verde';
+            }
+            return { eq: eq, color: color, diasSinService: dias || Infinity };
+          });
+          var vencidos = ranking.filter(function(it) { return it.color === 'rojo'; });
+          if (vencidos.length > 1) {
+            var grupos = {};
+            vencidos.forEach(function(it) {
+              var f = it.eq.ultimo_service || '';
+              if (!grupos[f]) grupos[f] = [];
+              grupos[f].push(it);
+            });
+            var fechas = Object.keys(grupos).sort(function(a, b) {
+              var pa = a.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+              var pb = b.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+              if (!pa || !pb) return 0;
+              return new Date(+pa[3], +pa[2]-1, +pa[1]) - new Date(+pb[3], +pb[2]-1, +pb[1]);
+            });
+            var mid = Math.ceil(fechas.length / 2);
+            for (var i = mid; i < fechas.length; i++) {
+              grupos[fechas[i]].forEach(function(it) { it.color = 'amarillo'; });
+            }
+          }
+          var PRIORIDAD = { rojo: 0, amarillo: 1, gris: 2, verde: 3, negro: 4 };
+          ranking.sort(function(a, b) {
+            var pa = PRIORIDAD[a.color], pb = PRIORIDAD[b.color];
+            if (pa !== pb) return pa - pb;
+            return b.diasSinService - a.diasSinService;
+          });
+          var body = [];
+          ranking.forEach(function(item) {
+            var eq = item.eq;
+            var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
+            var fecha = (!eq.ultimo_service || eq.ultimo_service === '—' || eq.ultimo_service === '-') ? 'Sin registro' : eq.ultimo_service;
+            var label = { rojo: 'Vencido', amarillo: 'Vencido', verde: 'OK', negro: 'No funciona', gris: 'Sin registro' }[item.color];
+            body.push([label, eq.nro, pisoLabel, eq.ubicacion, eq.marca || '-', eq.capacidad || '-', fecha]);
+          });
+          var jsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+          if (!jsPDF) { alert('Error: jsPDF no cargado'); return; }
+          var doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.setTextColor(255, 105, 0);
+          doc.text('Reporte de equipos para service de mantenimiento', 14, 18);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.setTextColor(100, 100, 100);
+          doc.text(branchName + ' \u2014 ' + fechaStr, 14, 25);
+          doc.autoTable({
+            startY: 30,
+            head: [['Semaforo', '#', 'Piso', 'Ubicaci\u00f3n', 'Marca', 'Capacidad', '\u00daltimo service']],
+            body: body,
+            styles: { fontSize: 8, cellPadding: 3 },
+            headStyles: { fillColor: [255, 105, 0], textColor: 255, fontStyle: 'bold' },
+            columnStyles: {
+              0: { cellWidth: 22, halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+              1: { cellWidth: 10, halign: 'center', fontStyle: 'bold' },
+              2: { cellWidth: 12, halign: 'center' }
+            },
+            margin: { left: 14, right: 14 },
+            didParseCell: function(data) {
+              if (data.section === 'body' && data.column.index === 0) {
+                var rowIdx = data.row.index;
+                var item = ranking[rowIdx];
+                var c = null;
+                if (item) {
+                  if (item.color === 'rojo') c = [220, 38, 38];
+                  else if (item.color === 'amarillo') c = [234, 179, 8];
+                  else if (item.color === 'verde') c = [34, 197, 94];
+                  else if (item.color === 'negro') c = [30, 30, 30];
+                  else if (item.color === 'gris') c = [156, 163, 175];
+                }
+                if (c) { data.cell.styles.fillColor = c; data.cell.styles.textColor = [255, 255, 255]; }
+                if (item && item.color === 'gris') { data.cell.styles.lineWidth = 0.5; data.cell.styles.lineColor = [220, 38, 38]; }
+              }
+              if (data.section === 'body' && data.column.index === 1) {
+                var rowIdx = data.row.index;
+                var item = ranking[rowIdx];
+                if (item && item.color === 'gris') {
+                  for (var ci = 0; ci < data.table.columns.length; ci++) {
+                    if (!data.table.body[rowIdx].cells[ci].styles.lineWidth || data.table.body[rowIdx].cells[ci].styles.lineWidth < 0.3) {
+                      data.table.body[rowIdx].cells[ci].styles.lineWidth = 0.3;
+                      data.table.body[rowIdx].cells[ci].styles.lineColor = [220, 38, 38];
+                    }
+                  }
+                }
+              }
+            }
+          });
+          var footerY = doc.lastAutoTable.finalY + 10;
+          doc.setFontSize(8);
+          doc.setTextColor(153, 153, 153);
+          doc.text('DyP — Desarrollos y Proyectos | Centro Motors', 105, footerY, { align: 'center' });
+          doc.save('reporte_' + branchName.toLowerCase().replace(/ /g, '_') + '.pdf');
+        })
+        .catch(function(err) {
+          console.error('Error generando PDF:', err);
+        });
     }
 
     function enviarReporteRoot() {
@@ -571,6 +743,109 @@ body.modo-profesional .logo-sub { color: #111; }
           setTimeout(function() { btn.disabled = false; btn.className = 'reporte-enviar-root'; btn.innerHTML = '<i class="ph ph-envelope-simple"></i> Enviar por mail'; }, 4000);
         });
     }
+
+    var branchNames = { 'sagrada-familia': 'Sagrada Familia', 'monsenor': 'Monse\u00f1or', 'colon': 'Col\u00f3n' };
+
+    function descargarPDFGeneral() {
+      var btn = document.getElementById('btn-reporte-general');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph ph-spinner"></i>';
+      var branches = ['sagrada-familia', 'monsenor', 'colon'];
+      var promises = branches.map(function(b) {
+        return fetch('/api/equipos/' + b)
+          .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function(data) {
+            var eqs = Array.isArray(data) ? data : (data.equipos || []);
+            return eqs.map(function(eq) { eq._branch = b; return eq; });
+          });
+      });
+      Promise.all(promises)
+        .then(function(results) {
+          var allEquipos = results[0].concat(results[1]).concat(results[2]);
+          var ranking = generarRankingRoot(allEquipos);
+          var SEMAFORO_HEX = { rojo: [220,38,38], amarillo: [234,179,8], verde: [34,197,94], negro: [30,30,30], gris: [156,163,175] };
+          var SEMAFORO_LABEL = { rojo: 'Vencido', amarillo: 'Vencido', verde: 'OK', negro: 'No funciona', gris: 'Sin registro' };
+          var now = new Date();
+          var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+          var body = [];
+          ranking.forEach(function(item) {
+            var eq = item.eq;
+            var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
+            var sucursal = branchNames[eq._branch] || eq._branch;
+            var fecha = (!eq.ultimo_service || eq.ultimo_service === '\u2014' || eq.ultimo_service === '-') ? 'Sin registro' : eq.ultimo_service;
+            var label = SEMAFORO_LABEL[item.color];
+            body.push([label, sucursal, eq.nro, pisoLabel, eq.ubicacion, eq.marca || '-', eq.capacidad || '-', fecha]);
+          });
+          var jsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+          if (!jsPDF) { alert('Error: jsPDF no cargado'); return; }
+          var doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.setTextColor(255, 105, 0);
+          doc.text('Reporte general de equipos para service de mantenimiento', 14, 14);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.setTextColor(100, 100, 100);
+          doc.text('Centro Motors \u2014 ' + fechaStr + ' \u2014 ' + allEquipos.length + ' equipos', 14, 21);
+          doc.autoTable({
+            startY: 26,
+            head: [['Semaforo', 'Sucursal', '#', 'Piso', 'Ubicaci\u00f3n', 'Marca', 'Capacidad', '\u00daltimo service']],
+            body: body,
+            styles: { fontSize: 7.5, cellPadding: 2.5 },
+            headStyles: { fillColor: [255, 105, 0], textColor: 255, fontStyle: 'bold' },
+            columnStyles: {
+              0: { cellWidth: 20, halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+              1: { cellWidth: 24 },
+              2: { cellWidth: 10, halign: 'center', fontStyle: 'bold' },
+              3: { cellWidth: 10, halign: 'center' }
+            },
+            margin: { left: 14, right: 14 },
+            didParseCell: function(data) {
+              if (data.section === 'body' && data.column.index === 0) {
+                var rowIdx = data.row.index;
+                var item = ranking[rowIdx];
+                var c = null;
+                if (item) {
+                  if (item.color === 'rojo') c = [220, 38, 38];
+                  else if (item.color === 'amarillo') c = [234, 179, 8];
+                  else if (item.color === 'verde') c = [34, 197, 94];
+                  else if (item.color === 'negro') c = [30, 30, 30];
+                  else if (item.color === 'gris') c = [156, 163, 175];
+                }
+                if (c) { data.cell.styles.fillColor = c; data.cell.styles.textColor = [255, 255, 255]; }
+                if (item && item.color === 'gris') { data.cell.styles.lineWidth = 0.5; data.cell.styles.lineColor = [220, 38, 38]; }
+              }
+              if (data.section === 'body' && data.column.index === 2) {
+                var rowIdx = data.row.index;
+                var item = ranking[rowIdx];
+                if (item && item.color === 'gris') {
+                  for (var ci = 0; ci < data.table.columns.length; ci++) {
+                    if (!data.table.body[rowIdx].cells[ci].styles.lineWidth || data.table.body[rowIdx].cells[ci].styles.lineWidth < 0.3) {
+                      data.table.body[rowIdx].cells[ci].styles.lineWidth = 0.3;
+                      data.table.body[rowIdx].cells[ci].styles.lineColor = [220, 38, 38];
+                    }
+                  }
+                }
+              }
+            }
+          });
+          var footerY = doc.lastAutoTable.finalY + 8;
+          doc.setFontSize(8);
+          doc.setTextColor(153, 153, 153);
+          doc.text('DyP \u2014 Desarrollos y Proyectos | Centro Motors', 150, footerY, { align: 'center' });
+          doc.save('reporte_general.pdf');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="ph ph-file-pdf"></i>';
+        })
+        .catch(function(err) {
+          console.error('Error generando reporte general:', err);
+          alert('Error al generar el reporte. Verific\u00e1 la conexi\u00f3n.');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="ph ph-file-pdf"></i>';
+        });
+    }
   </script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>

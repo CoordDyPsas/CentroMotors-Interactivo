@@ -1,5 +1,5 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQmzSSzvInJvvFDV-D_BTi7p5VrhUjfB3ja6uAy8v44epabHqWsOb6SZvnCMCVQCLnrZYFGoIOfKLnt/pub?gid=359397000&single=true&output=csv';
-const BRANCHES = { colon: 0, 'sagrada-familia': 8, monsenor: 16, hino: 24 };
+const BRANCHES = { colon: 0, 'sagrada-familia': 8, monsenor: 16, hino: 24, lexus: 32 };
 
 function parseCSV(csv, branchKey) {
   const offset = BRANCHES[branchKey];
