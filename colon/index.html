@@ -97,6 +97,60 @@ body { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background: #0d0d1a
 }
 body.modo-profesional .reporte-panel { background: rgba(10,10,10,0.95); border-color: rgba(255,255,255,0.08); }
 body.modo-profesional .reporte-header { background: rgba(81,81,81,0.85); }
+.ruta-actions {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 12px 20px 4px;
+}
+.ruta-actions .ruta-count { font-size: 12px; color: #888; margin-right: auto; }
+.ruta-btn {
+  background: transparent; color: #ff6900; border: 2px solid #ff6900; border-radius: 6px;
+  padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.ruta-btn:hover { background: rgba(255,105,0,0.1); }
+.ruta-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ruta-btn.primario { background: #ff6900; color: #fff; }
+.ruta-btn.primario:hover { background: #e65c00; }
+.ruta-check { width: 15px; height: 15px; accent-color: #ff6900; cursor: pointer; }
+.ruta-overlay {
+  display: none; position: fixed; inset: 0; z-index: 5100;
+  background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
+}
+.ruta-overlay.activo { display: flex; }
+.ruta-panel {
+  background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
+  width: 92%; max-width: 820px; max-height: 85vh; display: flex;
+  flex-direction: column; overflow: hidden;
+}
+.ruta-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: rgba(10,10,10,0.95);
+  border-bottom: 2px solid #ff6900; font-size: 16px; font-weight: 700;
+}
+.ruta-header .fecha-gen { font-weight: 400; font-size: 12px; color: #888; margin-left: 8px; }
+.ruta-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.ruta-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ruta-tabla th {
+  background: #ff6900; color: #fff; font-weight: 700; padding: 8px 10px;
+  text-align: left; position: sticky; top: 0; white-space: nowrap;
+}
+.ruta-tabla td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.ruta-tabla tr { cursor: pointer; }
+.ruta-tabla tr:hover td { background: rgba(255,105,0,0.08); }
+.ruta-tabla .num { text-align: center; font-weight: 700; }
+.ruta-tabla .paso { text-align: center; font-weight: 700; color: #ff6900; }
+.ruta-tabla .dist { text-align: right; font-variant-numeric: tabular-nums; }
+.ruta-totales {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+  justify-content: flex-end; align-items: center;
+}
+.ruta-totales .chip {
+  background: rgba(255,105,0,0.12); color: #ff6900; font-size: 12px; font-weight: 600;
+  padding: 4px 12px; border-radius: 12px;
+}
+body.modo-profesional .ruta-panel { background: rgba(10,10,10,0.95); border-color: rgba(255,255,255,0.08); }
+body.modo-profesional .ruta-header { background: rgba(81,81,81,0.85); }
+#ruta-svg { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5; }
 .lista-panel {
   background: rgba(15,15,25,0.98); border: 1px solid #333; border-radius: 12px;
   width: 90%; max-width: 500px; max-height: 80vh; display: flex;
@@ -750,6 +804,19 @@ body.modo-profesional .search-suggestions { background: #3a3a3a; border-color: #
   </div>
 </div>
 
+<div class="ruta-overlay" id="ruta-overlay" onclick="cerrarRuta()">
+  <div class="ruta-panel" onclick="event.stopPropagation()">
+    <div class="ruta-header">
+      <span>Ruta de service optimizada<span class="fecha-gen" id="ruta-panel-nombre">— Colón</span></span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="reporte-pdf" onclick="descargarPDFRuta('Colón','colon')"><i class="ph ph-download-simple"></i> PDF</button>
+        <button class="reporte-cerrar" onclick="cerrarRuta()"><i class="ph ph-x"></i></button>
+      </div>
+    </div>
+    <div class="ruta-body" id="ruta-body"></div>
+  </div>
+</div>
+
 <div class="contenedor">
   <div class="plano-wrapper" id="plano-wrapper">
     <div id="plano-container">
@@ -853,6 +920,9 @@ let equipoSeleccionado = null;
 let filtroEstado = null;
 let filtroMarca = null;
 let filtroCapacidad = null;
+let rutaSeleccion = new Set();
+let rutaAbierta = false;
+let rutaPasos = [];
 
 let zoom = 0.41;
 let panX = 0, panY = 0;
@@ -1163,6 +1233,24 @@ function renderizarMarcadores() {
   });
   actualizarStats();
   dibujarMinimapa();
+  if (rutaAbierta) refrescarRutaPorFiltros();
+}
+
+function refrescarRutaPorFiltros() {
+  if (!rutaAbierta) return;
+  const texto = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  const base = EQUIPOS.filter(e => rutaSeleccion.has(e.nro) && pasaFiltrosRuta(e, texto));
+  if (base.length < 2) { cerrarRuta(); return; }
+  generarRuta(base);
+  renderizarRuta();
+  dibujarRuta();
+}
+function pasaFiltrosRuta(eq, texto) {
+  if (filtroMarca && eq.marca !== filtroMarca) return false;
+  if (filtroCapacidad && eq.capacidad !== filtroCapacidad) return false;
+  if (filtroEstado && estadoClase(eq.estado) !== filtroEstado) return false;
+  if (texto && !String(eq.nro).includes(texto) && !(eq.ubicacion || '').toLowerCase().includes(texto)) return false;
+  return true;
 }
 
 function trackClick(accion, equipoNro, detalle) {
@@ -2315,7 +2403,7 @@ function abrirReporte() {
   } else {
     enviarBtn.style.display = 'none';
   }
-  var h = '<table class="reporte-tabla"><thead><tr><th>Semaforo</th><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Último service</th></tr></thead><tbody>';
+  var h = '<table class="reporte-tabla"><thead><tr><th style="width:34px"><input type="checkbox" class="ruta-check" title="Seleccionar todos" onchange="toggleRutaTodos(this)"></th><th>Semaforo</th><th>#</th><th>Piso</th><th>Ubicación</th><th>Marca</th><th>Capacidad</th><th>Último service</th></tr></thead><tbody>';
   ranking.forEach(function(item, i) {
     var eq = item.eq;
     var sc = SEMAFORO_HEX[item.color];
@@ -2323,15 +2411,272 @@ function abrirReporte() {
     var pisoLabel = eq.piso === 'pa' ? 'PA' : 'PB';
     var fechaHtml = item.sinFecha ? '<em style="color:#ff6900;font-style:italic">Sin registro</em>' : formatearFechaCorta(eq.ultimo_service);
     var borderStyle = item.color === 'gris' ? 'border:2px solid #dc2626;' : '';
-    h += '<tr><td style="text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#fff;background:' + sc + ';' + borderStyle + '">' + esc(sl) + '</span></td><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td>' + fechaHtml + '</td></tr>';
+    var checked = rutaSeleccion.has(eq.nro) ? ' checked' : '';
+    h += '<tr data-nro="' + eq.nro + '"><td style="text-align:center"><input type="checkbox" class="ruta-check marcador" data-nro="' + eq.nro + '"' + checked + ' onchange="toggleRutaSel(this);event.stopPropagation()"></td><td style="text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#fff;background:' + sc + ';' + borderStyle + '">' + esc(sl) + '</span></td><td class="num">' + eq.nro + '</td><td><span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(255,105,0,0.15);color:#ff6900">' + pisoLabel + '</span></td><td>' + esc(eq.ubicacion) + '</td><td>' + esc(eq.marca || '-') + '</td><td>' + esc(eq.capacidad || '-') + '</td><td>' + fechaHtml + '</td></tr>';
   });
   h += '</tbody></table>';
-  document.getElementById('reporte-body').innerHTML = h;
+  var nroVencidos = ranking.filter(function(it) { return it.color === 'rojo' || it.color === 'amarillo' || it.color === 'gris'; }).length;
+  var totalSel = rutaSeleccion.size;
+  var bar = '<div class="ruta-actions"><span class="ruta-count" id="ruta-count">' + totalSel + ' seleccionado' + (totalSel === 1 ? '' : 's') + '</span>' +
+    '<button class="ruta-btn" onclick="rutaPreset(\'vencidos\')" title="Marcar los equipos más urgentes (rojos, amarillos y sin registro)">Vencidos (' + nroVencidos + ')</button>' +
+    '<button class="ruta-btn" onclick="rutaPreset(\'limpiar\')">Limpiar</button>' +
+    '<button class="ruta-btn primario" id="btn-rutear" onclick="abrirRuta()" disabled><i class="ph ph-signpost"></i> Rutear (' + totalSel + ')</button></div>';
+  document.getElementById('reporte-body').innerHTML = bar + h;
+  actualizarBtnRutear();
   document.getElementById('reporte-overlay').classList.add('activo');
 }
 
 function cerrarReporte() {
   document.getElementById('reporte-overlay').classList.remove('activo');
+}
+
+function toggleRutaTodos(cb) {
+  document.querySelectorAll('#reporte-body .ruta-check.marcador').forEach(c => {
+    c.checked = cb.checked;
+    const nro = parseInt(c.dataset.nro, 10);
+    if (cb.checked) rutaSeleccion.add(nro); else rutaSeleccion.delete(nro);
+  });
+  actualizarBtnRutear();
+}
+function toggleRutaSel(cb) {
+  const nro = parseInt(cb.dataset.nro, 10);
+  if (cb.checked) rutaSeleccion.add(nro); else rutaSeleccion.delete(nro);
+  actualizarBtnRutear();
+}
+function rutaPreset(modo) {
+  const ranking = generarRanking(EQUIPOS);
+  if (modo === 'limpiar') {
+    rutaSeleccion.clear();
+  } else if (modo === 'vencidos') {
+    rutaSeleccion.clear();
+    ranking.forEach(it => {
+      if (it.color === 'rojo' || it.color === 'amarillo' || it.color === 'gris') rutaSeleccion.add(it.eq.nro);
+    });
+  }
+  document.querySelectorAll('#reporte-body .ruta-check.marcador').forEach(c => {
+    c.checked = rutaSeleccion.has(parseInt(c.dataset.nro, 10));
+  });
+  actualizarBtnRutear();
+}
+function actualizarBtnRutear() {
+  const n = rutaSeleccion.size;
+  const btn = document.getElementById('btn-rutear');
+  if (!btn) return;
+  btn.disabled = n < 2;
+  btn.innerHTML = '<i class="ph ph-signpost"></i> Rutear (' + n + ')';
+  const cont = document.getElementById('ruta-count');
+  if (cont) cont.textContent = n + ' seleccionado' + (n === 1 ? '' : 's');
+}
+
+function abrirRuta() {
+  if (rutaSeleccion.size < 2) return;
+  const seleccion = EQUIPOS.filter(e => rutaSeleccion.has(e.nro));
+  generarRuta(seleccion);
+  if (rutaPasos.length < 2) return;
+  rutaAbierta = true;
+  document.getElementById('ruta-overlay').classList.add('activo');
+  renderizarRuta();
+  dibujarRuta();
+  document.getElementById('reporte-overlay').classList.remove('activo');
+}
+
+function generarRuta(seleccion) {
+  const PRIORIDAD = { rojo: 0, amarillo: 1, gris: 2, verde: 3, negro: 4 };
+  const items = seleccion.map(eq => {
+    const c = clasificarEquipo(eq);
+    return { eq, color: c.color, dias: c.diasSinService };
+  }).sort((a, b) => {
+    if (PRIORIDAD[a.color] !== PRIORIDAD[b.color]) return PRIORIDAD[a.color] - PRIORIDAD[b.color];
+    if (a.color === 'verde' || a.color === 'negro') return a.eq.nro - b.eq.nro;
+    const da = a.dias === Infinity ? 1e9 : a.dias;
+    const db = b.dias === Infinity ? 1e9 : b.dias;
+    return db - da;
+  });
+  const pisoInicial = items.length ? items[0].eq.piso : null;
+  const pisoAlt = pisoInicial === 'pb' ? 'pa' : 'pb';
+  const pisoPrincipal = items.filter(it => it.eq.piso === pisoInicial);
+  const pisoSecundario = items.filter(it => it.eq.piso === pisoAlt);
+  const chunka = chunksPorUrgencia(pisoPrincipal);
+  const chunkb = chunksPorUrgencia(pisoSecundario);
+  const pasos = [];
+  [chunka, chunkb].forEach(chunks => {
+    chunks.forEach(bloque => {
+      const rest = bloque.items.map(it => it.eq);
+      let actual = pasos.length ? pasos[pasos.length - 1] : null;
+      const orden = [];
+      while (rest.length) {
+        let idx = 0;
+        let mejor = null;
+        let mejorD = Infinity;
+        rest.forEach((cand, i) => {
+          const d = actual ? Math.hypot(cand.x - actual.x, cand.y - actual.y) : 0;
+          if (d < mejorD) { mejorD = d; mejor = cand; idx = i; }
+        });
+        const eq = rest.splice(idx, 1)[0];
+        orden.push(eq);
+        actual = eq;
+      }
+      optimizarBloque(orden).forEach(eq => pasos.push(eq));
+    });
+  });
+  let acum = 0;
+  rutaPasos = pasos.map((eq, i) => {
+    const prev = i > 0 ? pasos[i - 1] : null;
+    const d = prev ? Math.round(Math.hypot(eq.x - prev.x, eq.y - prev.y)) : 0;
+    acum += d;
+    return { eq, orden: i + 1, distParcial: d, distAcum: acum };
+  });
+}
+function chunksPorUrgencia(lista) {
+  const chunks = [];
+  lista.forEach(it => {
+    const ult = chunks[chunks.length - 1];
+    if (!ult || ult.color !== it.color) chunks.push({ color: it.color, items: [it] });
+    else ult.items.push(it);
+  });
+  return chunks;
+}
+function optimizarBloque(pts) {
+  const n = pts.length;
+  if (n < 4) return pts;
+  let mejorado = true;
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  while (mejorado) {
+    mejorado = false;
+    for (let i = 0; i < n - 2; i++) {
+      for (let j = i + 2; j < n - 1; j++) {
+        const a = pts[i], b = pts[i + 1], c = pts[j], d = pts[j + 1];
+        if (dist(a, b) + dist(c, d) > dist(a, c) + dist(b, d)) {
+          const seg = pts.splice(i + 1, j - i).reverse();
+          pts.splice(i + 1, 0, ...seg);
+          mejorado = true;
+        }
+      }
+    }
+  }
+  return pts;
+}
+
+function renderizarRuta() {
+  const body = document.getElementById('ruta-body');
+  if (!rutaAbierta) { body.innerHTML = ''; return; }
+  let h = '<table class="ruta-tabla"><thead><tr><th>Orden</th><th>#</th><th>Piso</th><th>Ubicación</th><th>Estado</th><th>Último service</th><th>Dist. parcial</th><th>Dist. acumulada</th></tr></thead><tbody>';
+  const PISO_LABEL = { pb: 'PB', pa: 'PA' };
+  rutaPasos.forEach(p => {
+    const eq = p.eq;
+    const cls = estadoClase(eq.estado);
+    const dot = eq.estado === 'OK' ? '#2ecc71' : eq.estado === 'No funciona' ? '#666' : '#ff6900';
+    const fecha = (!eq.ultimo_service || eq.ultimo_service === '—' || eq.ultimo_service === '-') ? '—' : esc(eq.ultimo_service);
+    h += '<tr onclick="centrarEnRuta(' + eq.nro + ')"><td class="paso">' + p.orden + '</td><td class="num">#' + eq.nro + '</td><td class="num">' + PISO_LABEL[eq.piso] + '</td><td>' + esc(eq.ubicacion) + '</td><td><span class="dot" style="background:' + dot + ';width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px"></span>' + esc(eq.estado || '-') + '</td><td>' + fecha + '</td><td class="dist">' + p.distParcial + ' px</td><td class="dist"><strong>' + p.distAcum + ' px</strong></td></tr>';
+  });
+  const total = rutaPasos.length ? rutaPasos[rutaPasos.length - 1].distAcum : 0;
+  h += '</tbody></table>';
+  h += '<div class="ruta-totales"><span class="chip"><i class="ph ph-shopping-cart"></i> ' + rutaPasos.length + ' equipos</span><span class="chip"><i class="ph ph-path"></i> ' + total + ' px recorridos (en plano)</span><span class="chip"><i class="ph ph-info"></i> Click en una fila centra el equipo en el plano</span></div>';
+  body.innerHTML = h;
+}
+
+function dibujarRuta() {
+  const old = document.getElementById('ruta-svg');
+  if (old) old.remove();
+  if (!rutaAbierta) return;
+  const pasosPiso = rutaPasos.filter(p => p.eq.piso === pisoActual);
+  if (pasosPiso.length < 2) return;
+  const W = IMG_W, H = IMG_H;
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('id', 'ruta-svg');
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('width', W + 'px');
+  svg.setAttribute('height', H + 'px');
+  const poly = document.createElementNS(NS, 'polyline');
+  poly.setAttribute('points', pasosPiso.map(p => p.eq.x + ',' + p.eq.y).join(' '));
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', '#ff6900');
+  poly.setAttribute('stroke-width', '4');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  poly.setAttribute('opacity', '0.85');
+  svg.appendChild(poly);
+  pasosPiso.forEach(p => {
+    const g = document.createElementNS(NS, 'g');
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', p.eq.x);
+    c.setAttribute('cy', p.eq.y);
+    c.setAttribute('r', '17');
+    c.setAttribute('fill', '#ff6900');
+    c.setAttribute('stroke', '#fff');
+    c.setAttribute('stroke-width', '3');
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', p.eq.x);
+    t.setAttribute('y', p.eq.y + 5);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', '14');
+    t.setAttribute('font-weight', 'bold');
+    t.setAttribute('fill', '#fff');
+    t.textContent = p.orden;
+    g.appendChild(c);
+    g.appendChild(t);
+    svg.appendChild(g);
+  });
+  container.appendChild(svg);
+}
+function centrarEnRuta(nro) {
+  const p = rutaPasos.find(x => x.eq.nro === nro);
+  if (!p) return;
+  if (p.eq.piso !== pisoActual) {
+    cambiarPiso(p.eq.piso);
+    setTimeout(function () { centrarEnMarker(p.eq); flashMarker(nro); }, 360);
+  } else {
+    centrarEnMarker(p.eq);
+    flashMarker(nro);
+  }
+}
+function cerrarRuta() {
+  rutaAbierta = false;
+  document.getElementById('ruta-overlay').classList.remove('activo');
+  const s = document.getElementById('ruta-svg');
+  if (s) s.remove();
+}
+function descargarPDFRuta(branchName, branchKey) {
+  var jsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+  if (!jsPDF) { alert('Error: jsPDF no cargado'); return; }
+  var now = new Date();
+  var fechaStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  var PISO_LABEL = { pb: 'PB', pa: 'PA' };
+  var body = rutaPasos.map(function(p) {
+    var eq = p.eq;
+    return [p.orden, eq.nro, PISO_LABEL[eq.piso], eq.ubicacion, eq.estado || '-', (!eq.ultimo_service || eq.ultimo_service === '—' || eq.ultimo_service === '-') ? '-' : eq.ultimo_service, p.distParcial + ' px', p.distAcum + ' px'];
+  });
+  var total = rutaPasos.length ? rutaPasos[rutaPasos.length - 1].distAcum : 0;
+  var doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(255, 105, 0);
+  doc.text('Ruta de service optimizada - ' + branchName, 14, 18);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Generada: ' + fechaStr + '   |   ' + rutaPasos.length + ' equipos   |   ' + total + ' px en plano', 14, 25);
+  doc.autoTable({
+    startY: 30,
+    head: [['Orden', '#', 'Piso', 'Ubicación', 'Estado', 'Último service', 'Dist. parcial', 'Dist. acumulada']],
+    body: body,
+    styles: { fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: [255, 105, 0], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 14, halign: 'center', fontStyle: 'bold' },
+      1: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
+      2: { cellWidth: 12, halign: 'center' },
+      6: { cellWidth: 20, halign: 'right' },
+      7: { cellWidth: 24, halign: 'right', fontStyle: 'bold' }
+    },
+    margin: { left: 14, right: 14 }
+  });
+  var footerY = (doc.lastAutoTable ? doc.lastAutoTable.finalY : 30) + 10;
+  doc.setFontSize(8);
+  doc.setTextColor(153, 153, 153);
+  doc.text('DyP — Desarrollos y Proyectos | Centro Motors', 105, footerY, { align: 'center' });
+  doc.save('ruta_' + branchKey + '.pdf');
 }
 
 function enviarReporte(branch, branchName) {

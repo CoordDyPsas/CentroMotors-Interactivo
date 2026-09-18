@@ -155,6 +155,20 @@ npx wrangler d1 execute dyp-tracking --local --command "SELECT 1;"
     Estados del botÃ³n: loading â†’ enviado âœ“ / error (auto-reset 3-4s).
 - Modos de diseÃ±o con `body.modo-profesional` (Claro) / sin clase (oscuro), persistidos en
   `localStorage` (`dyp_tema`).
+- **Ruteo de service** (feature reciente): en el overlay del reporte hay una columna de
+  checkboxes por equipo + barra de acciÃ³n (Vencidos / Limpiar / Rutear (n)). `generarRuta()`
+  ordena por urgencia (rojoâ†’amarilloâ†’grisâ†’verdeâ†’negro, primera fecha vencida dentro del
+  color), arranca en el mÃ¡s urgente, agrupa por bloques de color (`chunksPorUrgencia`) y
+  resuelve cada bloque con greedy del vecino mÃ¡s cercano (distancia en px del plano) +
+  **`optimizarBloque()` (2-opt)** que elimina cruces/retrocesos manteniendo fijo el primer
+  equipo del bloque; separa
+  pisos (primero el piso del equipo mÃ¡s urgente). `renderizarRuta()` lista Orden/#/Piso/
+  UbicaciÃ³n/Estado/Ãšltimo service/Dist. parcial/Dist. acumulada. `dibujarRuta()` crea un SVG
+  dinÃ¡mico `#ruta-svg` dentro del container del plano (polilÃ­nea #ff6900 + nÃºmeros) que hereda
+  zoom/pan y se redibuja con el piso. Click en fila centra el equipo (`centrarEnRuta`, cambia
+  de piso si hace falta). `refrescarRutaPorFiltros()` (hook al final de `renderizarMarcadores`)
+  recalcula la ruta con filtros/bÃºsqueda activos y la cierra si quedan <2 equipos.
+  `descargarPDFRuta()` genera `ruta_<branch>.pdf` con jsPDF 2.5.2 + jspdf-autotable 3.8.4.
 
 ## 7. SincronizaciÃ³n de datos (Google Sheets â†’ app)
 
@@ -365,3 +379,33 @@ px wrangler d1 execute dyp-tracking --remote --file.
   - `reporteRootRanking`: eliminado (variable declarada y asignada, nunca leída).
   - `refrescarCardsDesdePlanilla`: cache en `sessionStorage` con TTL 5 min (`cards_api_<branch>`); datos cacheados se aplican sin fade; fetch fresco aplica con fade y persiste en cache.
   Deploy: a4aa3d24.relevamientocm.pages.dev. Verificación: `node --check` de todos los .js y extracción+check del JS inline de los 4 HTML.
+
+- **18/09/2026** — **Herramienta de ruteo de service en las 3 sucursales** (colon, monsenor,
+  sagrada-familia). En el overlay del reporte: columna de checkboxes (header = "seleccionar
+  todos") + barra de acción con "Vencidos (n)" / "Limpiar" / "Rutear (n)". Algoritmo en
+  `generarRuta()`: sort por urgencia (rojo→amarillo→gris→verde→negro; mismo color → primera
+  fecha vencida; verde/negro → por nro), arranca en el más urgente, separa pisos (primero el
+  del más urgente), `chunksPorUrgencia()` agrupa bloques consecutivos por color y cada bloque
+  se resuelve con greedy del vecino más cercano (distancia euclidiana en px) + **`optimizarBloque()`**
+  (2-opt): reordena el bloque eliminando cruces/retrocesos con el primer equipo fijo (el más
+  urgente del bloque; en el piso 2, el más cercano al final del piso 1). En validación con
+  datos reales de Colón (26 vencidos) el recorrido bajó de 5755 px a 5233 px (9%) y el orden
+  quedó #35→#42 determinista. `renderizarRuta()`
+  tabla Orden/#/Piso/Ubicación/Estado/Último service/Dist. parcial/Dist. acumulada + chips.
+  `dibujarRuta()` SVG dinámico `#ruta-svg` dentro del container (polilínea #ff6900 + círculos
+  numerados), hereda zoom/pan y se redibuja al cambiar de piso (sagrada usa `curImgW/curImgH`;
+  colon/monsenor `IMG_W/IMG_H`). Click en fila = `centrarEnRuta()` (cambia de piso 300ms +
+  centra + flash). `refrescarRutaPorFiltros()` hook al final de `renderizarMarcadores` recalcula
+  la ruta con filtros/búsqueda activos y la cierra si quedan <2 equipos. `cerrarRuta()` limpia
+  overlay+SVG. `descargarPDFRuta()` genera `ruta_<branch>.pdf` con jsPDF 2.5.2 +
+  jspdf-autotable 3.8.4 (ya cargadas; sin librerías nuevas). Fix durante la implementación:
+  `chunksPorUrgencia` devuelve `{color, items}` → `bloque.items.map(...)` (no `bloque.map`).
+  Verificación: `node --check` del JS inline de los 3 HTML + test en Node del algoritmo con
+  datos reales de Colón (26 vencidos → orden #35→#42, determinista).
+  **Deploy a producción**: `2f95cacf` (Production, main, `npx wrangler pages deploy . --project-name
+  relevamientocm --branch main`). Verificado: `/colon/` → 302 a `/login` (auth obligatoria OK),
+  `/login` → 200, `/api/equipos/sagrada-familia` sin sesión → 401 `{"error":"No autorizado"}`
+  (middleware OK). **Nota wrangler**: wrangler 4.135 muestra warning de que `wrangler.toml`
+  (binding D1) se ignora por falta de `pages_build_output_dir` — es análogo al deploy anterior
+  `a4aa3d24`; las funciones siguen funcionando (el 401 lo confirma) y el binding D1 se
+  configura vía Dashboard.**
