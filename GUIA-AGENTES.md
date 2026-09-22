@@ -409,3 +409,13 @@ px wrangler d1 execute dyp-tracking --remote --file.
   (binding D1) se ignora por falta de `pages_build_output_dir` — es análogo al deploy anterior
   `a4aa3d24`; las funciones siguen funcionando (el 401 lo confirma) y el binding D1 se
   configura vía Dashboard.**
+
+- **22/09/2026** — **Service reciente en Colón 11, 21, 22, 23, 24, 25, 35 y 39**. La planilla
+  (Google Sheets) muestra para esos equipos `ultimo_service 19/09/2026`, estado OK y OTs
+  nuevas (11→9705, 21/22/23→9707, 24/25/35→9703, 39→9706). Actualizados los datos maestros
+  en `colon/index.html` (solo cambiaron `ultimo_service`, `estado` y `ot`; ubicación/marca/
+  capacidad/piso/x/y intactos). Registradas las OTs nuevas en `ot_historial` con
+  `db/ot_historial_colon_2026_09.sql` (INSERT OR IGNORE, PK compuesta branch+equipo_nro+ot)
+  manteniendo visibles las anteriores (11→6616+5552, 21/22/23→6974/3586, 24/25→6938, 35→5927,
+  39→6940). Verificado en D1 remoto: cada equipo tiene OTs viejas + nueva. Sintaxis OK
+  (`node --check`). Commit + push + deploy necesarios.
