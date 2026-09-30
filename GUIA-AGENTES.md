@@ -410,6 +410,26 @@ px wrangler d1 execute dyp-tracking --remote --file.
   `a4aa3d24`; las funciones siguen funcionando (el 401 lo confirma) y el binding D1 se
   configura vía Dashboard.**
 
+- **23/09/2026** — **Reset de contraseña usuario Aberrondo**. `aberrondo@centromotorsa.com.ar`
+  (visitante, activo, creado 28/07/2026). Contraseña resetada a **`Dypsas2026`** (hash bcrypt
+  cost 10 vía bcryptjs, generado con `bcrypt.hashSync(pw, 10)` — mismo método que
+  `functions/api/admin/usuarios.js`). Aplicado en D1 remoto con `db/reset_pw_aberrondo.sql`
+  (`UPDATE usuarios SET password_hash`, 1 row written, verificado que el hash almacenado
+  coincide con el generado). El login (`functions/api/login.js` usa `bcrypt.compareSync`)
+  queda funcional con la nueva contraseña.
+
+- **23/09/2026** — **Alineación total con la planilla (30/09/2026)**. Sync completo entre
+  Google Sheets y los HTMLs en las 3 sucursales. **Colón**: 17 equipos con service 26/09/2026
+  → OK con OTs nuevas 9779/9780/9782/9783/9784/9785/9786/9787 (14, 18, 20, 26, 27, 29, 30, 31,
+  32, 34, 41, 42, 44, 46, 47, 48, 49), + ajuste de estados por fórmula de vencimiento
+  (1 y 15 → No funciona; 16, 17 y 36 → Necesita service). **Monseñor**: #16 Sala rack data →
+  Necesita service (vencido por fórmula, últ. service 27/03/2026). **Sagrada Familia** sin
+  cambios. OTs nuevas registradas en `ot_historial` con `db/ot_historial_colon_2026_09_26.sql`
+  (INSERT OR IGNORE), manteniendo las anteriores visibles (14→6614, 18→7929, 20→6522,
+  26/27→6963, 29/32→6970, 30/31→6969, 44→6479, 48→7281). Diff verificado programáticamente:
+  0/52 colon, 0/18 sagrada-familia, 0/24 monsenor vs CSV de Google Sheets. Commit + push +
+  deploy necesarios.
+
 - **22/09/2026** — **Service reciente en Colón 11, 21, 22, 23, 24, 25, 35 y 39**. La planilla
   (Google Sheets) muestra para esos equipos `ultimo_service 19/09/2026`, estado OK y OTs
   nuevas (11→9705, 21/22/23→9707, 24/25/35→9703, 39→9706). Actualizados los datos maestros

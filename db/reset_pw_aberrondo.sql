@@ -1,0 +1,1 @@
+UPDATE usuarios SET password_hash = '$2a$10$gcRx9AEboPkJhF9vE5nSHe0LFcNH6OEfclAbKHKghR9Jps2opjyk.' WHERE LOWER(email) = 'aberrondo@centromotorsa.com.ar';
