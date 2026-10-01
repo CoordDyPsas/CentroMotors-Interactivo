@@ -418,6 +418,14 @@ px wrangler d1 execute dyp-tracking --remote --file.
   coincide con el generado). El login (`functions/api/login.js` usa `bcrypt.compareSync`)
   queda funcional con la nueva contraseña.
 
+- **23/09/2026** — **Fotos nuevas en Colón 27, 41, 44, 48, 49**. El usuario agregó en
+  `colon/` los archivos `Equipo 27.jpeg`, `Equipo 41.jpeg`, `Equipo 44.jpeg`, `Equipo 48.jpeg`
+  y `Equipo 49.jpeg` (tamaños 0.04–0.13 MB, antes untracked en git). Se referenciaron en los
+  arrays `fotos` de esos equipos en `colon/index.html` (todos estaban con `fotos:[]`). Colón
+  pasa de 35 a **40 equipos con foto**; quedan 12 sin foto: 15, 19, 26, 37, 38, 42, 43, 45,
+  46, 47, 50, 51. Verificado: sintaxis OK (`node --check` de EQUIPOS) y todos los archivos
+  referenciados existen en disco. Commit + push + deploy necesarios (incluye los 5 .jpeg).
+
 - **23/09/2026** — **Alineación total con la planilla (30/09/2026)**. Sync completo entre
   Google Sheets y los HTMLs en las 3 sucursales. **Colón**: 17 equipos con service 26/09/2026
   → OK con OTs nuevas 9779/9780/9782/9783/9784/9785/9786/9787 (14, 18, 20, 26, 27, 29, 30, 31,
