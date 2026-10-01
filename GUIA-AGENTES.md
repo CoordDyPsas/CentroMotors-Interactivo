@@ -418,6 +418,12 @@ px wrangler d1 execute dyp-tracking --remote --file.
   coincide con el generado). El login (`functions/api/login.js` usa `bcrypt.compareSync`)
   queda funcional con la nueva contraseña.
 
+- **23/09/2026** — **OT 9779 quitada del historial de Colón #47**: la OT 9779 no correspondía a
+  ese equipo (error de carga del batch 26/09/2026). Se ejecutó un DELETE en `ot_historial`
+  (`db/ot_historial_colon47_del9779.sql`) con cláusula `WHERE branch='colon' AND equipo_nro=47
+  AND ot='9779'`, dejando solo la 9781 vigente (verificada por SELECT). Sin cambios en HTML
+  (la tarjeta Historial OT sale de D1). Commit + push + deploy necesarios.
+
 - **23/09/2026** — **OT corregida Colón #47 (Electrica)**: la planilla muestra la OT **9781**
   para el batch 26/09/2026 (antes figuraba 9779). Actualizado `colon/index.html` (`ot: "9781"`,
   resto del equipo intacto: Midea 5000, OK, 26/09/2026) y registrada la OT nueva en

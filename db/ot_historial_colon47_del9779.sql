@@ -1,0 +1,1 @@
+DELETE FROM ot_historial WHERE branch='colon' AND equipo_nro=47 AND ot='9779';
