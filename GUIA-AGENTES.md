@@ -418,6 +418,13 @@ px wrangler d1 execute dyp-tracking --remote --file.
   coincide con el generado). El login (`functions/api/login.js` usa `bcrypt.compareSync`)
   queda funcional con la nueva contraseña.
 
+- **23/09/2026** — **OT corregida Colón #47 (Electrica)**: la planilla muestra la OT **9781**
+  para el batch 26/09/2026 (antes figuraba 9779). Actualizado `colon/index.html` (`ot: "9781"`,
+  resto del equipo intacto: Midea 5000, OK, 26/09/2026) y registrada la OT nueva en
+  `ot_historial` con `db/ot_historial_colon47_9781.sql` (INSERT OR IGNORE, PK compuesta),
+  conservando la 9779 anterior (ambas visibles en la tarjeta Historial OT). Diff vs planilla
+  verificado: 0/52 colon, 0/18 sagrada, 0/24 monsenor. Commit + push + deploy necesarios.
+
 - **23/09/2026** — **Conteo de fotos en menú raíz actualizado**. En `Planos interactivos -
   Centro Motors.html`, el campo `fotos` de `SUCURSALES` para Colón se actualizó de 35 a **40**
   (sagrada-familia 18 y monsenor 21 ya correctos). El conteo es estático porque la planilla
