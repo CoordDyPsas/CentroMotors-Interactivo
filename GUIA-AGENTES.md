@@ -418,6 +418,14 @@ px wrangler d1 execute dyp-tracking --remote --file.
   coincide con el generado). El login (`functions/api/login.js` usa `bcrypt.compareSync`)
   queda funcional con la nueva contraseña.
 
+- **23/09/2026** — **Conteo de fotos en menú raíz actualizado**. En `Planos interactivos -
+  Centro Motors.html`, el campo `fotos` de `SUCURSALES` para Colón se actualizó de 35 a **40**
+  (sagrada-familia 18 y monsenor 21 ya correctos). El conteo es estático porque la planilla
+  (Google Sheets) no tiene columna de fotos (los archivos son locales del repo); por eso
+  `refrescarCardsDesdePlanilla()` sigue usando `s.fotos` — solo chequea estados vía
+  `/api/equipos/[branch]` y el texto "· N con foto" sale del valor estático. Verificado que
+  40 == equipos con `fotos.length>0` en `colon/index.html`. Commit + push + deploy necesarios.
+
 - **23/09/2026** — **Fotos nuevas en Colón 27, 41, 44, 48, 49**. El usuario agregó en
   `colon/` los archivos `Equipo 27.jpeg`, `Equipo 41.jpeg`, `Equipo 44.jpeg`, `Equipo 48.jpeg`
   y `Equipo 49.jpeg` (tamaños 0.04–0.13 MB, antes untracked en git). Se referenciaron en los
