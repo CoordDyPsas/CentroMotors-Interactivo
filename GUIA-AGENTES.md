@@ -424,6 +424,20 @@ px wrangler d1 execute dyp-tracking --remote --file.
   AND ot='9779'`, dejando solo la 9781 vigente (verificada por SELECT). Sin cambios en HTML
   (la tarjeta Historial OT sale de D1). Commit + push + deploy necesarios.
 
+- **23/09/2026** — **OT 9779 quitada del historial de Colón #47**: la OT 9779 no correspondía a
+  ese equipo (error de carga del batch 26/09/2026). Se ejecutó un DELETE en `ot_historial`
+  (`db/ot_historial_colon47_del9779.sql`) con cláusula `WHERE branch='colon' AND equipo_nro=47
+  AND ot='9779'`, dejando solo la 9781 vigente (verificada por SELECT). Sin cambios en HTML
+  (la tarjeta Historial OT sale de D1). Commit + push + deploy necesarios.
+- **23/09/2026** — **Service reciente en Sagrada Familia (17/09/2026)**: actualización masiva de
+  10 equipos (#1,2,3,4,5,6,7,8,11,12) con service **17/09/2026**, estado **OK** y OTs nuevas
+  **9979/9980/9981/9982** (distribución por equipo según planilla). Actualizados en
+  `sagrada-familia/index.html` (ultimo_service/estado/ot). **Intercambio de ubicación** entre
+  #16 y #17 según planilla: #16 pasa de Repuestos→**Garantia**, #17 pasa de
+  Garantía→**Repuestos** (se mantuvieron coords, piso y fotos originales de cada equipo). Se
+  registraron las OTs nuevas en `ot_historial` con `db/ot_historial_sagrada_2026_09_17.sql`
+  (INSERT OR IGNORE, PK compuesta) conservando las anteriores. Diff vs planilla verificado:
+  **0/18**. Commit + push + deploy necesarios.
 - **23/09/2026** — **OT corregida Colón #47 (Electrica)**: la planilla muestra la OT **9781**
   para el batch 26/09/2026 (antes figuraba 9779). Actualizado `colon/index.html` (`ot: "9781"`,
   resto del equipo intacto: Midea 5000, OK, 26/09/2026) y registrada la OT nueva en
