@@ -445,6 +445,20 @@ px wrangler d1 execute dyp-tracking --remote --file.
   conservando la 9779 anterior (ambas visibles en la tarjeta Historial OT). Diff vs planilla
   verificado: 0/52 colon, 0/18 sagrada, 0/24 monsenor. Commit + push + deploy necesarios.
 
+- **23/09/2026** — **OT 9779 quitada del historial de Colón #47**: la OT 9779 no correspondía a
+  ese equipo (error de carga del batch 26/09/2026). Se ejecutó un DELETE en `ot_historial`
+  (`db/ot_historial_colon47_del9779.sql`) con cláusula `WHERE branch='colon' AND equipo_nro=47
+  AND ot='9779'`, dejando solo la 9781 vigente (verificada por SELECT). Sin cambios en HTML
+  (la tarjeta Historial OT sale de D1). Commit + push + deploy necesarios.
+- **23/09/2026** — **Trabajos Colón (21/10/2026)**: #13 (Oficinas frente a Post-ventas, Midea
+  5000) pasa de Necesita service (01/11/2025, OT 6614) a **OK** (21/10/2026, OT **10021**);
+  #38 (Servidor) pasa de Necesita service a **OK** (21/10/2026, OT **9967**), marca
+  corregida por planilla a **Hitachi** (antes figuraba con datos desactualizados); #50 (Llaves,
+  Kelvinator 3000) y #51 (Guardia, Surrey 3000) pasan a **OK** (21/10/2026, OTs **10022**/**10038**);
+  #6 (GR) pasa de OK a **Necesita service** (20/04/2026, sin OT); #37 (Servidor) pasa a **No
+  funciona** (sin fecha/OT). Actualizados en `colon/index.html` y registradas las OTs nuevas en
+  `ot_historial` con `db/ot_historial_colon_2026_10_21.sql` (INSERT OR IGNORE). Diff vs
+  planilla verificado: **0/52**. Commit + push + deploy necesarios.
 - **23/09/2026** — **Conteo de fotos en menú raíz actualizado**. En `Planos interactivos -
   Centro Motors.html`, el campo `fotos` de `SUCURSALES` para Colón se actualizó de 35 a **40**
   (sagrada-familia 18 y monsenor 21 ya correctos). El conteo es estático porque la planilla
