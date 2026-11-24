@@ -313,7 +313,8 @@ px wrangler d1 execute dyp-tracking --remote --file. Gracias al INSERT OR
     ['colon','monsenor'] y todos sus checks 403.
   - unctions/api/sync.js: ya no borra ranches.colon/ranches.monsenor para no-admin; devuelve
     todas las sucursales a cualquier usuario autenticado (es admin-only de todos modos).
-  - Men� ra�z Planos interactivos - Centro Motors.html: enderDashboard ahora carga las tarjetas
+  - Men� ra�z Planos interactivos - Centro Motors.html: 
+enderDashboard ahora carga las tarjetas
     de Col�n/Monse�or din�micamente desde /api/equipos/[branch] para **todos** los tipos (antes solo
     admin; no-admin ve�a "Pr�ximamente"). Solo HINO queda como tarjeta "Pr�ximamente" (no tiene planos).
   El login sigue siendo obligatorio para todo el sitio (middleware: path no-whitelisted sin cookie ->
@@ -496,3 +497,19 @@ px wrangler d1 execute dyp-tracking --remote --file.
   manteniendo visibles las anteriores (11→6616+5552, 21/22/23→6974/3586, 24/25→6938, 35→5927,
   39→6940). Verificado en D1 remoto: cada equipo tiene OTs viejas + nueva. Sintaxis OK
   (`node --check`). Commit + push + deploy necesarios.
+
+- **27/10/2026** — **Trabajos Sagrada Familia (24/10/2026)**. Actualización de 7 equipos a OK
+  con service 24/10/2026 según planilla: #9 (Garita, OT 10009), #10 (Lavadero Carrier, OT 10010),
+  #13 (Lavadero Midea, OT 10011), #14 (Lavadero Midea, OT 10010), #15 (Lavadero Carrier, OT 10010),
+  #16 (Garantía, OT 10069), #17 (Repuestos, OT 10051). Actualizado `sagrada-familia/index.html`
+  preservando `fotos`, `piso`, `x`, `y`. Registradas OTs nuevas en `ot_historial` D1
+  (INSERT OR IGNORE). Diff vs planilla: 0/18. Commit `41000a7`.
+
+- **24/11/2026** — **Trabajos Monseñor (21/11/2026)**. Actualización de 14 equipos a OK con
+  service 21/11/2026 según planilla: #3 (Gastos entrega, OT 10315), #5 (Gerencia Post Ventas,
+  OT 10284), #6 (Sala de estar, OT 10297), #9 (Exhibición, OT 10283), #10 (Exhibición, OT 10283),
+  #245 (Taller, OT 10314), #246 (Taller, OT 10324), #14 (Call Administración, OT 10284),
+  #15 (Call center, OT 10284), #16 (Sala rack data, OT 10284), #17 (Gerente general, OT 10284),
+  #18 (Sala reunión, OT 10284), #19 (Gerente Plan de ahorro, OT 10284), #20 (Oficina, OT 10284).
+  Actualizado `monsenor/index.html` preservando `fotos`, `piso`, `x`, `y`. Registradas 14 OTs
+  nuevas en `ot_historial` D1 (INSERT OR IGNORE, 14 changes). Diff vs planilla: 0/24.
